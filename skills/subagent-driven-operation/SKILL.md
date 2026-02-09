@@ -60,7 +60,7 @@ digraph process {
     "Read plan, extract all tasks with full text, note context, create TodoWrite" [shape=box];
     "More tasks remain?" [shape=diamond];
     "Dispatch final artifact reviewer subagent for entire operation" [shape=box];
-    "Use superpowers:finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
+    "Decide: merge to control repo or create MR" [shape=box style=filled fillcolor=lightgreen];
 
     "Read plan, extract all tasks with full text, note context, create TodoWrite" -> "Dispatch operator subagent (./operator-prompt.md)";
     "Dispatch operator subagent (./operator-prompt.md)" -> "Operator subagent asks questions?";
@@ -79,7 +79,7 @@ digraph process {
     "Mark task complete in TodoWrite" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch operator subagent (./operator-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final artifact reviewer subagent for entire operation" [label="no"];
-    "Dispatch final artifact reviewer subagent for entire operation" -> "Use superpowers:finishing-a-development-branch";
+    "Dispatch final artifact reviewer subagent for entire operation" -> "Decide: merge to control repo or create MR";
 }
 ```
 
@@ -256,13 +256,15 @@ Done!
 ## Integration
 
 **Required workflow skills:**
-- **superpowers:using-git-worktrees** - REQUIRED: Set up isolated workspace before starting
-- **superpowers:writing-plans** - Creates the plan this skill executes
-- **superpowers:requesting-code-review** - Artifact review template for reviewer subagents
-- **superpowers:finishing-a-development-branch** - Complete development after all tasks
+- **srepowers:writing-operation-plans** - Creates the operation plan this skill executes
+- **srepowers:brainstorming-operations** - Design operations before planning (optional but recommended)
 
 **Subagents should use:**
-- **superpowers:test-driven-operation** - Subagents follow TDO for each operation
+- **srepowers:test-driven-operation** - Subagents follow TDO for each operation
+
+**Completion:**
+- After all tasks complete, decide: merge directly to control repo or create MR for review
+- For high-risk operations, create MR and require peer review before merging
 
 **Alternative workflow:**
-- **superpowers:executing-plans** - Use for parallel session instead of same-session execution
+- For parallel session execution, create operation plan and execute in separate session
