@@ -87,12 +87,57 @@ kubectl get pod -n production -l app=api-server
 - **Spec Compliance:** Did we execute exactly what was requested?
 - **Artifact Quality:** Are the infrastructure artifacts well-built?
 
+### brainstorming-operations
+
+**Use when:** Planning infrastructure operations before implementation.
+
+**Core principle:** Design operations with risk assessment, verification strategies, and rollback plans before executing.
+
+**Workflow:**
+1. Understand current infrastructure state
+2. Ask questions to refine operation scope
+3. Present design in sections with validation
+4. Document current state, desired state, approach
+5. Include risk assessment and rollback strategies
+
+**Output:** Design document saved to `docs/plans/YYYY-MM-DD-<operation-name>-design.md`
+
+### writing-operation-plans
+
+**Use when:** You have a design and need to create bite-sized execution steps.
+
+**Core principle:** Create detailed plans with exact commands, verification steps, and rollback instructions.
+
+**Workflow:**
+1. Write plan with TDO discipline for each task
+2. Include exact commands (no placeholders)
+3. Document verification commands with expected outputs
+4. Provide rollback steps for each task
+5. Save to `docs/plans/YYYY-MM-DD-<operation-name>.md`
+
+**Output:** Execution plan that operators can follow step-by-step.
+
+### verification-before-completion
+
+**Use when:** About to claim work is complete, fixed, or passing.
+
+**Core principle:** Evidence before claims, always.
+
+**Workflow:**
+1. IDENTIFY: What command proves this claim?
+2. RUN: Execute the full command (fresh, complete)
+3. READ: Full output, check exit code
+4. VERIFY: Does output confirm the claim?
+5. ONLY THEN: Make the claim with evidence
+
 ## Commands
 
 Quick invoke skills using `/command` syntax:
 
 - `/test-driven-operation` - Execute operations with verification commands
 - `/subagent-driven-operation` - Execute operation plans with subagent dispatch
+- `/brainstorming-operations` - Design infrastructure operations
+- `/writing-operation-plans` - Create detailed execution plans
 
 Commands are thin wrappers that invoke skills directly for quick access.
 
