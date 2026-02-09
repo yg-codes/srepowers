@@ -1,13 +1,13 @@
 {
   "name": "srepowers",
-  "description": "SRE infrastructure skills: Test-Driven Operations, Subagent-Driven Operations, planning, verification, and meta-skills for Kubernetes, Keycloak, GitOps, and API workflows",
-  "version": "2.0.0",
+  "description": "SRE infrastructure skills: Test-Driven Operations, Subagent-Driven Operations, runbooks, Proxmox administration, Puppet analysis, cache cleanup, GitLab ECR pipelines, and ClickUp ticket creation for Kubernetes, Keycloak, GitOps, Proxmox VE, and CI/CD workflows",
+  "version": "2.1.0",
   "author": {
     "name": "yg",
     "email": "yg@example.com"
   },
-  "homepage": "https://github.com/yg/srepowers",
-  "repository": "https://github.com/yg/srepowers",
+  "homepage": "https://github.com/yg-codes/srepowers",
+  "repository": "https://github.com/yg-codes/srepowers",
   "license": "MIT",
-  "keywords": ["sre", "infrastructure", "kubernetes", "keycloak", "gitops", "tdo", "operations", "devops", "api", "kubectl", "verification", "planning"]
+  "keywords": ["sre", "infrastructure", "kubernetes", "keycloak", "gitops", "tdo", "operations", "devops", "api", "kubectl", "verification", "planning", "proxmox", "pve", "pbs", "puppet", "cache", "gitlab", "ecr", "clickup", "runbook"]
 }

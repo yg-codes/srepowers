@@ -97,7 +97,7 @@ The skill itself tells you which.
 - Core principle: Fresh subagent per task + two-stage review (spec compliance then artifact quality)
 - Workflow: Dispatch operator → Execute operations → Spec compliance review → Artifact quality review
 
-### Planning Skills
+### Planning & Documentation Skills
 
 **brainstorming-operations** - Design infrastructure operations before implementation
 - Use when: Planning new infrastructure operations, migrations, or changes
@@ -107,12 +107,50 @@ The skill itself tells you which.
 - Use when: You have a design and need to create bite-sized execution steps
 - Focus: Step-by-step operations with verification commands at each step
 
+**sre-runbook** - Create structured SRE runbooks for infrastructure operations
+- Use when: Creating runbooks for operational procedures
+- Focus: Command/Expected/Result format for verifiable steps
+- Output: Structured runbooks with pre-requisites, procedures, verification, rollback
+
 ### Quality Skills
 
 **verification-before-completion** - Verify before claiming completion
 - Use when: About to claim work is complete, fixed, or passing
 - Core principle: Evidence before claims, always
 - Required: Run verification command and confirm output BEFORE any success claims
+
+### Infrastructure Administration Skills
+
+**pve-admin** - Proxmox VE/Backup Server administration
+- Use when: Managing Proxmox VE 8.x/9.x or Proxmox Backup Server 3.x infrastructure
+- Features: Cluster management, VM/CT operations, ZFS storage, networking, HA, backup/restore
+- Operations: VM lifecycle, storage management, network config, cluster operations
+
+**puppet-code-analyzer** - Puppet code quality analysis
+- Use when: Analyzing Puppet control repos or modules
+- Features: Linting, dependency analysis, best practice validation, error troubleshooting
+- Output: Analysis report with recommendations for improvements
+
+### CI/CD & Pipeline Skills
+
+**gitlab-ecr-pipeline** - GitLab CI/CD → AWS ECR pipelines
+- Use when: Creating GitLab pipelines that push container images to AWS ECR
+- Supports: Building from Containerfile/Dockerfile, mirroring upstream images
+- Features: AWS authentication, Podman support, multi-stage builds, tagging strategies
+
+### Development Tools
+
+**cache-cleanup** - Interactive cleanup for dev tool caches
+- Use when: Cleaning up development tool caches with verification
+- Supports: mise, npm, Go, Cargo, uv, pipx, pip
+- Workflow: Pre-check (verify tools work) → Cleanup → Post-check (verify tools still work)
+
+### Project Management
+
+**clickup-ticket-creator** - ClickUp tickets with CCB template
+- Use when: Creating ClickUp tickets following CCB template format
+- Sections: Description, Rationale, Impact, Risk, UAT, Procedure, Verification, Rollback
+- Output: Formatted ticket ready for submission
 
 ## Infrastructure Operation Examples
 

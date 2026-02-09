@@ -1,5 +1,79 @@
 # Release Notes
 
+## [2.1.0] - 2026-02-09
+
+### Minor Release - Merge from yg-claude Repository
+
+Merged all 7 skills from `/home/yg/src/github/yg-claude` into srepowers as the single source of truth.
+
+#### New Skills
+
+**sre-runbook**
+- Create structured SRE runbooks with Command/Expected/Result format
+- Step-by-step procedures with verification and rollback sections
+- Output: Structured runbooks for infrastructure operations
+
+**pve-admin**
+- Proxmox VE 8.x/9.x and Proxmox Backup Server 3.x administration
+- Cluster management, VM/CT operations, ZFS storage
+- Networking, HA setup, backup/restore, health checks
+- Helper scripts for common operations
+
+**puppet-code-analyzer**
+- Automated Puppet code quality analysis
+- Linting, dependency analysis, best practice validation
+- Control repo and module analysis
+- Error troubleshooting and reporting
+
+**gitlab-ecr-pipeline**
+- Generate GitLab CI/CD pipelines for AWS ECR
+- Supports building from Containerfile/Dockerfile
+- Supports mirroring upstream images
+- Proper authentication, tagging, and pushing
+
+**cache-cleanup**
+- Interactive cleanup for development tool caches
+- Pre-check: Verify tools work before cleanup
+- Post-check: Verify tools still work after cleanup
+- Supports: mise, npm, Go, Cargo, uv, pipx, pip
+
+**clickup-ticket-creator**
+- Create ClickUp tickets following CCB template format
+- Structured sections: Description, Rationale, Impact, Risk
+- UAT, Procedure, Verification, Rollback sections
+
+#### New Documentation
+
+**Container CI/CD Reference** (`docs/container-cicd-reference/`)
+- AWS ECR documentation and patterns
+- GitLab Container Registry reference
+- IAM authentication patterns
+- Container deployment comparisons
+
+#### New Commands
+
+- `/sre-runbook` - Create structured SRE runbooks
+- `/pve-admin` - Proxmox VE/Backup administration
+- `/puppet-code-analyzer` - Puppet code quality analysis
+- `/cache-cleanup` - Interactive dev tool cache cleanup
+- `/gitlab-ecr-pipeline` - GitLab CI/CD → AWS ECR pipelines
+- `/clickup-ticket-creator` - Create CCB-formatted ClickUp tickets
+
+#### Enhancements
+
+- **Total skills:** 13 (6 core SRE + 7 merged from yg-claude)
+- **Total commands:** 10 (4 core + 6 new)
+- **Updated plugin description** to reflect all skill categories
+- **Updated meta-skill** to include all new skills
+
+#### Migration Notes
+
+- `/home/yg/src/github/yg-claude` repository archived (README pointer to srepowers)
+- container-cicd-reference moved from skills/ to docs/ (reference documentation)
+- All skills now in single source of truth: yg-codes/srepowers
+
+---
+
 ## [2.0.0] - 2026-02-09
 
 ### Major Release - Complete SRE Operations Framework
@@ -194,5 +268,6 @@ Adapted from the [superpowers](https://github.com/obra/superpowers) plugin by Je
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 2.1.0 | 2026-02-09 | Minor release: Merge 7 skills from yg-claude (sre-runbook, pve-admin, puppet-code-analyzer, gitlab-ecr-pipeline, cache-cleanup, clickup-ticket-creator, container-cicd-reference docs) |
 | 2.0.0 | 2026-02-09 | Major release: 4 new skills (VBC, brainstorming-ops, writing-ops, using-srepowers), command system, hooks, test suite, documentation |
 | 1.0.0 | 2025-02-09 | Initial release with test-driven-operation and subagent-driven-operation skills |

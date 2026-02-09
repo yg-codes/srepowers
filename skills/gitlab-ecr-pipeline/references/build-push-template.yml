@@ -1,0 +1,121 @@
+# GitLab CI/CD Pipeline - Build & Push to ECR
+# Complete template for building container images from Containerfile and pushing to AWS ECR
+
+variables:
+  ECR_REGISTRY: $ECR_AWS_ACCOUNT_ID.dkr.ecr.$ECR_AWS_REGION.amazonaws.com
+  IMAGE_NAME: my-app
+  CONTAINER_IMAGE: $ECR_REGISTRY/$IMAGE_NAME
+  CONTAINER_ENGINE: podman
+
+stages:
+  - build
+  - test
+  - release
+
+# Build container image and push to AWS ECR
+build:
+  stage: build
+  image: quay.io/podman/stable:latest
+  before_script:
+    # Install AWS CLI
+    - microdnf install -y python3 python3-pip
+    - pip3 install awscli
+    # Configure AWS credentials (project-specific)
+    - export AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY
+    - export AWS_DEFAULT_REGION=$ECR_AWS_REGION
+    # Login to ECR
+    - echo "Logging into ECR..."
+    - aws ecr get-login-password --region $ECR_AWS_REGION |
+      $CONTAINER_ENGINE login --username AWS --password-stdin $ECR_REGISTRY
+  script:
+    - echo "Building container image..."
+    - $CONTAINER_ENGINE build -t $IMAGE_NAME:$CI_COMMIT_SHORT_SHA -f Containerfile .
+
+    # Tag with commit SHA
+    - $CONTAINER_ENGINE tag $IMAGE_NAME:$CI_COMMIT_SHORT_SHA $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA
+
+    # Tag as latest for main branch
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
+        echo "Tagging as latest..."
+        $CONTAINER_ENGINE tag $IMAGE_NAME:$CI_COMMIT_SHORT_SHA $CONTAINER_IMAGE:latest
+      fi
+
+    # Push to ECR
+    - echo "Pushing image to ECR..."
+    - $CONTAINER_ENGINE push $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
+        $CONTAINER_ENGINE push $CONTAINER_IMAGE:latest
+      fi
+
+    - echo "Image pushed successfully:"
+    - echo "  $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA"
+  rules:
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
+  tags:
+    - shared
+
+# Test the built image
+test:
+  stage: test
+  image: quay.io/podman/stable:latest
+  before_script:
+    - microdnf install -y python3 python3-pip
+    - pip3 install awscli
+    - export AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY
+    - export AWS_DEFAULT_REGION=$ECR_AWS_REGION
+    - aws ecr get-login-password --region $ECR_AWS_REGION |
+      $CONTAINER_ENGINE login --username AWS --password-stdin $ECR_REGISTRY
+  script:
+    - echo "Pulling image from ECR..."
+    - $CONTAINER_ENGINE pull $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA
+    - echo "Running tests..."
+    - $CONTAINER_ENGINE run --rm --entrypoint <command> $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA <args>
+    - echo "All tests passed!"
+  dependencies:
+    - build
+  rules:
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
+  tags:
+    - shared
+
+# Release tagged versions
+release:
+  stage: release
+  image: quay.io/podman/stable:latest
+  before_script:
+    - microdnf install -y python3 python3-pip
+    - pip3 install awscli
+    - export AWS_ACCESS_KEY_ID=$ECR_AWS_ACCESS_KEY_ID
+    - export AWS_SECRET_ACCESS_KEY=$ECR_AWS_SECRET_ACCESS_KEY
+    - export AWS_DEFAULT_REGION=$ECR_AWS_REGION
+    - aws ecr get-login-password --region $ECR_AWS_REGION |
+      $CONTAINER_ENGINE login --username AWS --password-stdin $ECR_REGISTRY
+  script:
+    - echo "Creating release for tag $CI_COMMIT_TAG..."
+    - $CONTAINER_ENGINE pull $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA
+
+    # Tag with semantic version
+    - $CONTAINER_ENGINE tag $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA $CONTAINER_IMAGE:$CI_COMMIT_TAG
+
+    # Create major and minor version tags
+    - export MAJOR=$(echo $CI_COMMIT_TAG | sed 's/v//' | cut -d. -f1)
+    - export MINOR=$(echo $CI_COMMIT_TAG | sed 's/v//' | cut -d. -f1-2)
+    - $CONTAINER_ENGINE tag $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA $CONTAINER_IMAGE:v$MAJOR
+    - $CONTAINER_ENGINE tag $CONTAINER_IMAGE:$CI_COMMIT_SHORT_SHA $CONTAINER_IMAGE:v$MINOR
+
+    # Push all version tags
+    - $CONTAINER_ENGINE push $CONTAINER_IMAGE:$CI_COMMIT_TAG
+    - $CONTAINER_ENGINE push $CONTAINER_IMAGE:v$MAJOR
+    - $CONTAINER_ENGINE push $CONTAINER_IMAGE:v$MINOR
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/
+  dependencies:
+    - build
+  tags:
+    - shared

@@ -130,14 +130,109 @@ kubectl get pod -n production -l app=api-server
 4. VERIFY: Does output confirm the claim?
 5. ONLY THEN: Make the claim with evidence
 
+### cache-cleanup
+
+**Use when:** Cleaning up development tool caches interactively with pre/post verification.
+
+**Core principle:** Clean caches safely - verify tools work before cleanup, verify tools still work after cleanup.
+
+**Supported Tools:** mise-managed tools (Go, Rust, Node.js, Python), npm, Cargo, uv, pipx, pip
+
+**Workflow:**
+1. Select caches to clean (mise, npm, Go, Cargo, uv, pipx, pip)
+2. Pre-check: Verify each tool is available and working
+3. Cleanup: Remove cache directories
+4. Post-check: Verify tools still work after cleanup
+
+### clickup-ticket-creator
+
+**Use when:** Creating ClickUp tickets following CCB template format.
+
+**Core principle:** Structured ticket generation with all required sections.
+
+**Sections:** Description, Rationale, Impact, Risk, UAT, Procedure, Verification, Rollback
+
+**Output:** Formatted ClickUp ticket ready for submission
+
+### gitlab-ecr-pipeline
+
+**Use when:** Creating GitLab CI/CD pipelines that push container images to AWS ECR.
+
+**Core principle:** Generate complete pipelines with proper authentication, building, and pushing.
+
+**Supports:** Building from Containerfile/Dockerfile, mirroring upstream images
+
+**Features:** AWS ECR authentication, Podman/buildah support, multi-stage builds, tagging strategies
+
+### puppet-code-analyzer
+
+**Use when:** Analyzing Puppet code quality in control repos or modules.
+
+**Core principle:** Automated analysis with linting, dependency checking, best practice validation.
+
+**Features:** Syntax validation, dependency analysis, style guide compliance, error troubleshooting
+
+**Workflow:**
+1. Identify Puppet control repo or module
+2. Run syntax validation with puppet-lint
+3. Analyze dependencies and module structure
+4. Check style guide compliance
+5. Generate analysis report with recommendations
+
+### pve-admin
+
+**Use when:** Managing Proxmox VE 8.x/9.x and Proxmox Backup Server 3.x infrastructure.
+
+**Core principle:** Complete Proxmox administration with cluster management and safe operations.
+
+**Features:** Cluster management, VM/CT operations, ZFS storage, networking, HA, backup/restore, health checks
+
+**Operations:**
+- VM/CT lifecycle (create, start, stop, migrate)
+- Storage management (ZFS, LVM, directory, NFS)
+- Network configuration (bridges, bonds, VLANs)
+- Cluster operations (join, leave, quorum)
+- Backup/restore (PBS integration)
+- Health monitoring and diagnostics
+
+### sre-runbook
+
+**Use when:** Creating structured SRE runbooks for infrastructure operations.
+
+**Core principle:** Runbooks with Command/Expected/Result format for verifiable procedures.
+
+**Output:** Structured runbooks with pre-requisites, step-by-step procedures, verification, rollback
+
+**Format:**
+- Pre-requisites (access, tools, state)
+- Procedures with Command/Expected/Result format
+- Verification steps
+- Rollback procedures
+- Troubleshooting section
+
 ## Commands
 
 Quick invoke skills using `/command` syntax:
 
+**SRE Operations:**
 - `/test-driven-operation` - Execute operations with verification commands
 - `/subagent-driven-operation` - Execute operation plans with subagent dispatch
 - `/brainstorming-operations` - Design infrastructure operations
 - `/writing-operation-plans` - Create detailed execution plans
+- `/sre-runbook` - Create structured SRE runbooks
+
+**Infrastructure Administration:**
+- `/pve-admin` - Proxmox VE/Backup administration
+- `/puppet-code-analyzer` - Puppet code quality analysis
+
+**Development Tools:**
+- `/cache-cleanup` - Interactive dev tool cache cleanup
+
+**CI/CD & Pipelines:**
+- `/gitlab-ecr-pipeline` - GitLab CI/CD → AWS ECR pipelines
+
+**Project Management:**
+- `/clickup-ticket-creator` - Create CCB-formatted ClickUp tickets
 
 Commands are thin wrappers that invoke skills directly for quick access.
 
@@ -240,7 +335,9 @@ curl -s https://api.example.com/users/123 | jq '.email'
 
 - [Testing Anti-Patterns](docs/testing-anti-patterns.md) - Common infrastructure operation testing pitfalls and how to avoid them
 - [Persuasion Principles](docs/persuasion-principles.md) - Psychology of effective skill design for SRE discipline
+- [Container CI/CD Reference](docs/container-cicd-reference/) - ECR, GitLab Container Registry, IAM auth patterns
 - [Implementation Plan](docs/plans/2026-02-09-implement-all-8-actions-from-user-feedback.md) - Development roadmap and task breakdown
+- [Merge Plan](docs/plans/2026-02-09-merge-yg-claude-skills-into-srepowers.md) - yg-claude merge strategy and execution
 
 ## Contributing
 
