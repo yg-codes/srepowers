@@ -1,0 +1,20 @@
+{
+  "name": "srepowers-marketplace",
+  "description": "SRE infrastructure skills marketplace for Claude Code",
+  "owner": {
+    "name": "yg",
+    "email": "yg@example.com"
+  },
+  "plugins": [
+    {
+      "name": "srepowers",
+      "description": "SRE infrastructure skills: Test-Driven Operations and Subagent-Driven Operations for Kubernetes, Keycloak, GitOps, and API workflows",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "yg",
+        "email": "yg@example.com"
+      }
+    }
+  ]
+}
