@@ -87,6 +87,15 @@ kubectl get pod -n production -l app=api-server
 - **Spec Compliance:** Did we execute exactly what was requested?
 - **Artifact Quality:** Are the infrastructure artifacts well-built?
 
+## Commands
+
+Quick invoke skills using `/command` syntax:
+
+- `/test-driven-operation` - Execute operations with verification commands
+- `/subagent-driven-operation` - Execute operation plans with subagent dispatch
+
+Commands are thin wrappers that invoke skills directly for quick access.
+
 ## Usage Examples
 
 ### Kubernetes Deployment
