@@ -253,6 +253,101 @@ Done!
 - Dispatch fix subagent with specific instructions
 - Don't try to fix manually (context pollution)
 
+## Common Rationalizations
+
+| Excuse | Reality |
+|--------|---------|
+| "Spec reviewer can just read my report" | Reports are incomplete and optimistic. Code/artifact inspection required. |
+| "I know what this task requires" | Knowing ≠ doing. Review catches missed requirements and over-building. |
+| "Artifact quality review is enough" | Beautiful implementation of wrong requirements = failure. Spec first. |
+| "Let me just fix this one thing" | Reviewer finds issues. Operator fixes. Loop until approved. |
+| "Reviews waste time" | Review loops prevent rework. One review cycle = faster than redirect. |
+| "Self-review is enough" | Self-review catches obvious issues. Reviewers catch subtle problems. |
+| "Spec compliance is obvious" | Obvious to you ≠ in the plan. Reviewer verifies against plan text. |
+| "Reviews are too formal" | Two-stage review prevents "beautiful but wrong" implementations. |
+| "I'll catch issues in final review" | Late issues = more rework. Per-task reviews catch issues early. |
+| "Review order doesn't matter" | Spec compliance first prevents wasting time on wrong implementations. |
+
+## Why Order Matters
+
+**Review Order: Spec Compliance Before Artifact Quality**
+
+The two-stage review order is critical: spec compliance review MUST pass before artifact quality review begins.
+
+**Why this order?**
+
+**Spec compliance first:**
+- Verifies correct thing was built
+- Prevents "beautiful but wrong" implementations
+- Artifact quality of wrong code = wasted effort
+- Missing requirements are more expensive than YAML syntax errors
+
+**Artifact quality second:**
+- Only runs after spec confirmed
+- Ensures correct thing is well-built
+- Checks YAML/JSON syntax, labels, annotations, security
+- Validates infrastructure artifacts are correct
+
+**Real infrastructure example:**
+
+Task: "Create Keycloak client with redirect URIs for app.example.com"
+
+Operator creates:
+```yaml
+apiVersion: k8s.keycloak.org/v2alpha1
+kind: KeycloakClient
+metadata:
+  name: my-app
+  namespace: keycloak
+spec:
+  enabled: true
+  clientId: my-app
+  redirectUris:
+    - https://app.example.com/callback
+  # ... (perfect YAML, proper labels)
+```
+
+**Spec compliance review finds:**
+- ❌ Missing: adminUrl (required by plan)
+- ❌ Extra: webOrigins (not in plan)
+- ✅ Artifact quality: Perfect YAML, proper labels
+
+**If artifact quality review ran first:**
+- Would approve (beautiful YAML, proper labels)
+- Then spec compliance review would fail (missing/extra fields)
+- Wasted time reviewing beautiful but wrong implementation
+
+**Correct order (spec compliance first):**
+- Spec compliance review immediately identifies missing/extra fields
+- Operator fixes before artifact quality review
+- Artifact quality review only runs on spec-compliant implementation
+- Efficient: no time wasted on wrong implementations
+
+**Review Loops: Both Reviews Loop Until Approval**
+
+When reviewers find issues:
+1. Operator (same subagent) fixes issues
+2. Reviewer reviews again
+3. Repeat until approved
+4. No "good enough" - approval required
+
+**Why loops matter:**
+
+**Without loops:**
+- Reviewer: "Missing adminUrl"
+- Operator: "Got it, I'll add it"
+- Task marked complete
+- Operator forgot to add adminUrl (no re-verification)
+
+**With loops:**
+- Reviewer: "Missing adminUrl"
+- Operator: Adds adminUrl
+- Reviewer reviews again: "✅ adminUrl present, spec compliant"
+- Then artifact quality review runs
+- Task marked complete
+
+Loops ensure fixes actually happen and reviewers confirm them.
+
 ## Integration
 
 **Required workflow skills:**

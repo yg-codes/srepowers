@@ -330,6 +330,13 @@ Verifications written after operations pass immediately. Passing immediately pro
 
 Verification-first forces you to see the verification fail, proving it actually verifies something.
 
+**Infrastructure example:**
+- Apply ConfigMap, then write verification for `kubectl get configmap`
+- Verification passes immediately (ConfigMap exists)
+- But ConfigMap might have wrong data, wrong namespace, or not be deployed to pods
+- Write verification FIRST, watch it fail ("not found"), THEN apply
+- Now you know verification actually checks the right thing
+
 **"I already manually checked everything works"**
 
 Manual verification is ad-hoc. You think you verified everything but:
@@ -340,6 +347,12 @@ Manual verification is ad-hoc. You think you verified everything but:
 
 Automated verifications are systematic. They run the same way every time.
 
+**Infrastructure example:**
+- Manually check pod status: `kubectl get pod -n production` - Running
+- Deploy new version, pod stays Running (but app crashes on startup)
+- Automated verification: `kubectl get pod -n production -o jsonpath='{.status.phase}'` - shows CrashLoopBackOff
+- Manual check missed container restarts, automated catches them
+
 **"Rolling back X hours of work is wasteful"**
 
 Sunk cost fallacy. The time is already gone. Your choice now:
@@ -347,6 +360,33 @@ Sunk cost fallacy. The time is already gone. Your choice now:
 - Keep it and verify after (30 min, low confidence, likely issues)
 
 The "waste" is keeping changes you can't trust. Infrastructure changes without real verification are technical debt.
+
+**Infrastructure example:**
+- Spent 3 hours writing Kubernetes manifests, skipped TDO
+- Applied to production, pods crash because of missing ConfigMap
+- Option A: Rollback 3 hours, write verification first, re-apply (1 more hour, high confidence)
+- Option B: Fix ConfigMap manually, keep manifests (30 min, low confidence, likely more issues)
+- Option A wastes 3 hours. Option B risks production incident. Which is more wasteful?
+
+**"kubectl apply succeeded, that's verification enough"**
+
+kubectl apply succeeding ≠ resource working. Apply only submits manifests to API server.
+
+**Infrastructure examples:**
+- `kubectl apply -f deployment.yaml` succeeds (exit 0)
+- But: Pods in CrashLoopBackOff, missing ConfigMap, insufficient quota, wrong image
+- Verification command: `kubectl get deployment -n production app -o jsonpath='{.status.readyReplicas}'` - reveals actual state
+- Apply success tells you manifests are valid YAML. Verification tells you infrastructure works.
+
+**"The script has built-in checks, no need for separate verification"**
+
+Script output ≠ verification. You must read and confirm script output shows expected results.
+
+**Infrastructure example:**
+- Deployment script prints "Deployed 5 pods successfully"
+- But: Script didn't check if pods are actually Running
+- Verification: `kubectl get pods -n production -l app=api --field-selector=status.phase=Running | wc -l` - shows actual count
+- Script output is optimistic. Verification is skeptical.
 
 ## Common Rationalizations
 
@@ -360,6 +400,18 @@ The "waste" is keeping changes you can't trust. Infrastructure changes without r
 | "Verification too hard = design unclear" | Listen to verification. Hard to verify = hard to operate. |
 | "TDO will slow me down" | TDO faster than debugging incidents. Pragmatic = verify-first. |
 | "Manual check faster" | Manual doesn't prove edge cases. You'll re-verify every change. |
+| "I'll verify after the operation" | Verification passing immediately proves nothing - could have been passing before |
+| "Already manually checked the dashboard" | Ad-hoc ≠ systematic. No record, can't re-run, not reproducible |
+| "This is just a quick server restart" | Quick operations fail too. Verification takes seconds, failures take hours |
+| "Production is down, no time for verification" | Verification confirms fix works. Without it, you're guessing during emergency |
+| "The script already has built-in checks" | Script output ≠ verification. You must read and confirm output |
+| "kubectl apply succeeded" | Apply succeeded ≠ resource ready. Pods may crash, config may be invalid |
+| "ArgoCD will deploy it automatically" | Verify deployment actually happened. Sync can fail silently |
+| "API returned 200" | 200 ≠ correct response body. Response may be wrong or incomplete |
+| "Dashboard shows it's up" | Dashboard ≠ verification command. Dashboards lag, cache data |
+| "Git push succeeded" | Push succeeded ≠ MR created. CI pipeline may fail, MR may not exist |
+| "Keycloak CRD applied" | CRD applied ≠ realm ready. Reconciliation takes time, can fail |
+| "SSH access works" | SSH access ≠ service running. Port may be closed, service may be down |
 
 ## Red Flags - STOP and Start Over
 
