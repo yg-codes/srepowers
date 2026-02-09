@@ -9,5 +9,6 @@
   "homepage": "https://github.com/yg/srepowers",
   "repository": "https://github.com/yg/srepowers",
   "license": "MIT",
-  "keywords": ["sre", "infrastructure", "kubernetes", "keycloak", "gitops", "tdo", "operations", "devops", "api", "kubectl"]
+  "keywords": ["sre", "infrastructure", "kubernetes", "keycloak", "gitops", "tdo", "operations", "devops", "api", "kubectl"],
+  "hooks": "hooks/hooks.json"
 }
