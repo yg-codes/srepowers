@@ -236,6 +236,12 @@ curl -s https://api.example.com/users/123 | jq '.email'
 1. **Spec Compliance** - Verified all operations executed, nothing missing/extra
 2. **Artifact Quality** - YAML/JSON valid, proper labels/annotations, security best practices
 
+## Documentation
+
+- [Testing Anti-Patterns](docs/testing-anti-patterns.md) - Common infrastructure operation testing pitfalls and how to avoid them
+- [Persuasion Principles](docs/persuasion-principles.md) - Psychology of effective skill design for SRE discipline
+- [Implementation Plan](docs/plans/2026-02-09-implement-all-8-actions-from-user-feedback.md) - Development roadmap and task breakdown
+
 ## Contributing
 
 Contributions are welcome! Please:
