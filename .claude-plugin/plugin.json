@@ -1,7 +1,7 @@
 {
   "name": "srepowers",
-  "description": "SRE infrastructure skills: Test-Driven Operations and Subagent-Driven Operations for Kubernetes, Keycloak, GitOps, and API workflows",
-  "version": "1.0.0",
+  "description": "SRE infrastructure skills: Test-Driven Operations, Subagent-Driven Operations, planning, verification, and meta-skills for Kubernetes, Keycloak, GitOps, and API workflows",
+  "version": "2.0.0",
   "author": {
     "name": "yg",
     "email": "yg@example.com"
@@ -9,6 +9,6 @@
   "homepage": "https://github.com/yg/srepowers",
   "repository": "https://github.com/yg/srepowers",
   "license": "MIT",
-  "keywords": ["sre", "infrastructure", "kubernetes", "keycloak", "gitops", "tdo", "operations", "devops", "api", "kubectl"],
+  "keywords": ["sre", "infrastructure", "kubernetes", "keycloak", "gitops", "tdo", "operations", "devops", "api", "kubectl", "verification", "planning"],
   "hooks": "hooks/hooks.json"
 }

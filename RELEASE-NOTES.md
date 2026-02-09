@@ -1,5 +1,143 @@
 # Release Notes
 
+## [2.0.0] - 2026-02-09
+
+### Major Release - Complete SRE Operations Framework
+
+Comprehensive expansion with 4 new skills, command system, test suite, meta-skill with hooks, and documentation.
+
+#### New Skills
+
+**verification-before-completion**
+- Evidence-before-claims discipline for infrastructure operations
+- Infrastructure-specific verification patterns for kubectl, APIs, Git, Keycloak, servers
+- Common rationalizations table with infrastructure examples
+- Iron Law: NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
+
+**brainstorming-operations**
+- Design infrastructure operations before implementation
+- Risk assessment, verification strategies, and rollback planning
+- Questions to ask for scope, dependencies, and verification approaches
+- Design document output for operation planning
+
+**writing-operation-plans**
+- Create detailed infrastructure operation execution plans
+- Bite-sized task granularity (2-5 minutes per step)
+- Complete YAML, exact commands, expected outputs, rollback steps
+- TDO discipline embedded in every task
+
+**using-srepowers** (meta-skill)
+- Auto-injected via session-start hook
+- Establishes skill invocation discipline before any work
+- Red flags table for infrastructure operation rationalizations
+- Skill priority and usage patterns
+
+#### New Features
+
+**Command System**
+- `/test-driven-operation` - Quick invoke TDO skill
+- `/subagent-driven-operation` - Quick invoke SDO skill
+- `/brainstorming-operations` - Quick invoke brainstorming skill
+- `/writing-operation-plans` - Quick invoke planning skill
+- Thin wrappers for fast skill invocation
+
+**Hooks System**
+- Session-start hook auto-injects using-srepowers meta-skill
+- Hook script reads skill content and injects as context
+- Async loading for minimal startup impact
+
+**Test Suite**
+- `test-helpers.sh` - Shared test utilities (run_claude, assert_contains, etc.)
+- `test-test-driven-operation.sh` - TDO skill unit tests
+- `test-subagent-driven-operation.sh` - SDO skill unit tests
+- `run-skill-tests.sh` - Test runner with verbose/integration modes
+
+#### Documentation
+
+**Testing Anti-Patterns** (`docs/testing-anti-patterns.md`)
+- 8 common infrastructure testing pitfalls
+- Why each anti-pattern fails
+- Correct TDO approach for each
+- Quick reference table
+
+**Persuasion Principles** (`docs/persuasion-principles.md`)
+- Seven principles adapted for SRE skills
+- Authority + Commitment + Social Proof for discipline
+- Infrastructure-specific examples
+- Ethical use guidelines
+
+**Implementation Plan** (`docs/plans/2026-02-09-implement-all-8-actions-from-user-feedback.md`)
+- Complete development roadmap
+- All 8 tasks from user feedback
+- Step-by-step implementation guide
+
+#### Enhancements
+
+**Expanded Rationalization Tables**
+- TDO: Added 10 infrastructure-specific rationalizations
+- SDO: Added 10 operation planning rationalizations
+
+**Why Order Matters Sections**
+- TDO: Infrastructure-specific order explanations
+- SDO: Two-stage review order rationale with real example
+- Review loops explanation with before/after comparison
+
+#### Bug Fixes
+
+- Fixed dangling superpowers references in SDO skill
+- All skills now reference srepowers: equivalents
+- Removed dependencies on external superpowers plugin
+
+#### Breaking Changes
+
+- Session-start hook requires Claude Code with hooks support
+- Meta-skill auto-injection changes startup behavior
+- Plugin now standalone (no superpowers dependency)
+
+#### Plugin Structure
+
+```
+.claude-plugin/
+├── plugin.json (v2.0.0)
+└── marketplace.json
+
+commands/
+├── test-driven-operation.md
+├── subagent-driven-operation.md
+├── brainstorming-operations.md (new)
+└── writing-operation-plans.md (new)
+
+hooks/
+├── hooks.json (new)
+└── session-start.sh (new)
+
+skills/
+├── test-driven-operation/SKILL.md (enhanced)
+├── subagent-driven-operation/SKILL.md (fixed, enhanced)
+├── verification-before-completion/SKILL.md (new)
+├── brainstorming-operations/SKILL.md (new)
+├── writing-operation-plans/SKILL.md (new)
+└── using-srepowers/SKILL.md (new)
+
+tests/claude-code/ (new)
+├── test-helpers.sh
+├── run-skill-tests.sh
+├── test-test-driven-operation.sh
+└── test-subagent-driven-operation.sh
+
+docs/
+├── testing-anti-patterns.md (new)
+├── persuasion-principles.md (new)
+└── plans/
+    └── 2026-02-09-implement-all-8-actions-from-user-feedback.md (new)
+```
+
+#### Acknowledgments
+
+Still adapted from the excellent [superpowers](https://github.com/obra/superpowers) plugin, now with full SRE infrastructure adaptations and standalone capability.
+
+---
+
 ## [1.0.0] - 2025-02-09
 
 ### Initial Release
@@ -56,4 +194,5 @@ Adapted from the [superpowers](https://github.com/obra/superpowers) plugin by Je
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 2.0.0 | 2026-02-09 | Major release: 4 new skills (VBC, brainstorming-ops, writing-ops, using-srepowers), command system, hooks, test suite, documentation |
 | 1.0.0 | 2025-02-09 | Initial release with test-driven-operation and subagent-driven-operation skills |
