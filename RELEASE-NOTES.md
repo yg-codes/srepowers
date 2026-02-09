@@ -4,7 +4,7 @@
 
 ### Minor Release - Merge from yg-claude Repository
 
-Merged all 7 skills from `/home/yg/src/github/yg-claude` into srepowers as the single source of truth.
+Merged 6 skills from `/home/yg/src/github/yg-claude` into srepowers as the single source of truth, plus container-cicd-reference as documentation.
 
 #### New Skills
 
@@ -61,7 +61,7 @@ Merged all 7 skills from `/home/yg/src/github/yg-claude` into srepowers as the s
 
 #### Enhancements
 
-- **Total skills:** 13 (6 core SRE + 7 merged from yg-claude)
+- **Total skills:** 12 (6 core SRE + 6 merged from yg-claude; container-cicd-reference is docs, not a skill)
 - **Total commands:** 10 (4 core + 6 new)
 - **Updated plugin description** to reflect all skill categories
 - **Updated meta-skill** to include all new skills
@@ -268,6 +268,6 @@ Adapted from the [superpowers](https://github.com/obra/superpowers) plugin by Je
 
 | Version | Date | Description |
 |---------|------|-------------|
-| 2.1.0 | 2026-02-09 | Minor release: Merge 7 skills from yg-claude (sre-runbook, pve-admin, puppet-code-analyzer, gitlab-ecr-pipeline, cache-cleanup, clickup-ticket-creator, container-cicd-reference docs) |
+| 2.1.0 | 2026-02-09 | Minor release: Merge 6 skills from yg-claude (sre-runbook, pve-admin, puppet-code-analyzer, gitlab-ecr-pipeline, cache-cleanup, clickup-ticket-creator) + container-cicd-reference docs |
 | 2.0.0 | 2026-02-09 | Major release: 4 new skills (VBC, brainstorming-ops, writing-ops, using-srepowers), command system, hooks, test suite, documentation |
 | 1.0.0 | 2025-02-09 | Initial release with test-driven-operation and subagent-driven-operation skills |

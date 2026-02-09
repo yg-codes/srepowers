@@ -1,6 +1,6 @@
 ---
 name: brainstorming-operations
-description: "Use before planning infrastructure operations - explores requirements, risks, verification strategies, and rollback plans before implementation"
+description: "Use when planning infrastructure operations - explores requirements, risks, verification strategies, and rollback plans before implementation"
 ---
 
 # Brainstorming Infrastructure Operations

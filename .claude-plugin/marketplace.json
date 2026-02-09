@@ -3,7 +3,7 @@
   "description": "SRE infrastructure skills marketplace for Claude Code",
   "owner": {
     "name": "yg",
-    "email": "yg@example.com"
+    "email": "sre@example.com"
   },
   "plugins": [
     {
@@ -13,7 +13,7 @@
       "source": "./",
       "author": {
         "name": "yg",
-        "email": "yg@example.com"
+        "email": "sre@example.com"
       }
     }
   ]

@@ -1,6 +1,6 @@
 ---
 name: cache-cleanup
-description: Interactive cache cleanup for development tools with pre-check, cleanup, and post-check verification. Use this skill when users request to clean up caches from mise, npm, Go, Cargo, uv, pipx, or pip. This skill ensures tools remain functional after cleanup by verifying availability before and after.
+description: Use when cleaning up development tool caches from mise, npm, Go, Cargo, uv, pipx, or pip - interactive cleanup with pre-check and post-check verification to ensure tools remain functional
 ---
 
 # Cache Cleanup
@@ -181,19 +181,19 @@ This skill includes `scripts/cleanup_caches.sh` which automates the entire workf
 
 ```bash
 # Launch interactive selection
-~/.claude/skills/cache-cleanup/scripts/cleanup_caches.sh
+./scripts/cleanup_caches.sh
 
 # Select specific caches
-~/.claude/skills/cache-cleanup/scripts/cleanup_caches.sh --mise --npm --go
+./scripts/cleanup_caches.sh --mise --npm --go
 
 # Clean all caches
-~/.claude/skills/cache-cleanup/scripts/cleanup_caches.sh --all
+./scripts/cleanup_caches.sh --all
 
 # Dry run (show what would be cleaned)
-~/.claude/skills/cache-cleanup/scripts/cleanup_caches.sh --all --dry-run
+./scripts/cleanup_caches.sh --all --dry-run
 
 # Verbose output
-~/.claude/skills/cache-cleanup/scripts/cleanup_caches.sh --all --verbose
+./scripts/cleanup_caches.sh --all --verbose
 ```
 
 ### Script Features

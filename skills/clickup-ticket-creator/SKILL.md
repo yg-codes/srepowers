@@ -1,21 +1,6 @@
 ---
 name: clickup-ticket-creator
-description: >-
-  Use when creating ClickUp tickets following the CCB template format. Structures ticket
-  content with Description, Rationale, Impact, Risk, UAT implementation, Procedure,
-  Verification, and Rollback sections. Supports interactive prompting for each section
-  or free-form to structured conversion. Default status: triage, assignee: unassigned,
-  priority: Normal. Keywords: ClickUp, ticket, CCB template, INFRA ticket, change request.
-triggers:
-  - ClickUp
-  - clickup
-  - CCB
-  - ticket
-  - INFRA ticket
-  - change request
-role: specialist
-scope: implementation
-output-format: markdown
+description: Use when creating ClickUp tickets following the CCB template format - structures content with Description, Rationale, Impact, Risk, UAT, Procedure, Verification, and Rollback sections
 ---
 
 # Clickup Ticket Creator

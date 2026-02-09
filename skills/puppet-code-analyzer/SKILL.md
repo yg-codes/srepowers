@@ -1,7 +1,6 @@
 ---
 name: puppet-code-analyzer
-description: Automatically analyze and improve Puppet code quality in control repos and modules. Activates when working with Puppet manifests (.pp files), Puppetfiles, or Hiera data at ~/src/fsx/puppet/control or ~/src/fsx/puppet/modules. Provides code linting, dependency analysis, best practice validation, and error troubleshooting.
-license: Complete terms in LICENSE.txt
+description: Use when analyzing Puppet code quality in control repos and modules - linting, dependency analysis, best practice validation, and error troubleshooting for Puppet manifests, Puppetfiles, and Hiera data
 ---
 
 # Puppet Code Analyzer
@@ -217,15 +216,6 @@ Documentation loaded into context as needed:
 - **`module-structure.md`** - Expected module layout and patterns
 
 **Usage:** Claude loads these files when detailed reference material is needed for analysis or recommendations.
-
-### assets/
-
-PDK templates and configuration files:
-
-- **`pdk-config/`** - PDK templates for project initialization
-- (Additional assets as needed for team standards)
-
-**Note:** Most teams won't need this directory. Delete if unused.
 
 ## Quick Start Examples
 

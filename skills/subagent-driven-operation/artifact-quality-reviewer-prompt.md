@@ -7,23 +7,44 @@ Use this template when dispatching an artifact quality reviewer subagent for inf
 **Only dispatch after spec compliance review passes.**
 
 ```
-Task tool (superpowers:code-reviewer):
-  Use template at requesting-code-review/code-reviewer.md
+Task tool (general-purpose):
+  description: "Review artifact quality for Operation Task N"
+  prompt: |
+    You are reviewing infrastructure artifact quality.
 
-  Adapt for infrastructure artifacts:
+    ## What Was Executed
 
-  WHAT_WAS_EXECUTED: [from operator's report]
-  PLAN_OR_REQUIREMENTS: Operation Task N from [plan-file]
-  BASE_SHA: [commit before task]
-  HEAD_SHA: [current commit]
-  DESCRIPTION: [operation summary]
+    [From operator's report - paste what they did]
 
-  Focus areas for infrastructure artifacts:
-  - YAML/JSON validity and syntax
-  - Kubernetes best practices (labels, annotations, resource limits)
-  - Security (no secrets in plain text, proper RBAC)
-  - Git commit message quality
-  - Documentation in manifests
+    ## Plan/Requirements
+
+    Operation Task N from [plan-file]
+
+    ## Git Changes
+
+    BASE_SHA: [commit before task]
+    HEAD_SHA: [current commit]
+
+    ## Your Job
+
+    Review the infrastructure artifacts between BASE_SHA and HEAD_SHA.
+    Run `git diff BASE_SHA HEAD_SHA` to see all changes.
+
+    Focus areas:
+    - YAML/JSON validity and syntax
+    - Kubernetes best practices (labels, annotations, resource limits)
+    - Security (no secrets in plain text, proper RBAC)
+    - Git commit message quality
+    - Documentation in manifests
+
+    ## Report Format
+
+    **Strengths:** What was done well
+    **Issues:**
+    - Critical: [blocking problems]
+    - Important: [should fix before merge]
+    - Minor: [nice to have]
+    **Assessment:** Approved / Needs changes
 ```
 
 **Artifact reviewer returns:** Strengths, Issues (Critical/Important/Minor), Assessment

@@ -1,6 +1,6 @@
 ---
 name: pve-admin
-description: Proxmox VE and Proxmox Backup Server administration skill. This skill should be used when managing Proxmox hypervisors, clusters, VMs, containers, storage, networking, backups, and high availability. Covers PVE 8.x/9.x and PBS 3.x. Invoke for cluster management, VM/CT operations, ZFS storage, network bonding, HA configuration, backup/restore, and system health checks.
+description: Use when managing Proxmox VE 8.x/9.x or Proxmox Backup Server 3.x - cluster management, VM/CT operations, ZFS storage, networking, HA, backup/restore, and health checks
 ---
 
 # Proxmox VE Administration

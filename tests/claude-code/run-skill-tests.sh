@@ -57,11 +57,18 @@ while [[ $# -gt 0 ]]; do
             echo "  --help, -h           Show this help"
             echo ""
             echo "Tests:"
-            echo "  test-test-driven-operation.sh  Test skill loading and requirements"
-            echo "  test-subagent-driven-operation.sh  Test skill loading and requirements"
-            echo ""
-            echo "Integration Tests (use --integration):"
-            echo "  Coming soon"
+            echo "  test-test-driven-operation.sh           TDO skill loading and requirements"
+            echo "  test-subagent-driven-operation.sh       SDO skill loading and requirements"
+            echo "  test-verification-before-completion.sh  VBC skill evidence requirements"
+            echo "  test-brainstorming-operations.sh        Brainstorming skill workflow"
+            echo "  test-writing-operation-plans.sh         Planning skill TDO discipline"
+            echo "  test-using-srepowers.sh                 Meta-skill skill listing"
+            echo "  test-sre-runbook.sh                     Runbook format and sections"
+            echo "  test-pve-admin.sh                       Proxmox administration"
+            echo "  test-puppet-code-analyzer.sh            Puppet linting and analysis"
+            echo "  test-cache-cleanup.sh                   Cache cleanup verification"
+            echo "  test-gitlab-ecr-pipeline.sh             ECR pipeline patterns"
+            echo "  test-clickup-ticket-creator.sh          ClickUp CCB template"
             exit 0
             ;;
         *)
@@ -76,6 +83,16 @@ done
 tests=(
     "test-test-driven-operation.sh"
     "test-subagent-driven-operation.sh"
+    "test-verification-before-completion.sh"
+    "test-brainstorming-operations.sh"
+    "test-writing-operation-plans.sh"
+    "test-using-srepowers.sh"
+    "test-sre-runbook.sh"
+    "test-pve-admin.sh"
+    "test-puppet-code-analyzer.sh"
+    "test-cache-cleanup.sh"
+    "test-gitlab-ecr-pipeline.sh"
+    "test-clickup-ticket-creator.sh"
 )
 
 # Integration tests (slow, full execution)

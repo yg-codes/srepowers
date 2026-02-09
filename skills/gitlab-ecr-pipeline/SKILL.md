@@ -1,8 +1,6 @@
 ---
 name: gitlab-ecr-pipeline
-description: Use this skill when creating or modifying GitLab CI/CD pipelines that push container images to AWS ECR. Supports both building images from Containerfile/Dockerfile and mirroring upstream images to ECR. Requires GitLab project with AWS credentials configured as CI/CD variables.
-skills:
-  - container-cicd-reference
+description: Use when creating or modifying GitLab CI/CD pipelines that push container images to AWS ECR - supports building from Containerfile/Dockerfile and mirroring upstream images
 ---
 
 # GitLab ECR Pipeline

@@ -219,6 +219,7 @@ Quick invoke skills using `/command` syntax:
 - `/subagent-driven-operation` - Execute operation plans with subagent dispatch
 - `/brainstorming-operations` - Design infrastructure operations
 - `/writing-operation-plans` - Create detailed execution plans
+- `/verification-before-completion` - Verify before claiming work complete
 - `/sre-runbook` - Create structured SRE runbooks
 
 **Infrastructure Administration:**

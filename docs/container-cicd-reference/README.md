@@ -1,15 +1,10 @@
----
-name: container-cicd-reference
-description: Comprehensive reference documentation for AWS ECR, GitLab CI/CD, and container deployment patterns. Use when setting up ECR repositories, configuring cross-account access, choosing between IAM User vs Role authentication, verifying GitLab Container Registry availability, or comparing Python vs Docker deployment approaches. Provides detailed guides, decision matrices, troubleshooting steps, and complete workflow examples.
----
-
 # Container CI/CD Reference
 
-Comprehensive reference documentation for container-based CI/CD with AWS ECR and GitLab. This skill provides detailed setup guides, architectural patterns, authentication decisions, and deployment comparisons for container infrastructure.
+Comprehensive reference documentation for container-based CI/CD with AWS ECR and GitLab. Provides detailed setup guides, architectural patterns, authentication decisions, and deployment comparisons for container infrastructure.
 
 ## Purpose
 
-This skill serves as a reference library for:
+This reference covers:
 - **AWS ECR setup and usage** - Complete container registry configuration
 - **Cross-account ECR access** - Multi-account deployment patterns
 - **IAM authentication decisions** - User vs Role comparison for GitLab CI/CD
@@ -117,7 +112,7 @@ podman pull <account-a-id>.dkr.ecr.us-east-1.amazonaws.com/repo:tag
 
 ## Related Skills
 
-This reference skill is designed to complement:
+This reference complements:
 - **`gitlab-ecr-pipeline`** - Practical GitLab CI/CD pipeline templates
 - **`aws-mcp-setup`** - AWS MCP server configuration
 - **`aws-cdk-development`** - CDK infrastructure patterns
