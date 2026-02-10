@@ -12,7 +12,7 @@ SREPowers adapts proven software development workflows (TDD, subagent-driven dev
 
 ```bash
 # Add the marketplace
-/plugin marketplace add yg-codes/srepowers-marketplace
+/plugin marketplace add yg-codes/srepowers
 
 # Install the plugin
 /plugin install srepowers@srepowers-marketplace
