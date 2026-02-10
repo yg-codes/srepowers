@@ -1,5 +1,73 @@
 # Release Notes
 
+## [3.0.0] - 2026-02-10
+
+### Major Release - 20 Domain Expertise Skills
+
+Added 20 domain expertise skills from [Jeffallan/claude-skills](https://github.com/Jeffallan/claude-skills), providing deep reference knowledge across architecture, cloud, DevOps, languages, security, and SRE domains. These complement the existing 12 SRE workflow skills.
+
+#### New Skills (20)
+
+**Architecture & Design**
+- **architecture-designer** - System architecture design, review, ADRs, design patterns, scalability planning
+- **cloud-architect** - Cloud architecture, Well-Architected Framework, cost optimization, disaster recovery, landing zones
+- **microservices-architect** - Distributed systems, DDD, saga patterns, event sourcing, service mesh
+
+**DevOps & Infrastructure**
+- **devops-engineer** - CI/CD pipelines, Docker, Kubernetes, cloud platforms, GitOps
+- **terraform-engineer** - Terraform IaC, module development, state management, multi-environment workflows
+- **kubernetes-specialist** - Helm charts, RBAC, NetworkPolicies, storage, performance optimization
+- **chaos-engineer** - Chaos experiments, failure injection, game days, blast radius control
+
+**Monitoring & Reliability**
+- **monitoring-expert** - Prometheus/Grafana, logging, metrics, tracing, alerting, capacity planning
+- **sre-engineer** - SLIs/SLOs, error budgets, incident management, toil reduction
+
+**Languages & Development**
+- **golang-pro** - Go concurrency, channels, generics, gRPC, microservices
+- **python-pro** - Python 3.11+ type safety, async/await, pytest, dataclasses
+- **rust-engineer** - Ownership, lifetimes, traits, async with tokio, systems programming
+- **sql-pro** - Window functions, CTEs, indexing strategies, query plan analysis
+- **postgres-pro** - EXPLAIN analysis, JSONB, replication, VACUUM tuning
+
+**Security**
+- **secure-code-guardian** - Authentication, authorization, OWASP Top 10 prevention, encryption
+- **security-reviewer** - SAST scans, penetration testing, DevSecOps, cloud security reviews
+
+**Quality & Documentation**
+- **code-reviewer** - PR reviews, code quality audits, refactoring suggestions
+- **code-documenter** - OpenAPI/Swagger, JSDoc, documentation sites, tutorials
+- **test-master** - Test strategies, unit/integration/E2E, coverage analysis, performance testing
+- **prompt-engineer** - LLM prompt design, chain-of-thought, few-shot learning, evaluation frameworks
+
+#### New Commands (20)
+
+- `/architecture-designer`, `/cloud-architect`, `/microservices-architect`
+- `/devops-engineer`, `/terraform-engineer`, `/kubernetes-specialist`, `/chaos-engineer`
+- `/monitoring-expert`, `/sre-engineer`
+- `/golang-pro`, `/python-pro`, `/rust-engineer`, `/sql-pro`, `/postgres-pro`
+- `/secure-code-guardian`, `/security-reviewer`
+- `/code-reviewer`, `/code-documenter`, `/test-master`, `/prompt-engineer`
+
+#### New Tests (20)
+
+- Test scripts for all 20 new skills following existing pattern (3 tests per skill)
+- Updated `run-skill-tests.sh` to include all 32 test scripts
+
+#### Enhancements
+
+- **Total skills:** 32 (12 SRE workflow + 20 domain expertise)
+- **Total commands:** 31 (11 existing + 20 new)
+- **Updated meta-skill** with categorized domain expertise skills and updated priority order
+- **Updated plugin description and keywords** to reflect expanded scope
+- **Frontmatter standardized** to `name` + `description` only (srepowers convention)
+
+#### Source Attribution
+
+All 20 domain expertise skills sourced from [Jeffallan/claude-skills](https://github.com/Jeffallan/claude-skills) (MIT license). Each skill includes SKILL.md and references/ directory with deep knowledge bases.
+
+---
+
 ## [2.1.0] - 2026-02-09
 
 ### Minor Release - Merge from yg-claude Repository
@@ -268,6 +336,7 @@ Adapted from the [superpowers](https://github.com/obra/superpowers) plugin by Je
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 3.0.0 | 2026-02-10 | Major release: 20 domain expertise skills from Jeffallan/claude-skills (architecture, cloud, DevOps, languages, security, SRE) |
 | 2.1.0 | 2026-02-09 | Minor release: Merge 6 skills from yg-claude (sre-runbook, pve-admin, puppet-code-analyzer, gitlab-ecr-pipeline, cache-cleanup, clickup-ticket-creator) + container-cicd-reference docs |
 | 2.0.0 | 2026-02-09 | Major release: 4 new skills (VBC, brainstorming-ops, writing-ops, using-srepowers), command system, hooks, test suite, documentation |
 | 1.0.0 | 2025-02-09 | Initial release with test-driven-operation and subagent-driven-operation skills |

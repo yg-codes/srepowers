@@ -70,10 +70,12 @@ These thoughts mean STOP—you're rationalizing:
 When multiple skills could apply, use this order:
 
 1. **Process skills first** (brainstorming-operations, writing-operation-plans) - these determine HOW to approach the operation
-2. **Execution skills second** (test-driven-operation, subagent-driven-operation) - these guide execution
+2. **Domain expertise skills second** (kubernetes-specialist, terraform-engineer, cloud-architect, etc.) - these provide deep knowledge
+3. **Execution skills third** (test-driven-operation, subagent-driven-operation) - these guide execution
 
 "Let's deploy X" → brainstorming-operations first, then writing-operation-plans, then subagent-driven-operation.
 "Fix this infrastructure issue" → test-driven-operation.
+"Design a Kubernetes deployment" → kubernetes-specialist for domain knowledge, then writing-operation-plans for execution steps.
 
 ## Skill Types
 
@@ -151,6 +153,100 @@ The skill itself tells you which.
 - Use when: Creating ClickUp tickets following CCB template format
 - Sections: Description, Rationale, Impact, Risk, UAT, Procedure, Verification, Rollback
 - Output: Formatted ticket ready for submission
+
+## Domain Expertise Skills
+
+### Architecture & Design
+
+**architecture-designer** - System architecture design, review, and decision-making
+- Use when: Designing new system architecture, reviewing existing designs, making architectural decisions
+- Focus: Design patterns, ADRs, scalability planning, system design review
+
+**cloud-architect** - Cloud architecture design and multi-cloud optimization
+- Use when: Designing cloud architectures, planning migrations, optimizing multi-cloud deployments
+- Focus: Well-Architected Framework, cost optimization, disaster recovery, landing zones, serverless
+
+**microservices-architect** - Distributed systems and microservices patterns
+- Use when: Designing distributed systems, decomposing monoliths, implementing microservices patterns
+- Focus: Service boundaries, DDD, saga patterns, event sourcing, service mesh, distributed tracing
+
+### DevOps & Infrastructure
+
+**devops-engineer** - CI/CD, containers, and infrastructure as code
+- Use when: Setting up CI/CD pipelines, containerizing applications, managing infrastructure as code
+- Focus: Pipelines, Docker, Kubernetes, cloud platforms, GitOps
+
+**terraform-engineer** - Infrastructure as code with Terraform
+- Use when: Implementing IaC with Terraform across AWS, Azure, or GCP
+- Focus: Module development, state management, provider configuration, multi-environment workflows
+
+**kubernetes-specialist** - Kubernetes operations depth
+- Use when: Deploying or managing Kubernetes workloads requiring cluster configuration, security hardening, or troubleshooting
+- Focus: Helm charts, RBAC, NetworkPolicies, storage, performance optimization
+
+**chaos-engineer** - Resilience testing and failure injection
+- Use when: Designing chaos experiments, implementing failure injection, conducting game day exercises
+- Focus: Blast radius control, game days, antifragile systems, resilience testing
+
+### Monitoring & Reliability
+
+**monitoring-expert** - Observability stack setup and management
+- Use when: Setting up monitoring systems, logging, metrics, tracing, or alerting
+- Focus: Dashboards, Prometheus/Grafana, load testing, profiling, capacity planning
+
+**sre-engineer** - SLO/SLI management and reliability at scale
+- Use when: Defining SLIs/SLOs, managing error budgets, building reliable systems at scale
+- Focus: Incident management, chaos engineering, toil reduction, capacity planning
+
+### Languages & Development
+
+**golang-pro** - Go application development
+- Use when: Building Go applications requiring concurrent programming, microservices, or high-performance systems
+- Focus: Goroutines, channels, Go generics, gRPC integration
+
+**python-pro** - Python application development
+- Use when: Building Python 3.11+ applications requiring type safety, async programming, or production-grade patterns
+- Focus: Type hints, pytest, async/await, dataclasses, mypy
+
+**rust-engineer** - Rust systems programming
+- Use when: Building Rust applications requiring memory safety, systems programming, or zero-cost abstractions
+- Focus: Ownership patterns, lifetimes, traits, async/await with tokio
+
+**sql-pro** - SQL query optimization and schema design
+- Use when: Optimizing SQL queries, designing database schemas, or tuning database performance
+- Focus: Window functions, CTEs, indexing strategies, query plan analysis
+
+**postgres-pro** - PostgreSQL operations and optimization
+- Use when: Optimizing PostgreSQL queries, configuring replication, or implementing advanced features
+- Focus: EXPLAIN analysis, JSONB operations, extension usage, VACUUM tuning
+
+### Security
+
+**secure-code-guardian** - Application security and OWASP prevention
+- Use when: Implementing authentication/authorization, securing user input, preventing OWASP Top 10
+- Focus: Authentication, authorization, input validation, encryption
+
+**security-reviewer** - Security audits and infrastructure security
+- Use when: Conducting security audits, reviewing code for vulnerabilities, analyzing infrastructure security
+- Focus: SAST scans, penetration testing, DevSecOps practices, cloud security reviews
+
+### Quality & Documentation
+
+**code-reviewer** - Code quality audits and PR reviews
+- Use when: Reviewing pull requests, conducting code quality audits, identifying vulnerabilities
+- Focus: PR reviews, code quality checks, refactoring suggestions
+
+**code-documenter** - API documentation and docstrings
+- Use when: Adding docstrings, creating API documentation, building documentation sites
+- Focus: OpenAPI/Swagger specs, JSDoc, doc portals, tutorials, user guides
+
+**test-master** - Testing strategy and automation
+- Use when: Writing tests, creating test strategies, building automation frameworks
+- Focus: Unit tests, integration tests, E2E, coverage analysis, performance testing
+
+**prompt-engineer** - LLM prompt design and evaluation
+- Use when: Designing prompts for LLMs, optimizing model performance, building evaluation frameworks
+- Focus: Chain-of-thought, few-shot learning, structured outputs, prompt evaluation
 
 ## Infrastructure Operation Examples
 

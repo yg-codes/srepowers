@@ -178,10 +178,270 @@
 #    - UAT, Procedure, Verification, Rollback
 ```
 
+### 13. Architecture Designer
+
+```
+# Test: Design system architecture
+"I need to design a microservices architecture for an e-commerce platform. Use architecture-designer."
+
+# Expected behavior:
+# 1. Claude invokes architecture-designer skill
+# 2. Discusses design patterns and trade-offs
+# 3. Considers scalability, reliability, maintainability
+# 4. May suggest creating an ADR
+```
+
+### 14. Chaos Engineer
+
+```
+# Test: Design chaos experiment
+"Design a chaos experiment to test our Kubernetes cluster's resilience to node failures. Use chaos-engineer."
+
+# Expected behavior:
+# 1. Claude invokes chaos-engineer skill
+# 2. Defines hypothesis, blast radius, steady state
+# 3. Plans failure injection approach
+# 4. Includes rollback and abort criteria
+```
+
+### 15. Cloud Architect
+
+```
+# Test: Cloud architecture design
+"Design a multi-region deployment on AWS following the Well-Architected Framework. Use cloud-architect."
+
+# Expected behavior:
+# 1. Claude invokes cloud-architect skill
+# 2. Addresses all WAF pillars
+# 3. Covers DR, cost optimization, security
+# 4. Proposes landing zone structure
+```
+
+### 16. Code Documenter
+
+```
+# Test: Create API documentation
+"Generate OpenAPI documentation for our REST API endpoints. Use code-documenter."
+
+# Expected behavior:
+# 1. Claude invokes code-documenter skill
+# 2. Creates structured API documentation
+# 3. Uses OpenAPI/Swagger format
+# 4. Includes examples and schemas
+```
+
+### 17. Code Reviewer
+
+```
+# Test: Review code quality
+"Review this pull request for code quality and security issues. Use code-reviewer."
+
+# Expected behavior:
+# 1. Claude invokes code-reviewer skill
+# 2. Checks for security vulnerabilities
+# 3. Evaluates code quality and readability
+# 4. Provides actionable feedback
+```
+
+### 18. DevOps Engineer
+
+```
+# Test: CI/CD pipeline setup
+"Set up a CI/CD pipeline for a Node.js application with Docker. Use devops-engineer."
+
+# Expected behavior:
+# 1. Claude invokes devops-engineer skill
+# 2. Creates pipeline configuration
+# 3. Includes build, test, deploy stages
+# 4. Containerization with Docker
+```
+
+### 19. Golang Pro
+
+```
+# Test: Go concurrency
+"Implement a worker pool pattern in Go with error handling. Use golang-pro."
+
+# Expected behavior:
+# 1. Claude invokes golang-pro skill
+# 2. Uses goroutines and channels
+# 3. Implements proper error handling
+# 4. Follows Go best practices
+```
+
+### 20. Kubernetes Specialist
+
+```
+# Test: K8s security hardening
+"Harden the RBAC configuration for our production Kubernetes cluster. Use kubernetes-specialist."
+
+# Expected behavior:
+# 1. Claude invokes kubernetes-specialist skill
+# 2. Reviews RBAC policies
+# 3. Applies least-privilege principle
+# 4. Configures NetworkPolicies
+```
+
+### 21. Microservices Architect
+
+```
+# Test: Service decomposition
+"Decompose our monolithic order system into microservices. Use microservices-architect."
+
+# Expected behavior:
+# 1. Claude invokes microservices-architect skill
+# 2. Identifies bounded contexts
+# 3. Defines service boundaries
+# 4. Proposes communication patterns (sync/async)
+```
+
+### 22. Monitoring Expert
+
+```
+# Test: Observability setup
+"Set up a monitoring stack with Prometheus and Grafana for our Kubernetes cluster. Use monitoring-expert."
+
+# Expected behavior:
+# 1. Claude invokes monitoring-expert skill
+# 2. Configures metrics collection
+# 3. Creates dashboards
+# 4. Sets up alerting rules
+```
+
+### 23. Postgres Pro
+
+```
+# Test: Query optimization
+"Optimize this slow PostgreSQL query using EXPLAIN ANALYZE. Use postgres-pro."
+
+# Expected behavior:
+# 1. Claude invokes postgres-pro skill
+# 2. Analyzes query plan
+# 3. Suggests index improvements
+# 4. Recommends VACUUM/ANALYZE if needed
+```
+
+### 24. Prompt Engineer
+
+```
+# Test: Prompt design
+"Design a chain-of-thought prompt for code review automation. Use prompt-engineer."
+
+# Expected behavior:
+# 1. Claude invokes prompt-engineer skill
+# 2. Structures prompt with CoT
+# 3. Includes few-shot examples
+# 4. Suggests evaluation metrics
+```
+
+### 25. Python Pro
+
+```
+# Test: Python async programming
+"Implement an async HTTP client with proper type hints and error handling. Use python-pro."
+
+# Expected behavior:
+# 1. Claude invokes python-pro skill
+# 2. Uses async/await with aiohttp
+# 3. Adds comprehensive type hints
+# 4. Follows Python best practices
+```
+
+### 26. Rust Engineer
+
+```
+# Test: Rust ownership patterns
+"Implement a thread-safe cache in Rust with proper lifetime management. Use rust-engineer."
+
+# Expected behavior:
+# 1. Claude invokes rust-engineer skill
+# 2. Uses proper ownership and borrowing
+# 3. Implements Send + Sync traits
+# 4. Uses Arc/Mutex for thread safety
+```
+
+### 27. Secure Code Guardian
+
+```
+# Test: Security hardening
+"Review this login form for OWASP Top 10 vulnerabilities. Use secure-code-guardian."
+
+# Expected behavior:
+# 1. Claude invokes secure-code-guardian skill
+# 2. Checks for injection, XSS, CSRF
+# 3. Validates authentication flow
+# 4. Recommends security improvements
+```
+
+### 28. Security Reviewer
+
+```
+# Test: Security audit
+"Conduct a security review of our cloud infrastructure configuration. Use security-reviewer."
+
+# Expected behavior:
+# 1. Claude invokes security-reviewer skill
+# 2. Performs SAST-style analysis
+# 3. Checks infrastructure security
+# 4. Generates findings report
+```
+
+### 29. SQL Pro
+
+```
+# Test: Complex query optimization
+"Optimize this query using window functions and CTEs. Use sql-pro."
+
+# Expected behavior:
+# 1. Claude invokes sql-pro skill
+# 2. Rewrites with window functions
+# 3. Uses CTEs for readability
+# 4. Analyzes indexing strategy
+```
+
+### 30. SRE Engineer
+
+```
+# Test: SLO definition
+"Define SLIs and SLOs for our payment processing service. Use sre-engineer."
+
+# Expected behavior:
+# 1. Claude invokes sre-engineer skill
+# 2. Defines meaningful SLIs
+# 3. Sets appropriate SLO targets
+# 4. Establishes error budget policies
+```
+
+### 31. Terraform Engineer
+
+```
+# Test: Terraform module
+"Create a reusable Terraform module for an AWS VPC with subnets. Use terraform-engineer."
+
+# Expected behavior:
+# 1. Claude invokes terraform-engineer skill
+# 2. Creates module with variables and outputs
+# 3. Follows module best practices
+# 4. Includes state management considerations
+```
+
+### 32. Test Master
+
+```
+# Test: Test strategy
+"Create a comprehensive testing strategy for our microservices. Use test-master."
+
+# Expected behavior:
+# 1. Claude invokes test-master skill
+# 2. Covers test pyramid (unit, integration, E2E)
+# 3. Defines coverage targets
+# 4. Includes performance and security testing
+```
+
 ## Command Wrappers Test
 
 ```bash
-# Test each /command
+# Test each /command - SRE workflow skills
 claude -p "/test-driven-operation"
 claude -p "/subagent-driven-operation"
 claude -p "/brainstorming-operations"
@@ -193,6 +453,28 @@ claude -p "/puppet-code-analyzer"
 claude -p "/cache-cleanup"
 claude -p "/gitlab-ecr-pipeline"
 claude -p "/clickup-ticket-creator"
+
+# Test each /command - Domain expertise skills
+claude -p "/architecture-designer"
+claude -p "/chaos-engineer"
+claude -p "/cloud-architect"
+claude -p "/code-documenter"
+claude -p "/code-reviewer"
+claude -p "/devops-engineer"
+claude -p "/golang-pro"
+claude -p "/kubernetes-specialist"
+claude -p "/microservices-architect"
+claude -p "/monitoring-expert"
+claude -p "/postgres-pro"
+claude -p "/prompt-engineer"
+claude -p "/python-pro"
+claude -p "/rust-engineer"
+claude -p "/secure-code-guardian"
+claude -p "/security-reviewer"
+claude -p "/sql-pro"
+claude -p "/sre-engineer"
+claude -p "/terraform-engineer"
+claude -p "/test-master"
 
 # Each should invoke the corresponding skill
 ```
@@ -261,7 +543,7 @@ claude
 ## Success Criteria
 
 - All tests pass: `./tests/claude-code/run-skill-tests.sh`
-- All 12 skills load when prompted
-- All 11 commands invoke correct skills
+- All 32 skills load when prompted
+- All 31 commands invoke correct skills
 - Hooks inject meta-skill on session start
 - Each skill demonstrates its workflow correctly

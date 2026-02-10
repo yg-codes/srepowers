@@ -1,7 +1,7 @@
 {
   "name": "srepowers",
-  "description": "SRE infrastructure skills: Test-Driven Operations, Subagent-Driven Operations, runbooks, Proxmox administration, Puppet analysis, cache cleanup, GitLab ECR pipelines, and ClickUp ticket creation for Kubernetes, Keycloak, GitOps, Proxmox VE, and CI/CD workflows",
-  "version": "2.1.0",
+  "description": "SRE infrastructure skills with domain expertise: 12 SRE workflow skills (TDO, SDO, runbooks, Proxmox, Puppet, CI/CD) plus 20 domain expertise skills (architecture, cloud, DevOps, Kubernetes, Terraform, monitoring, Go, Python, Rust, SQL, PostgreSQL, security, testing, prompt engineering)",
+  "version": "3.0.0",
   "author": {
     "name": "yg",
     "email": "sre@example.com"
@@ -9,5 +9,5 @@
   "homepage": "https://github.com/yg-codes/srepowers",
   "repository": "https://github.com/yg-codes/srepowers",
   "license": "MIT",
-  "keywords": ["sre", "infrastructure", "kubernetes", "keycloak", "gitops", "tdo", "operations", "devops", "api", "kubectl", "verification", "planning", "proxmox", "pve", "pbs", "puppet", "cache", "gitlab", "ecr", "clickup", "runbook"]
+  "keywords": ["sre", "infrastructure", "kubernetes", "keycloak", "gitops", "tdo", "operations", "devops", "api", "kubectl", "verification", "planning", "proxmox", "pve", "pbs", "puppet", "cache", "gitlab", "ecr", "clickup", "runbook", "architecture", "cloud", "terraform", "monitoring", "golang", "python", "rust", "sql", "postgres", "security", "testing", "chaos-engineering", "microservices", "prompt-engineering"]
 }

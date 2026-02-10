@@ -210,6 +210,126 @@ kubectl get pod -n production -l app=api-server
 - Rollback procedures
 - Troubleshooting section
 
+### architecture-designer
+
+**Use when:** Designing new system architecture, reviewing existing designs, or making architectural decisions.
+
+**Focus:** Design patterns, ADRs, scalability planning, system design review.
+
+### chaos-engineer
+
+**Use when:** Designing chaos experiments, implementing failure injection frameworks, or conducting game day exercises.
+
+**Focus:** Blast radius control, game days, antifragile systems, resilience testing.
+
+### cloud-architect
+
+**Use when:** Designing cloud architectures, planning migrations, or optimizing multi-cloud deployments.
+
+**Focus:** Well-Architected Framework, cost optimization, disaster recovery, landing zones, serverless.
+
+### code-documenter
+
+**Use when:** Adding docstrings, creating API documentation, or building documentation sites.
+
+**Focus:** OpenAPI/Swagger specs, JSDoc, doc portals, tutorials, user guides.
+
+### code-reviewer
+
+**Use when:** Reviewing pull requests, conducting code quality audits, or identifying security vulnerabilities.
+
+**Focus:** PR reviews, code quality checks, refactoring suggestions.
+
+### devops-engineer
+
+**Use when:** Setting up CI/CD pipelines, containerizing applications, or managing infrastructure as code.
+
+**Focus:** Pipelines, Docker, Kubernetes, cloud platforms, GitOps.
+
+### golang-pro
+
+**Use when:** Building Go applications requiring concurrent programming, microservices architecture, or high-performance systems.
+
+**Focus:** Goroutines, channels, Go generics, gRPC integration.
+
+### kubernetes-specialist
+
+**Use when:** Deploying or managing Kubernetes workloads requiring cluster configuration, security hardening, or troubleshooting.
+
+**Focus:** Helm charts, RBAC, NetworkPolicies, storage, performance optimization.
+
+### microservices-architect
+
+**Use when:** Designing distributed systems, decomposing monoliths, or implementing microservices patterns.
+
+**Focus:** Service boundaries, DDD, saga patterns, event sourcing, service mesh, distributed tracing.
+
+### monitoring-expert
+
+**Use when:** Setting up monitoring systems, logging, metrics, tracing, or alerting.
+
+**Focus:** Dashboards, Prometheus/Grafana, load testing, profiling, capacity planning.
+
+### postgres-pro
+
+**Use when:** Optimizing PostgreSQL queries, configuring replication, or implementing advanced database features.
+
+**Focus:** EXPLAIN analysis, JSONB operations, extension usage, VACUUM tuning, performance monitoring.
+
+### prompt-engineer
+
+**Use when:** Designing prompts for LLMs, optimizing model performance, building evaluation frameworks.
+
+**Focus:** Chain-of-thought, few-shot learning, structured outputs, prompt evaluation.
+
+### python-pro
+
+**Use when:** Building Python 3.11+ applications requiring type safety, async programming, or production-grade patterns.
+
+**Focus:** Type hints, pytest, async/await, dataclasses, mypy configuration.
+
+### rust-engineer
+
+**Use when:** Building Rust applications requiring memory safety, systems programming, or zero-cost abstractions.
+
+**Focus:** Ownership patterns, lifetimes, traits, async/await with tokio.
+
+### secure-code-guardian
+
+**Use when:** Implementing authentication/authorization, securing user input, or preventing OWASP Top 10 vulnerabilities.
+
+**Focus:** Authentication, authorization, input validation, encryption.
+
+### security-reviewer
+
+**Use when:** Conducting security audits, reviewing code for vulnerabilities, or analyzing infrastructure security.
+
+**Focus:** SAST scans, penetration testing, DevSecOps practices, cloud security reviews.
+
+### sql-pro
+
+**Use when:** Optimizing SQL queries, designing database schemas, or tuning database performance.
+
+**Focus:** Window functions, CTEs, indexing strategies, query plan analysis.
+
+### sre-engineer
+
+**Use when:** Defining SLIs/SLOs, managing error budgets, or building reliable systems at scale.
+
+**Focus:** Incident management, chaos engineering, toil reduction, capacity planning.
+
+### terraform-engineer
+
+**Use when:** Implementing infrastructure as code with Terraform across AWS, Azure, or GCP.
+
+**Focus:** Module development, state management, provider configuration, multi-environment workflows.
+
+### test-master
+
+**Use when:** Writing tests, creating test strategies, or building automation frameworks.
+
+**Focus:** Unit tests, integration tests, E2E, coverage analysis, performance testing, security testing.
+
 ## Commands
 
 Quick invoke skills using `/command` syntax:
@@ -234,6 +354,38 @@ Quick invoke skills using `/command` syntax:
 
 **Project Management:**
 - `/clickup-ticket-creator` - Create CCB-formatted ClickUp tickets
+
+**Architecture & Design:**
+- `/architecture-designer` - System architecture design and review
+- `/cloud-architect` - Cloud architecture and multi-cloud optimization
+- `/microservices-architect` - Distributed systems and microservices patterns
+
+**DevOps & Infrastructure:**
+- `/devops-engineer` - CI/CD pipelines, containers, infrastructure as code
+- `/terraform-engineer` - Infrastructure as code with Terraform
+- `/kubernetes-specialist` - Kubernetes operations depth
+- `/chaos-engineer` - Resilience testing and failure injection
+
+**Monitoring & Reliability:**
+- `/monitoring-expert` - Observability stack setup and management
+- `/sre-engineer` - SLO/SLI management and reliability at scale
+
+**Languages & Development:**
+- `/golang-pro` - Go application development
+- `/python-pro` - Python application development
+- `/rust-engineer` - Rust systems programming
+- `/sql-pro` - SQL query optimization and schema design
+- `/postgres-pro` - PostgreSQL operations and optimization
+
+**Security:**
+- `/secure-code-guardian` - Application security and OWASP prevention
+- `/security-reviewer` - Security audits and infrastructure security
+
+**Quality & Documentation:**
+- `/code-reviewer` - Code quality audits and PR reviews
+- `/code-documenter` - API documentation and docstrings
+- `/test-master` - Testing strategy and automation
+- `/prompt-engineer` - LLM prompt design and evaluation
 
 Commands are thin wrappers that invoke skills directly for quick access.
 
