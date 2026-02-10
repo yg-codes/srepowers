@@ -12,7 +12,7 @@ SREPowers adapts proven software development workflows (TDD, subagent-driven dev
 
 ```bash
 # Add the marketplace
-/plugin marketplace add yg/srepowers-marketplace
+/plugin marketplace add yg-codes/srepowers-marketplace
 
 # Install the plugin
 /plugin install srepowers@srepowers-marketplace
@@ -30,7 +30,7 @@ Clone this repository to your local skills directory:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yg/srepowers.git ~/.claude/plugins/srepowers
+git clone https://github.com/yg-codes/srepowers.git ~/.claude/plugins/srepowers
 
 # Or copy skills directly
 cp -r srepowers/skills/* ~/.claude/skills/

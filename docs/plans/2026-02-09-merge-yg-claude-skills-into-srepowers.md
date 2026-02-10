@@ -449,7 +449,7 @@ If you have this repository installed:
 2. **Install SREPowers:**
    ```bash
    # Via Claude Code Marketplace
-   /plugin marketplace add yg/srepowers-marketplace
+   /plugin marketplace add yg-codes/srepowers-marketplace
    /plugin install srepowers@srepowers-marketplace
    ```
 

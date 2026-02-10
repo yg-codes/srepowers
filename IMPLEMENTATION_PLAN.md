@@ -47,8 +47,8 @@ srepowers/
     "name": "yg",
     "email": "yg@example.com"
   },
-  "homepage": "https://github.com/yg/srepowers",
-  "repository": "https://github.com/yg/srepowers",
+  "homepage": "https://github.com/yg-codes/srepowers",
+  "repository": "https://github.com/yg-codes/srepowers",
   "license": "MIT",
   "keywords": ["sre", "infrastructure", "kubernetes", "keycloak", "gitops", "tdo", "operations", "devops"]
 }
@@ -98,7 +98,7 @@ SRE infrastructure skills for Claude Code.
 
 Via Claude Code marketplace:
 ```bash
-/plugin marketplace add yg/srepowers-marketplace
+/plugin marketplace add yg-codes/srepowers-marketplace
 /plugin install srepowers@srepowers-marketplace
 ```
 
