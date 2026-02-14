@@ -60,6 +60,33 @@ Load detailed guidance based on context:
 - Hardcode secrets in code
 - Disable security features for convenience
 
+## SRE Principles
+
+### Safety First
+- Run SAST scans and dependency vulnerability checks before every deployment
+- Validate security controls in staging before production (never test security in prod first)
+- Phase structure: **Pre-check** (threat model, scan dependencies) → **Execute** (implement security controls) → **Verify** (SAST scan, secret scan, penetration test)
+
+### Structured Output
+- Present security findings using severity tables (finding, CWE, severity, file:line, remediation)
+- Use OWASP Top 10 coverage matrix showing protection status per category
+- Include security control inventory (control, implementation, test status, coverage)
+
+### Evidence-Driven
+- Reference specific CVE IDs and CVSS scores for vulnerability findings
+- Include SAST tool output with exact file paths and line numbers
+- Cite secret scanning results and dependency audit output as evidence
+
+### Audit-Ready
+- Maintain a security finding tracker with status (open, in-progress, resolved, accepted-risk)
+- Document all accepted risks with justification, approver, and review date
+- Track remediation timelines and compliance evidence (SOC2, PCI-DSS requirements)
+
+### Communication
+- Lead with risk level (e.g., "Critical: SQL injection vulnerability exposing 50K user records")
+- Summarize security posture in executive-friendly terms (risk score, trend, top issues)
+- Provide clear remediation priorities with effort estimates
+
 ## Output Templates
 
 When implementing security features, provide:

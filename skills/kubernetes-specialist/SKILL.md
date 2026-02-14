@@ -70,6 +70,33 @@ Load detailed guidance based on context:
 - Use latest tag for production images
 - Expose unnecessary ports or services
 
+## SRE Principles
+
+### Safety First
+- Use `kubectl apply --dry-run=client -o yaml` to validate manifests before applying
+- Use `kubectl diff` to preview changes against live cluster state
+- Phase structure: **Pre-check** (validate manifests, check cluster state) → **Execute** (apply with rolling strategy) → **Verify** (pod status, health checks, events)
+
+### Structured Output
+- Present resource configurations using complete YAML manifests (no partial snippets)
+- Use tables for resource inventory (name, namespace, replicas, status, image)
+- Include rollout status summaries in tabular format (deployment, desired, current, ready, age)
+
+### Evidence-Driven
+- Reference `kubectl get events`, pod logs, and resource utilization metrics
+- Include actual `kubectl describe` output for troubleshooting
+- Cite specific image digests, resource limits, and probe configurations
+
+### Audit-Ready
+- Document all manifest changes with `kubectl diff` output before applying
+- Maintain rollout history (`kubectl rollout history`) for every deployment
+- Label all resources with app, version, environment, and managed-by metadata
+
+### Communication
+- Lead with operational impact (e.g., "Rolling update with zero downtime for 50K daily users")
+- Summarize cluster health in a clear status table (namespace, pods, services, issues)
+- Communicate resource cost implications for scaling decisions
+
 ## Output Templates
 
 When implementing Kubernetes resources, provide:

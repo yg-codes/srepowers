@@ -62,6 +62,33 @@ Load detailed guidance based on context:
 - Skip input validation
 - Commit .terraform directories
 
+## SRE Principles
+
+### Safety First
+- Always run `terraform plan` and review output before `terraform apply`
+- Back up state file before migrations or imports; use state locking
+- Phase structure: **Pre-check** (validate, plan, policy check) → **Execute** (apply with approval) → **Verify** (output values, resource status, drift detection)
+
+### Structured Output
+- Present plan output using resource change tables (action, resource, attribute changes)
+- Use comparison tables for module evaluations (module, inputs, outputs, dependencies)
+- Include cost estimation summaries (resource type, count, monthly cost, total)
+
+### Evidence-Driven
+- Reference actual `terraform plan` output diffs showing exact resource changes
+- Include `terraform state list` output to verify resource tracking
+- Cite cost estimation tool output (Infracost, AWS Calculator) with specific numbers
+
+### Audit-Ready
+- Version all Terraform code with meaningful commit messages referencing change tickets
+- Maintain state file version history with apply logs
+- Document resource change history with who applied, when, and what changed
+
+### Communication
+- Lead with infrastructure impact (e.g., "This module provisions a 3-AZ HA cluster reducing RTO from 4h to 15min")
+- Present cost implications in monthly/annual business terms
+- Summarize drift detection findings for operations review
+
 ## Output Templates
 
 When implementing Terraform solutions, provide:

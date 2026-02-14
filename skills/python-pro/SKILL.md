@@ -61,6 +61,33 @@ Load detailed guidance based on context:
 - Hardcode secrets or configuration
 - Use deprecated stdlib modules (use pathlib not os.path)
 
+## SRE Principles
+
+### Safety First
+- Run `mypy --strict`, `ruff check`, and full `pytest` suite before merge
+- Use virtual environment isolation to prevent dependency conflicts
+- Phase structure: **Pre-check** (lint, type-check, test) → **Execute** (implement changes) → **Verify** (full test suite, coverage report, type-check clean)
+
+### Structured Output
+- Present code quality using coverage tables (module, statements, coverage %, missing lines)
+- Use type-check summary tables (files checked, errors, warnings)
+- Include test results in structured format (total, passed, failed, skipped, duration)
+
+### Evidence-Driven
+- Reference pytest coverage reports with actual percentages and uncovered lines
+- Include mypy output showing zero errors in strict mode
+- Cite profiling results (cProfile/py-spy) for performance optimization claims
+
+### Audit-Ready
+- Track dependency changes with `pip-audit` vulnerability scans
+- Document breaking API changes with deprecation warnings and migration guides
+- Maintain test coverage trends across PRs (no coverage regression)
+
+### Communication
+- Lead with quality impact (e.g., "Type coverage increased from 60% to 95%, eliminating a class of runtime errors")
+- Express performance improvements with concrete metrics (e.g., "Async refactor reduces API response time by 3x")
+- Summarize dependency security posture for stakeholders
+
 ## Output Templates
 
 When implementing Python features, provide:

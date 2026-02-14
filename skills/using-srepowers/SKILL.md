@@ -45,6 +45,20 @@ digraph skill_flow {
 }
 ```
 
+## SRE Principles
+
+All skills in this marketplace are bound by five core SRE principles:
+
+| # | Principle | Description |
+|---|-----------|-------------|
+| 1 | **Safety First** | All operational commands MUST include dry-run validation before execution |
+| 2 | **Structured Output** | Use tables, bullet points, and explicit phases (Pre-check → Execute → Verify) |
+| 3 | **Evidence-Driven** | Always reference specific log lines, metrics, or config parameters |
+| 4 | **Audit-Ready** | Every recommendation must be traceable and reversible |
+| 5 | **Communication** | Technical accuracy with business clarity |
+
+These principles apply to both core workflow skills and domain expertise skills. Each skill includes a customized "SRE Principles" section showing how these principles apply in its specific domain.
+
 ## Red Flags
 
 These thoughts mean STOP—you're rationalizing:

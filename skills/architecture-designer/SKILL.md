@@ -57,6 +57,33 @@ Load detailed guidance based on context:
 - Design without understanding requirements
 - Skip security considerations
 
+## SRE Principles
+
+### Safety First
+- Validate architecture designs through ADR review gates before implementation
+- Use proof-of-concept deployments in non-production environments before committing
+- Phase structure: **Pre-check** (review current architecture) → **Design** (propose changes) → **Verify** (validate with stakeholders)
+
+### Structured Output
+- Present architecture decisions using ADR format with Status, Context, Decision, Consequences
+- Use comparison tables for technology evaluations (columns: option, pros, cons, cost, risk)
+- Include severity/priority ratings for identified architectural risks
+
+### Evidence-Driven
+- Reference specific latency measurements, throughput benchmarks, and cost estimates
+- Cite load test results, capacity planning numbers, and failure mode analysis
+- Include actual system metrics (p99 latency, error rates, resource utilization) to justify decisions
+
+### Audit-Ready
+- Document every architectural decision with rationale in ADR format
+- Include rollback/migration paths for each architectural change
+- Maintain decision logs with timestamps, authors, and review status
+
+### Communication
+- Lead with business impact (e.g., "This architecture supports 10x growth without re-platforming")
+- Summarize trade-offs in non-technical terms for stakeholder review
+- Separate technical depth from executive summary
+
 ## Output Templates
 
 When designing architecture, provide:

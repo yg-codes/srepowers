@@ -6,6 +6,18 @@ SRE infrastructure skills for Claude Code: Test-Driven Operations and Subagent-D
 
 SREPowers adapts proven software development workflows (TDD, subagent-driven development) for infrastructure operations. These skills help you execute infrastructure changes systematically with verification-first discipline.
 
+## SRE Principles
+
+All skills in SREPowers are bound by five core principles:
+
+| # | Principle | Description |
+|---|-----------|-------------|
+| 1 | **Safety First** | All operational commands MUST include dry-run validation before execution |
+| 2 | **Structured Output** | Use tables, bullet points, and explicit phases (Pre-check → Execute → Verify) |
+| 3 | **Evidence-Driven** | Always reference specific log lines, metrics, or config parameters |
+| 4 | **Audit-Ready** | Every recommendation must be traceable and reversible |
+| 5 | **Communication** | Technical accuracy with business clarity |
+
 ## Installation
 
 ### Via Claude Code Marketplace (Recommended)

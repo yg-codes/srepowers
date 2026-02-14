@@ -67,6 +67,33 @@ Load detailed guidance based on context:
 - Use `latest` tag in production
 - Deploy on Fridays without monitoring
 
+## SRE Principles
+
+### Safety First
+- All deployments MUST include dry-run validation before execution (pipeline dry-runs, `--dry-run` flags)
+- Implement automated rollback triggers (health check failures, error rate thresholds)
+- Phase structure: **Pre-check** (validate configs, verify staging) → **Execute** (deploy with canary/rolling) → **Verify** (health checks, smoke tests, metrics)
+
+### Structured Output
+- Present deployment plans using phases: Build → Test → Stage → Deploy → Verify
+- Use comparison tables for deployment strategy selection (rolling vs blue-green vs canary)
+- Include pipeline stage summaries in tabular format (stage, duration, status, artifacts)
+
+### Evidence-Driven
+- Reference build logs, deployment metrics, and health check results
+- Include artifact checksums (SHA256) and container image digests
+- Cite pipeline run IDs, deployment timestamps, and rollout status
+
+### Audit-Ready
+- Tag all deployments with version, commit SHA, deployer, and timestamp
+- Maintain deployment manifests and pipeline configs in version control
+- Document rollback procedures with exact commands for every deployment
+
+### Communication
+- Lead with deployment impact (e.g., "Zero-downtime deployment affecting 3 services")
+- Summarize deployment status in a clear pass/fail format
+- Communicate rollback triggers and escalation paths to stakeholders
+
 ## Output Templates
 
 Provide: CI/CD pipeline config, Dockerfile, K8s/Terraform files, deployment verification, rollback procedure

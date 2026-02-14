@@ -65,6 +65,33 @@ Load detailed guidance based on context:
 - Store shared state without proper patterns
 - Deploy without observability
 
+## SRE Principles
+
+### Safety First
+- Validate service contracts with consumer-driven contract tests before deployment
+- Configure circuit breakers and bulkheads before enabling cross-service communication
+- Phase structure: **Pre-check** (contract tests, dependency health) → **Execute** (deploy with canary) → **Verify** (distributed traces, SLO dashboards, error rates)
+
+### Structured Output
+- Present service boundaries using domain context maps with clear ownership
+- Use comparison tables for communication patterns (sync vs async, trade-offs, latency)
+- Include service dependency matrices showing coupling levels (low/medium/high)
+
+### Evidence-Driven
+- Reference distributed trace data (Jaeger/Zipkin) for latency analysis across service boundaries
+- Include service mesh metrics (request rates, error rates, latency per service pair)
+- Cite SLO dashboard values for each service boundary
+
+### Audit-Ready
+- Document all service contracts with versioned API specifications (OpenAPI, protobuf)
+- Maintain service dependency maps updated with every architecture change
+- Track change impact analysis for cross-service modifications
+
+### Communication
+- Lead with business impact (e.g., "Decomposing checkout service reduces deploy frequency from weekly to hourly")
+- Explain eventual consistency in business terms (e.g., "Order status updates within 2 seconds")
+- Summarize service health in a single-page dashboard format
+
 ## Output Templates
 
 When designing microservices architecture, provide:

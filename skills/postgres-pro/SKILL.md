@@ -63,6 +63,33 @@ Load detailed guidance based on context:
 - Store large BLOBs in database (use object storage)
 - Ignore pg_stat_statements warnings
 
+## SRE Principles
+
+### Safety First
+- Run `EXPLAIN ANALYZE` on read replicas before executing on primary
+- Wrap all schema changes in transactions with explicit `ROLLBACK` on failure
+- Phase structure: **Pre-check** (backup, EXPLAIN plan review) → **Execute** (apply migration in transaction) → **Verify** (row counts, checksums, application queries)
+
+### Structured Output
+- Present query optimization using before/after comparison tables (plan cost, actual time, rows, buffers)
+- Use tables for index recommendations (table, columns, type, size estimate, query benefit)
+- Include maintenance status summaries (table, dead tuples, last vacuum, last analyze)
+
+### Evidence-Driven
+- Reference actual `EXPLAIN ANALYZE` output with specific cost numbers and row estimates
+- Include `pg_stat_statements` query stats (calls, mean_time, rows)
+- Cite `pg_stat_user_tables` metrics (seq_scan count, idx_scan count, dead tuples)
+
+### Audit-Ready
+- Version all migration scripts with rollback counterparts
+- Document schema changes with before/after DDL comparisons
+- Maintain query performance baselines for critical queries (stored in version control)
+
+### Communication
+- Lead with performance impact (e.g., "This index reduces checkout query from 2.3s to 15ms")
+- Express storage and maintenance implications in business terms
+- Summarize replication health in a clear status format for operations teams
+
 ## Output Templates
 
 When implementing PostgreSQL solutions, provide:

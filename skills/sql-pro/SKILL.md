@@ -62,6 +62,33 @@ Load detailed guidance based on context:
 - Ignore platform-specific optimizations
 - Leave queries undocumented
 
+## SRE Principles
+
+### Safety First
+- Run `EXPLAIN ANALYZE` before executing any query optimization in production
+- Wrap DDL changes in transactions; test on read replicas first
+- Phase structure: **Pre-check** (EXPLAIN plan, backup) → **Execute** (apply changes in transaction) → **Verify** (compare plan costs, validate row counts, confirm performance)
+
+### Structured Output
+- Present query optimization using before/after tables (plan cost, execution time, rows scanned, buffers hit)
+- Use index recommendation tables (table, columns, type, estimated size, query benefit)
+- Include performance comparison matrices for query alternatives
+
+### Evidence-Driven
+- Reference actual `EXPLAIN ANALYZE` output with specific cost and timing numbers
+- Include execution plan diffs showing improvement (seq scan → index scan, rows reduced)
+- Cite row count estimates vs actuals and buffer hit ratios
+
+### Audit-Ready
+- Document all schema changes with versioned migration scripts and rollback counterparts
+- Maintain query performance baselines for critical queries
+- Track index changes with before/after execution plan comparisons
+
+### Communication
+- Lead with performance impact (e.g., "Query optimization reduces report generation from 45s to 200ms")
+- Express database load in business terms (e.g., "Supports 10x user growth without hardware changes")
+- Summarize index and schema changes for operations review
+
 ## Output Templates
 
 When implementing SQL solutions, provide:

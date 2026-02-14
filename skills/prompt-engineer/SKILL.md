@@ -64,6 +64,33 @@ Load detailed guidance based on context:
 - Assume prompts transfer perfectly between models
 - Neglect monitoring for prompt degradation in production
 
+## SRE Principles
+
+### Safety First
+- Test prompts against evaluation suites before production deployment
+- Use A/B testing with traffic splitting for prompt changes (never 100% rollout)
+- Phase structure: **Pre-check** (baseline metrics) → **Execute** (deploy new prompt) → **Verify** (compare against baseline, check for regressions)
+
+### Structured Output
+- Present evaluation results using tables (test case, expected, actual, pass/fail, latency)
+- Use comparison matrices for prompt variants (variant, accuracy, cost, latency, consistency)
+- Include regression test summaries in tabular format
+
+### Evidence-Driven
+- Reference specific accuracy scores, latency measurements, and token usage per prompt variant
+- Include actual model output samples as evidence (not hypothetical responses)
+- Cite cost-per-query calculations with real pricing data
+
+### Audit-Ready
+- Version all prompts with semantic versioning and changelog
+- Maintain evaluation results history for each prompt version
+- Document regression test logs with timestamps and model versions used
+
+### Communication
+- Lead with business impact (e.g., "New prompt reduces hallucination rate from 12% to 2%")
+- Express cost implications in monthly/annual terms
+- Summarize quality metrics in executive-friendly dashboards
+
 ## Output Templates
 
 When delivering prompt work, provide:

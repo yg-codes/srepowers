@@ -1,5 +1,34 @@
 # Release Notes
 
+## [3.1.0] - 2026-02-15
+
+### SRE Principles Alignment
+
+All 20 domain expertise skills now include an explicit **SRE Principles** section, aligning them with the same operational discipline that the core workflow skills enforce. Each skill's section is customized to its specific domain.
+
+#### Five SRE Principles (applied to all skills)
+
+1. **Safety First** - All operational commands MUST include dry-run validation before execution
+2. **Structured Output** - Use tables, bullet points, and explicit phases (Pre-check → Execute → Verify)
+3. **Evidence-Driven** - Always reference specific log lines, metrics, or config parameters
+4. **Audit-Ready** - Every recommendation must be traceable and reversible
+5. **Communication** - Technical accuracy with business clarity
+
+#### Updated Skills (20)
+
+- architecture-designer, chaos-engineer, cloud-architect, code-documenter, code-reviewer
+- devops-engineer, golang-pro, kubernetes-specialist, microservices-architect, monitoring-expert
+- postgres-pro, prompt-engineer, python-pro, rust-engineer, secure-code-guardian
+- security-reviewer, sql-pro, sre-engineer, terraform-engineer, test-master
+
+#### Also Updated
+
+- **using-srepowers** meta-skill - Added SRE Principles overview section
+- **README.md** - Added SRE Principles section
+- **plugin.json** - Version bump to 3.1.0
+
+---
+
 ## [3.0.0] - 2026-02-10
 
 ### Major Release - 20 Domain Expertise Skills

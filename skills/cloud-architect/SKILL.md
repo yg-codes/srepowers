@@ -65,6 +65,33 @@ Load detailed guidance based on context:
 - Ignore compliance requirements
 - Skip disaster recovery testing
 
+## SRE Principles
+
+### Safety First
+- Run `terraform plan` (or equivalent) before any infrastructure provisioning
+- Generate cost estimates before deploying new resources
+- Phase structure: **Pre-check** (review current state, estimate costs) → **Execute** (provision with IaC) → **Verify** (validate deployment, confirm costs)
+
+### Structured Output
+- Present architecture decisions using comparison tables (service options, cost, availability, trade-offs)
+- Use Well-Architected Framework pillar scores in tabular format
+- Include risk assessment matrices with likelihood and impact ratings
+
+### Evidence-Driven
+- Reference specific Well-Architected review findings and compliance scan results
+- Include actual cost breakdowns, projected savings, and resource utilization metrics
+- Cite availability calculations (e.g., "3-AZ deployment = 99.99% availability target")
+
+### Audit-Ready
+- Document all architecture decisions with Architecture Decision Records (ADRs)
+- Tag all resources for cost allocation, ownership, and environment tracking
+- Maintain change logs with before/after state for infrastructure modifications
+
+### Communication
+- Lead with business impact (e.g., "This migration reduces infrastructure costs by 35%")
+- Present cost projections in monthly/annual business terms
+- Summarize compliance posture in non-technical language for stakeholders
+
 ## Output Templates
 
 When designing cloud architecture, provide:

@@ -62,6 +62,33 @@ Load detailed guidance based on context:
 - Skip team communication
 - Leave systems in degraded state
 
+## SRE Principles
+
+### Safety First
+- All chaos experiments MUST include blast radius controls and automated rollback (< 30 seconds)
+- Run experiments in staging/non-production first; production experiments require explicit approval
+- Phase structure: **Pre-check** (verify steady state metrics) → **Execute** (inject failure) → **Verify** (confirm rollback and recovery)
+
+### Structured Output
+- Present experiment results using tables: hypothesis, steady-state metric, actual result, verdict
+- Use Pre-check → Execute → Verify phases for every experiment
+- Include severity ratings for discovered weaknesses (Critical/High/Medium/Low)
+
+### Evidence-Driven
+- Reference specific steady-state metrics (error rate, latency p99, throughput) before and during experiments
+- Include actual monitoring dashboard screenshots or metric values as evidence
+- Cite mean time to detect (MTTD) and mean time to recover (MTTR) from experiment results
+
+### Audit-Ready
+- Log every experiment with hypothesis, start/end time, blast radius, and outcome
+- Document all remediation actions taken as a result of findings
+- Maintain experiment history for compliance and incident review
+
+### Communication
+- Lead with business impact (e.g., "This experiment revealed a single point of failure affecting 10K users")
+- Summarize findings in non-technical terms for leadership review
+- Clearly distinguish between expected behavior and discovered weaknesses
+
 ## Output Templates
 
 When implementing chaos engineering, provide:

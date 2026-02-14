@@ -63,6 +63,33 @@ Load detailed guidance based on context:
 - Ignore error budget exhaustion
 - Build systems that can't degrade gracefully
 
+## SRE Principles
+
+### Safety First
+- Check error budget status before approving changes (freeze changes if budget exhausted)
+- Enforce change freeze windows during critical business periods
+- Phase structure: **Pre-check** (error budget status, SLO compliance) → **Execute** (implement reliability improvement) → **Verify** (SLO dashboards, burn rate, error budget delta)
+
+### Structured Output
+- Present SLO status using tables (service, SLI, target, current, budget remaining, trend)
+- Use incident summaries in structured format (severity, MTTD, MTTR, impact, root cause)
+- Include toil measurement tables (task, frequency, duration, automation potential, priority)
+
+### Evidence-Driven
+- Reference specific SLO burn rates, error budget remaining percentages, and trend data
+- Include incident metrics (MTTD, MTTR, customer impact duration) from actual incidents
+- Cite toil measurements with time tracking data (hours/week per task)
+
+### Audit-Ready
+- Document SLO revisions with rationale, review dates, and stakeholder sign-off
+- Maintain blameless postmortem records with action items and completion tracking
+- Track toil reduction progress with before/after measurements
+
+### Communication
+- Lead with business reliability impact (e.g., "Error budget at 15% - feature releases paused until recovery")
+- Express SLO status in customer-facing terms (e.g., "99.95% of users experienced normal checkout")
+- Summarize incident impact and resolution for executive review
+
 ## Output Templates
 
 When implementing SRE practices, provide:

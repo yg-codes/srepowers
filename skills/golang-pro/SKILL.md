@@ -61,6 +61,33 @@ Load detailed guidance based on context:
 - Mix sync and async patterns carelessly
 - Hardcode configuration (use functional options or env vars)
 
+## SRE Principles
+
+### Safety First
+- Run `go vet`, `golangci-lint`, and race detector (`-race`) before merge
+- Use `go build` dry-run to verify compilation before deployment
+- Phase structure: **Pre-check** (lint, vet, test) → **Execute** (implement changes) → **Verify** (full test suite, benchmarks, race detector)
+
+### Structured Output
+- Present code changes using interface-first design (contracts before implementation)
+- Use table-driven tests with clear input/expected/actual columns
+- Include benchmark comparison tables (before/after with ns/op, B/op, allocs/op)
+
+### Evidence-Driven
+- Reference benchmark results from `go test -bench` with actual numbers
+- Include pprof profiling output for performance claims
+- Cite test coverage percentages and race detector results
+
+### Audit-Ready
+- Document all exported API changes with backward compatibility notes
+- Track dependency updates with `go mod tidy` and vulnerability scans (`govulncheck`)
+- Include test reports and coverage trends in PR reviews
+
+### Communication
+- Lead with performance impact (e.g., "Reduces p99 latency from 50ms to 12ms")
+- Explain concurrency design decisions in terms of resource utilization
+- Summarize breaking changes with migration guidance
+
 ## Output Templates
 
 When implementing Go features, provide:

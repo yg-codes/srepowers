@@ -62,6 +62,33 @@ Load detailed guidance based on context:
 - Use string interpolation in logs (use structured fields)
 - Skip correlation IDs in distributed systems
 
+## SRE Principles
+
+### Safety First
+- Test alert rules in staging before deploying to production (avoid alert storms)
+- Validate dashboard queries against actual data before publishing
+- Phase structure: **Pre-check** (review current monitoring gaps) → **Execute** (deploy instrumentation) → **Verify** (confirm metrics flowing, alerts firing correctly)
+
+### Structured Output
+- Present monitoring coverage using RED/USE method tables per service
+- Use dashboards with clear sections: Overview → SLOs → Golden Signals → Resources → Alerts
+- Include alert severity matrices (Critical/Warning/Info with escalation paths)
+
+### Evidence-Driven
+- Reference specific PromQL/LogQL queries and their actual output values
+- Include metric samples showing baseline vs anomaly (e.g., "p99 latency: 50ms baseline, 500ms during incident")
+- Cite alert firing history and false positive rates
+
+### Audit-Ready
+- Version control all alert rules, dashboard JSON, and recording rules
+- Document alert rule changes with rationale and expected firing conditions
+- Maintain SLO burn rate records and error budget consumption history
+
+### Communication
+- Lead with business impact (e.g., "This monitoring gap means 15-minute blind spot during checkout failures")
+- Present alert escalation paths in clear, non-technical language
+- Summarize SLO status in executive-friendly format (budget remaining, trend)
+
 ## Knowledge Reference
 
 Prometheus, Grafana, ELK Stack, Loki, Jaeger, OpenTelemetry, DataDog, New Relic, CloudWatch, structured logging, RED metrics, USE method, k6, Artillery, Locust, JMeter, clinic.js, pprof, py-spy, async-profiler, capacity planning

@@ -62,6 +62,33 @@ Load detailed guidance based on context:
 - Use String when &str suffices
 - Clone unnecessarily (use borrowing)
 
+## SRE Principles
+
+### Safety First
+- Run `cargo clippy`, `cargo test`, and `cargo audit` before merge
+- Use MIRI for unsafe code validation in CI
+- Phase structure: **Pre-check** (clippy, test, audit) → **Execute** (implement changes) → **Verify** (full test suite, benchmarks, unsafe audit)
+
+### Structured Output
+- Present code quality using test result tables (module, tests, passed, failed, duration)
+- Use benchmark comparison tables (function, before ns/op, after ns/op, improvement %)
+- Include unsafe code audit summary (block count, safety invariants documented)
+
+### Evidence-Driven
+- Reference `cargo bench` (criterion) results with actual throughput numbers
+- Include `cargo audit` output showing zero known vulnerabilities
+- Cite test coverage and unsafe block counts as quality evidence
+
+### Audit-Ready
+- Track `Cargo.lock` changes with dependency diff in PRs
+- Document all `unsafe` blocks with safety invariant comments
+- Maintain MSRV (minimum supported Rust version) documentation
+
+### Communication
+- Lead with performance and safety impact (e.g., "Zero-copy parsing reduces memory usage by 80%")
+- Explain ownership design decisions in terms of resource lifecycle guarantees
+- Summarize safety properties for stakeholders (memory safety, thread safety, no undefined behavior)
+
 ## Output Templates
 
 When implementing Rust features, provide:

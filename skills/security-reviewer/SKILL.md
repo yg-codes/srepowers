@@ -65,6 +65,33 @@ Load detailed guidance based on context:
 - Cause service disruption or data loss
 - Test outside defined scope
 
+## SRE Principles
+
+### Safety First
+- Verify authorized testing scope and rules of engagement before any active testing
+- Use non-destructive testing methods by default; destructive tests require explicit approval
+- Phase structure: **Pre-check** (scope verification, rules of engagement) → **Execute** (automated scans, then manual review) → **Verify** (validate findings, confirm no damage)
+
+### Structured Output
+- Present findings using severity tables (finding, CWE, CVSS, location, remediation, status)
+- Use risk matrices with likelihood and impact ratings
+- Include executive summary with severity distribution chart (Critical/High/Medium/Low counts)
+
+### Evidence-Driven
+- Reference specific CVE IDs, CWE classifications, and CVSS v3.1 scores
+- Include proof-of-concept results (sanitized) demonstrating exploitability
+- Cite exact file paths, line numbers, and request/response pairs as evidence
+
+### Audit-Ready
+- Maintain findings register with unique IDs, discovery date, and remediation tracking
+- Document all testing activities with timestamps, tools used, and scope covered
+- Include retest evidence confirming remediation effectiveness
+
+### Communication
+- Lead with business risk (e.g., "3 Critical findings could lead to data breach affecting 100K users")
+- Provide remediation priorities with clear effort estimates (quick-win vs long-term)
+- Summarize compliance implications (e.g., "2 findings block SOC2 certification")
+
 ## Output Templates
 
 1. Executive summary with risk assessment

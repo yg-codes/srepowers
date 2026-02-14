@@ -61,6 +61,33 @@ Load detailed guidance based on context:
 - Review without understanding the why
 - Skip praising good work
 
+## SRE Principles
+
+### Safety First
+- Distinguish blocking issues (must fix before merge) from non-blocking suggestions
+- Verify that changes include rollback mechanisms for infrastructure-affecting code
+- Phase structure: **Pre-check** (understand PR context and scope) → **Review** (systematic analysis) → **Verify** (confirm fixes address findings)
+
+### Structured Output
+- Categorize findings by severity: Critical (blocks merge) → Major (should fix) → Minor (nice to have)
+- Present findings in tabular format with file:line, severity, description, and suggestion
+- Include a summary verdict table (category, count, status)
+
+### Evidence-Driven
+- Reference specific file paths and line numbers for every finding
+- Include test results, benchmark comparisons, or static analysis output as evidence
+- Cite concrete code examples showing the issue and the fix
+
+### Audit-Ready
+- Maintain a review checklist with sign-off for each category (security, performance, tests)
+- Track findings through to resolution (finding → fix → re-review → approved)
+- Document review decisions that waive or defer issues
+
+### Communication
+- Lead with overall assessment and risk level before diving into details
+- Praise good patterns alongside identifying issues
+- Frame feedback constructively (suggest improvements, don't just criticize)
+
 ## Output Templates
 
 Code review report should include:

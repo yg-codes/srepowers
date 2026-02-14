@@ -1,7 +1,7 @@
 {
   "name": "srepowers",
   "description": "SRE infrastructure skills with domain expertise: 12 SRE workflow skills (TDO, SDO, runbooks, Proxmox, Puppet, CI/CD) plus 20 domain expertise skills (architecture, cloud, DevOps, Kubernetes, Terraform, monitoring, Go, Python, Rust, SQL, PostgreSQL, security, testing, prompt engineering)",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "author": {
     "name": "yg",
     "email": "sre@example.com"

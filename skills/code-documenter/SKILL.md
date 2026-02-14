@@ -64,6 +64,33 @@ Load detailed guidance based on context:
 - Document obvious getters/setters verbosely
 - Create documentation that's hard to maintain
 
+## SRE Principles
+
+### Safety First
+- Validate documentation builds before publishing (broken links, missing references)
+- Test all code examples in documentation to ensure they compile/run correctly
+- Phase structure: **Pre-check** (audit current doc coverage) → **Execute** (write/update docs) → **Verify** (build, link-check, test examples)
+
+### Structured Output
+- Present documentation coverage using tables (module, coverage %, missing items)
+- Use clear section hierarchy: Overview → Quick Start → API Reference → Examples → Troubleshooting
+- Include documentation coverage reports with gap analysis
+
+### Evidence-Driven
+- Reference actual API response examples and endpoint URLs, not hypothetical ones
+- Include version-specific behavior notes with exact version numbers
+- Cite test results for code examples (e.g., "Verified against Python 3.12, Node 22")
+
+### Audit-Ready
+- Version documentation alongside code (same commit, same PR)
+- Include changelog entries for API documentation updates
+- Track documentation coverage metrics over time
+
+### Communication
+- Write for the reader's level (quick start for beginners, API reference for experts)
+- Lead with the most common use case, not the most complex
+- Include "Why" alongside "How" for architectural documentation
+
 ## Output Formats
 
 Depending on the task, provide:

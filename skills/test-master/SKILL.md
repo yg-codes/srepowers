@@ -57,6 +57,33 @@ Load detailed guidance based on context:
 
 **MUST NOT**: Skip error testing, use production data, create order-dependent tests, ignore flaky tests, test implementation details, leave debug code
 
+## SRE Principles
+
+### Safety First
+- Ensure test isolation (no shared state, no production data, deterministic fixtures)
+- Run tests in CI before merge; block deployments on test failures
+- Phase structure: **Pre-check** (review test coverage gaps) → **Execute** (write and run tests) → **Verify** (coverage report, flakiness check, CI green)
+
+### Structured Output
+- Present test coverage using module-level tables (module, statements, branches, coverage %, trend)
+- Use test result summaries in structured format (suite, total, passed, failed, skipped, duration)
+- Include flakiness reports (test name, failure rate, last failure, root cause)
+
+### Evidence-Driven
+- Reference specific coverage percentages and uncovered code paths
+- Include test execution times and flakiness rates from CI history
+- Cite actual failure messages and stack traces for failing tests
+
+### Audit-Ready
+- Track test coverage trends across releases (no regression allowed)
+- Maintain flaky test registry with assigned owners and resolution timelines
+- Document test strategy decisions with rationale (why E2E vs integration for specific flows)
+
+### Communication
+- Lead with quality confidence (e.g., "95% code coverage with zero flaky tests - safe to release")
+- Express test gaps in risk terms (e.g., "Payment flow has 40% coverage - high risk for regressions")
+- Summarize test health for stakeholders (coverage trend, flakiness trend, CI reliability)
+
 ## Output Templates
 
 When creating test plans, provide:
