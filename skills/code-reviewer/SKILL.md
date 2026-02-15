@@ -64,7 +64,7 @@ Load detailed guidance based on context:
 ## SRE Principles
 
 ### Safety First
-- Distinguish blocking issues (must fix before merge) from non-blocking suggestions
+- Verify CI pipeline passes (tests, linters, SAST scans) before starting detailed code review; block review on CI failures
 - Verify that changes include rollback mechanisms for infrastructure-affecting code
 - Phase structure: **Pre-check** (understand PR context and scope) → **Review** (systematic analysis) → **Verify** (confirm fixes address findings)
 
@@ -86,7 +86,7 @@ Load detailed guidance based on context:
 ### Communication
 - Lead with overall assessment and risk level before diving into details
 - Praise good patterns alongside identifying issues
-- Frame feedback constructively (suggest improvements, don't just criticize)
+- Translate critical findings into business impact (e.g., "This N+1 query will cause 5s page loads affecting checkout conversion rates")
 
 ## Output Templates
 

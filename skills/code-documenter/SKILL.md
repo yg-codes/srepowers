@@ -79,17 +79,17 @@ Load detailed guidance based on context:
 ### Evidence-Driven
 - Reference actual API response examples and endpoint URLs, not hypothetical ones
 - Include version-specific behavior notes with exact version numbers
-- Cite test results for code examples (e.g., "Verified against Python 3.12, Node 22")
+- Reference documentation build logs, coverage metrics, and link-check results as evidence of completeness
 
 ### Audit-Ready
 - Version documentation alongside code (same commit, same PR)
 - Include changelog entries for API documentation updates
-- Track documentation coverage metrics over time
+- Ensure documentation deployments are reversible (e.g., rollback published site to previous version, revert doc PRs)
 
 ### Communication
 - Write for the reader's level (quick start for beginners, API reference for experts)
 - Lead with the most common use case, not the most complex
-- Include "Why" alongside "How" for architectural documentation
+- Connect documentation quality to business impact (e.g., "Missing API docs cause 40% of support tickets for this endpoint")
 
 ## Output Formats
 

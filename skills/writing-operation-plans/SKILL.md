@@ -278,6 +278,33 @@ Step 4: Verify GREEN - Run verification, expect '3'"
 "Rollback: kubectl apply -f backup/app-v1-old.yaml
 Verify: kubectl get pods -n production -l app=app,version=v1"
 
+## SRE Principles
+
+### Safety First
+- Include a dry-run step in every task: run the operation command with `--dry-run=client` (or equivalent) to validate before live execution
+- Every task must have an explicit rollback section with tested rollback commands
+- Phase structure per task: **RED** (failing verification) → **Dry-run** (validate command) → **GREEN** (execute) → **Verify GREEN** → **Verify no side effects** → **Commit**
+
+### Structured Output
+- Present plans using the standardized task template: RED → Verify RED → GREEN → Verify GREEN → Side-effect check → Commit
+- Use plan header with Goal, Risk Level, Rollback Plan, and Final Verification sections
+- Include a task summary table (task #, name, risk, status) for progress tracking
+
+### Evidence-Driven
+- Every step must include exact commands and expected outputs showing what success looks like
+- Reference specific resource names, namespaces, config values, and metric thresholds
+- Side-effect verification (Step 5) must check adjacent systems with concrete commands
+
+### Audit-Ready
+- Save plans with date-stamped filenames in `docs/plans/` and commit to version control
+- Include git commit messages per task with descriptive change summaries
+- Document rollback per task with exact commands (e.g., `kubectl delete -f`, `git revert HEAD`)
+
+### Communication
+- Include "Stakeholder Notification" in plan header: who should be informed before/during/after execution
+- Add "Business Impact" to plan header: services affected, expected downtime, customer impact
+- After plan execution, generate a completion summary suitable for change management review
+
 ## Execution Handoff
 
 After saving the plan, offer execution choice:

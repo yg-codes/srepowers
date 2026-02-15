@@ -496,6 +496,33 @@ apt dist-upgrade
 | QEMU | `journalctl -u qemu-server@<vmid>` |
 | Container | `journalctl -u pve-container@<ctid>` |
 
+## SRE Principles
+
+### Safety First
+- Use simulation flags before destructive operations (`apt dist-upgrade --simulate`, `zfs destroy -n`, `qm snapshot` before changes)
+- Create VM/CT snapshots or ZFS snapshots before any configuration change or upgrade
+- Phase structure: **Pre-check** (verify cluster quorum, check storage health, snapshot state) → **Execute** (apply change on single node first) → **Verify** (confirm service status, check cluster sync, validate replication)
+
+### Structured Output
+- Present cluster health using node status tables (node, status, CPU, memory, storage, uptime)
+- Use storage pool tables for capacity planning (pool, type, total, used, available, % used)
+- Include upgrade status summaries in tabular format (node, current version, target version, status)
+
+### Evidence-Driven
+- Reference specific `pvesh`, `qm`, and `pct` command outputs with actual values
+- Include `journalctl` and `/var/log/pve/tasks/` log entries for troubleshooting evidence
+- Cite ZFS pool status (`zpool status`), SMART data, and replication lag metrics
+
+### Audit-Ready
+- Document all configuration changes with before/after values and operator identity
+- Maintain snapshot history before every destructive operation for rollback capability
+- Track cluster changes with timestamps linking to change tickets or maintenance windows
+
+### Communication
+- Lead with infrastructure impact (e.g., "Rolling upgrade of 3-node cluster with zero VM downtime")
+- Present storage capacity trends in business terms (months until full, expansion cost)
+- Summarize cluster health in a single status table for operations review
+
 ## Resources
 
 ### Reference Documentation

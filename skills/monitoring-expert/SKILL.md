@@ -65,7 +65,7 @@ Load detailed guidance based on context:
 ## SRE Principles
 
 ### Safety First
-- Test alert rules in staging before deploying to production (avoid alert storms)
+- Validate alert rules with `promtool check rules` and recording rules with `promtool test rules` before deploying; use `--dry-run` flags for monitoring config deployments
 - Validate dashboard queries against actual data before publishing
 - Phase structure: **Pre-check** (review current monitoring gaps) → **Execute** (deploy instrumentation) → **Verify** (confirm metrics flowing, alerts firing correctly)
 

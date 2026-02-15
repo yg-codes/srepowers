@@ -388,6 +388,33 @@ Script output ≠ verification. You must read and confirm script output shows ex
 - Verification: `kubectl get pods -n production -l app=api --field-selector=status.phase=Running | wc -l` - shows actual count
 - Script output is optimistic. Verification is skeptical.
 
+## SRE Principles
+
+### Safety First
+- Run mutating commands with `--dry-run` (or equivalent) between RED and GREEN to validate syntax and intent before live execution
+- Mandatory rollback plan before every GREEN step; if rollback is unclear, stop and clarify
+- Phase structure: **RED** (write failing verification) → **Dry-run** (validate command) → **GREEN** (execute minimal operation) → **Verify GREEN** (confirm pass) → **REFACTOR** (document)
+
+### Structured Output
+- Present each TDO cycle using the 5-step format: RED → Verify RED → GREEN → Verify GREEN → REFACTOR
+- Use verification result tables (step, command, expected output, actual output, status)
+- Include operation summary tables for multi-step operations (step, operation, verification, status)
+
+### Evidence-Driven
+- Every verification must include the exact command and its actual output (not paraphrased)
+- Reference specific resource states (pod phase, HTTP status codes, git SHAs) as evidence
+- Distinguish between evidence (command output) and assumptions ("should be working")
+
+### Audit-Ready
+- Record operator identity, timestamp, and change ticket in commit messages and runbook entries
+- Preserve verification command outputs as audit artifacts alongside git commits
+- Ensure every operation has a documented rollback command that has been validated
+
+### Communication
+- After operation completion, summarize what changed in business-impact terms (e.g., "API endpoint now serves 50K users with <100ms p99")
+- Communicate operation status to stakeholders: what changed, services affected, verification results
+- Provide escalation context for failures: what was attempted, what failed, business impact, next steps
+
 ## Common Rationalizations
 
 | Excuse | Reality |

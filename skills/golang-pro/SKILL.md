@@ -64,8 +64,8 @@ Load detailed guidance based on context:
 ## SRE Principles
 
 ### Safety First
+- Validate all operational commands with dry-run flags (e.g., `go build` for compilation, `--dry-run` for deployments, `goreleaser check` for releases) before execution
 - Run `go vet`, `golangci-lint`, and race detector (`-race`) before merge
-- Use `go build` dry-run to verify compilation before deployment
 - Phase structure: **Pre-check** (lint, vet, test) → **Execute** (implement changes) → **Verify** (full test suite, benchmarks, race detector)
 
 ### Structured Output
@@ -81,7 +81,7 @@ Load detailed guidance based on context:
 ### Audit-Ready
 - Document all exported API changes with backward compatibility notes
 - Track dependency updates with `go mod tidy` and vulnerability scans (`govulncheck`)
-- Include test reports and coverage trends in PR reviews
+- Every release must include a documented rollback path (previous binary restore, version pinning, or feature flag disable)
 
 ### Communication
 - Lead with performance impact (e.g., "Reduces p99 latency from 50ms to 12ms")

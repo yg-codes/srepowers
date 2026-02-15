@@ -222,6 +222,33 @@ Done!
 - Review loops add iterations
 - But catches issues early (cheaper than debugging incidents)
 
+## SRE Principles
+
+### Safety First
+- Before dispatching the first operator subagent, confirm environment target and require explicit user consent for production operations
+- Each operator subagent must follow TDO with dry-run validation before live execution
+- Phase structure: **Pre-check** (validate plan, confirm environment) → **Execute** (dispatch operators with TDO) → **Verify** (spec compliance review, then artifact quality review)
+
+### Structured Output
+- Present operation progress using task status tables (task #, name, operator status, spec review, quality review)
+- Use two-stage review summaries: spec compliance verdict followed by artifact quality assessment
+- Include final operation summary with all tasks, their verification results, and review outcomes
+
+### Evidence-Driven
+- Operator reports must include specific verification command outputs, not just pass/fail claims
+- Spec reviewers must independently run verification commands and cite their own output as evidence
+- Artifact reviewers must reference specific file:line locations and git diff output
+
+### Audit-Ready
+- Maintain an operation log with timestamps, subagent IDs, task outcomes, and reviewer decisions
+- Track git SHAs (BASE_SHA → HEAD_SHA) per task for complete change traceability
+- Link operations to change tickets and preserve review findings as audit artifacts
+
+### Communication
+- After all tasks complete, generate an operation summary suitable for incident channels or change management boards
+- Translate technical operation outcomes into business impact (services affected, users impacted, downtime)
+- Communicate review findings clearly: what passed, what was flagged, what was remediated
+
 ## Red Flags
 
 **Never:**

@@ -375,6 +375,33 @@ Complete Mirror & Push pipeline template for mirroring upstream images.
 
 ---
 
+## SRE Principles
+
+### Safety First
+- Include a `validate` stage before `build` to verify ECR repository exists and credentials are valid
+- Use `podman build --no-cache` for reproducible builds; verify image with `podman inspect` before push
+- Phase structure: **Pre-check** (validate ECR access, verify Containerfile syntax) → **Execute** (build and push image) → **Verify** (confirm image digest in ECR, run vulnerability scan)
+
+### Structured Output
+- Present pipeline stages using summary tables (stage, duration, status, artifacts produced)
+- Use image metadata tables (tag, digest, size, scan status, push timestamp)
+- Include tag strategy documentation in tabular format (branch pattern, tag format, example)
+
+### Evidence-Driven
+- Reference image digests (`podman images --digests`) to confirm push integrity
+- Include ECR scan results with specific CVE IDs and severity counts
+- Cite pipeline job IDs, timestamps, and commit SHAs for every image pushed
+
+### Audit-Ready
+- Log image digests, tags, and push timestamps for every pipeline run
+- Maintain image promotion history (which digest was promoted from staging to production, when, by whom)
+- Document rollback procedure with exact commands to revert to previous image tag
+
+### Communication
+- Lead with deployment impact (e.g., "New image pipeline reduces build-to-deploy from 30min to 5min")
+- Present image security posture in summary format (total CVEs by severity, scan pass/fail)
+- Communicate pipeline failures with clear root cause and remediation steps for the team
+
 ## Related Reference Documentation
 
 For detailed ECR setup, cross-account configuration, and authentication guidance, refer to the **container-cicd-reference** skill (auto-loaded):

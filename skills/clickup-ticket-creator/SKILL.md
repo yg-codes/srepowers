@@ -123,6 +123,33 @@ Display the formatted ticket and ask the user how they want to proceed:
 
 Load the template file when generating tickets to ensure exact format compliance.
 
+## SRE Principles
+
+### Safety First
+- Present a completeness preview before final output (validate all required sections are filled)
+- Flag missing critical sections (Verification, Rollback) as warnings before ticket generation
+- Phase structure: **Pre-check** (gather all sections) → **Execute** (format ticket) → **Verify** (review completeness, validate Procedure/Verification commands are executable)
+
+### Structured Output
+- Use the CCB template structure consistently (Description → Rationale → Impact → Risk → UAT → Procedure → Verification → Rollback)
+- Present Impact and Risk with explicit level justifications in tabular format
+- Include a completeness checklist showing which sections are populated vs empty
+
+### Evidence-Driven
+- Require specific expected values in Verification section (e.g., "Expect: usage less than 20G", not just "verify disk usage")
+- Include concrete commands with expected output in Procedure section (Action + Expect pairs)
+- Reference actual metric thresholds, log patterns, or config values in technical sections
+
+### Audit-Ready
+- Track ticket ID (INFRA-xxxx) linkage to git commits and deployment records
+- Include estimated rollback time with specific rollback commands
+- Maintain CCB approval chain (requester, reviewer, approver) in ticket metadata
+
+### Communication
+- Lead Description and Rationale with business impact before technical details
+- Express Impact level in customer-facing terms (e.g., "Users cannot complete checkout" not just "service degraded")
+- Summarize risk in plain language for non-technical CCB reviewers
+
 ## Notes
 
 - Tickets are created manually by copying the output into Clickup (no API integration)

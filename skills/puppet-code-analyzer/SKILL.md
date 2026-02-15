@@ -194,6 +194,33 @@ The skill wraps and enhances existing Puppet tooling:
 | **puppet parser** | Syntax validation via lint script |
 | **Git** | Pre-commit hooks (optional), staged file scanning |
 
+## SRE Principles
+
+### Safety First
+- Run analysis in `--check` mode before applying `--fix` to preview all proposed changes
+- Commit current state before running `--fix` to ensure reversibility via `git revert`
+- Phase structure: **Pre-check** (lint, dependency scan, best practice check) → **Execute** (apply fixes with `--fix`) → **Verify** (re-run analysis, confirm zero issues, test compilation)
+
+### Structured Output
+- Present analysis results using severity tables (file, line, severity, rule, message, auto-fixable)
+- Use dependency summary tables (module, current version, latest version, breaking changes)
+- Include trend reports showing issue counts over time (date, critical, warning, info, total)
+
+### Evidence-Driven
+- Reference specific puppet-lint rule codes and line numbers for every finding
+- Include `puppet parser validate` output and r10k/librarian dependency resolution logs
+- Cite before/after code diffs showing exactly what `--fix` changed
+
+### Audit-Ready
+- Save analysis reports with timestamps in JSON format for historical tracking
+- Document all auto-fix changes with git diffs showing original and modified code
+- Maintain a remediation log linking findings to fix commits and review approvals
+
+### Communication
+- Lead with deployment risk (e.g., "12 critical issues blocking safe Puppet deployment across 200 nodes")
+- Present code quality trends in business terms (deployment confidence, change failure rate)
+- Summarize technical debt in effort estimates (hours to remediate per severity level)
+
 ## Resources
 
 ### scripts/

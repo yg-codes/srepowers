@@ -280,6 +280,33 @@ ssh -o ConnectTimeout=5 server.example.com "echo 'Connected' && hostname"
 | `-o StrictHostKeyChecking=no` | Skip host key prompt (use carefully) | `ssh -o StrictHostKeyChecking=no server` |
 | `-q` | Quiet mode, reduce output | `ssh -q server "command"` |
 
+## SRE Principles
+
+### Safety First
+- Include a "Part 0: Dry-Run Validation" section for critical commands using `--dry-run`, `--simulate`, or `--check` flags
+- Mandate backup/snapshot creation before any destructive operation step
+- Phase structure: **Pre-checks** (verify system state, backups) → **Dry-run** (validate critical commands) → **Execution** (perform operations) → **Verification** (confirm changes) → **Post-checks** (ensure system health)
+
+### Structured Output
+- Use the mandatory Command/Expected/Result format for every step
+- Organize steps into explicit phases: Pre-checks → Execution → Verification → Post-checks
+- Include a Completion Summary table tracking status per step (step, description, status emoji)
+
+### Evidence-Driven
+- Every step must have a specific "Expected" value (not vague descriptions like "should work")
+- Results must include actual values from command output (e.g., "769 assets", "24G available")
+- Log verification must reference specific journalctl filters, grep patterns, and expected log content
+
+### Audit-Ready
+- Include metadata in runbook header: Operator, Date, Change Ticket, Approved By, Environment
+- Add a "Rollback Plan" section with specific rollback commands for each critical operation
+- Preserve completed runbooks as audit artifacts with actual Result values filled in
+
+### Communication
+- Add "Escalation" to runbook header: who to contact if steps fail, with contact details
+- Include "Notifications" section: teams/channels to notify before/during/after execution
+- Summarize operation outcome in business terms for post-execution stakeholder update
+
 ## Output
 
 Generate the runbook as a `.md` file in the user's specified location or a sensible default (e.g., current directory or `/tmp/`).

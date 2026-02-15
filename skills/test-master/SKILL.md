@@ -60,7 +60,7 @@ Load detailed guidance based on context:
 ## SRE Principles
 
 ### Safety First
-- Ensure test isolation (no shared state, no production data, deterministic fixtures)
+- Run test framework changes in dry-run mode first (e.g., `pytest --collect-only`, `jest --listTests`, `go test -list .`) to validate configuration before full execution
 - Run tests in CI before merge; block deployments on test failures
 - Phase structure: **Pre-check** (review test coverage gaps) → **Execute** (write and run tests) → **Verify** (coverage report, flakiness check, CI green)
 
@@ -77,7 +77,7 @@ Load detailed guidance based on context:
 ### Audit-Ready
 - Track test coverage trends across releases (no regression allowed)
 - Maintain flaky test registry with assigned owners and resolution timelines
-- Document test strategy decisions with rationale (why E2E vs integration for specific flows)
+- Test infrastructure changes must be reversible; maintain previous CI configurations and test framework versions for rollback
 
 ### Communication
 - Lead with quality confidence (e.g., "95% code coverage with zero flaky tests - safe to release")

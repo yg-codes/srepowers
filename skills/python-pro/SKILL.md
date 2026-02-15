@@ -64,7 +64,7 @@ Load detailed guidance based on context:
 ## SRE Principles
 
 ### Safety First
-- Run `mypy --strict`, `ruff check`, and full `pytest` suite before merge
+- Validate all operational commands with dry-run flags (e.g., `--check` for formatters, `--dry-run` for deployments, migration preview before applying database changes)
 - Use virtual environment isolation to prevent dependency conflicts
 - Phase structure: **Pre-check** (lint, type-check, test) → **Execute** (implement changes) → **Verify** (full test suite, coverage report, type-check clean)
 
@@ -81,7 +81,7 @@ Load detailed guidance based on context:
 ### Audit-Ready
 - Track dependency changes with `pip-audit` vulnerability scans
 - Document breaking API changes with deprecation warnings and migration guides
-- Maintain test coverage trends across PRs (no coverage regression)
+- Every change must include a documented rollback path (migration down scripts, previous package version pins, or feature flag disable)
 
 ### Communication
 - Lead with quality impact (e.g., "Type coverage increased from 60% to 95%, eliminating a class of runtime errors")

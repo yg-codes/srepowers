@@ -141,6 +141,33 @@ Every operation design should include:
 - Are there maintenance windows?
 - Who needs to be notified?
 
+## SRE Principles
+
+### Safety First
+- Include a "Dry-Run Strategy" in every design document: which commands support `--dry-run` and should be validated before live execution
+- Every operation design must include rollback triggers and rollback procedures for each step
+- Phase structure: **Pre-check** (assess current state, identify risks) → **Design** (create operation approach with safety gates) → **Verify** (review design with stakeholders before execution)
+
+### Structured Output
+- Present operation designs using structured sections: Current State → Desired State → Approach → Risk Assessment → Prerequisites
+- Use risk assessment matrices with likelihood and impact ratings in tabular format
+- Include verification strategy tables (step, verification command, expected outcome, rollback trigger)
+
+### Evidence-Driven
+- Reference specific current-state evidence (pod counts, config values, metric baselines) in the design document
+- Include actual infrastructure metrics and capacity numbers, not estimates or assumptions
+- Cite previous operation outcomes and incident data to inform risk assessment
+
+### Audit-Ready
+- Save design documents with date-stamped filenames in `docs/plans/` and commit to version control
+- Document all design decisions with rationale, alternatives considered, and trade-offs
+- Include rollback strategy for each operation step with specific commands and verification
+
+### Communication
+- Include a "Business Impact" section: what business services are affected, expected downtime, customer-facing impact
+- Present risk assessment in terms stakeholders understand (revenue impact, user experience, compliance)
+- Collaborate iteratively: present design in small sections, check understanding after each before proceeding
+
 ## Red Flags
 
 - Proceeding without understanding current infrastructure state

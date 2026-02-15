@@ -67,7 +67,7 @@ Load detailed guidance based on context:
 ## SRE Principles
 
 ### Safety First
-- Test prompts against evaluation suites before production deployment
+- Run evaluation suite as a mandatory dry-run gate; no prompt reaches production without passing regression tests against the baseline
 - Use A/B testing with traffic splitting for prompt changes (never 100% rollout)
 - Phase structure: **Pre-check** (baseline metrics) → **Execute** (deploy new prompt) → **Verify** (compare against baseline, check for regressions)
 

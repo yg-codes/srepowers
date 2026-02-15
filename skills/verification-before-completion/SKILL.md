@@ -147,6 +147,33 @@ From infrastructure operations failures:
 - Implications of success
 - ANY communication suggesting completion/correctness
 
+## SRE Principles
+
+### Safety First
+- This skill applies post-execution; for pre-execution safety (dry-runs, pre-checks), use srepowers:test-driven-operation -- both are required
+- Never accept cached or stale verification results; re-run commands fresh before every completion claim
+- Phase structure: **Pre-check** (identify what needs verification) → **Execute** (run verification commands) → **Verify** (confirm output matches expected state)
+
+### Structured Output
+- Present verification results using evidence tables (claim, verification command, expected output, actual output, status)
+- Use categorized verification checklists organized by operation type (Kubernetes, API, Git, Database)
+- Include a completion summary table mapping each claimed outcome to its verification evidence
+
+### Evidence-Driven
+- Every completion claim requires a fresh verification command with actual output (not memory or assumptions)
+- Reference specific resource states, HTTP response codes, row counts, or file checksums as evidence
+- Reject non-evidence explicitly: "should be up", "looks correct", "swagger says valid" are insufficient
+
+### Audit-Ready
+- Record all verification results with timestamps for audit trail preservation
+- Verification evidence should be included in commit messages, runbook entries, or operation logs
+- Maintain verification history to demonstrate compliance and track recurring verification patterns
+
+### Communication
+- Translate verification results into business-relevant statements (e.g., "API health check confirmed -- customer-facing service is operational")
+- Communicate verification failures with business impact context (what's broken, who's affected, severity)
+- Provide clear pass/fail summaries suitable for stakeholder updates and incident channels
+
 ## Infrastructure-Specific Verification Commands
 
 ### Kubernetes Operations

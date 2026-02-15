@@ -65,7 +65,7 @@ Load detailed guidance based on context:
 ## SRE Principles
 
 ### Safety First
-- Run `cargo clippy`, `cargo test`, and `cargo audit` before merge
+- Validate all operational commands with dry-run flags (e.g., `cargo build --release` before publishing, `goreleaser check` for releases, staging validation before production deployment)
 - Use MIRI for unsafe code validation in CI
 - Phase structure: **Pre-check** (clippy, test, audit) → **Execute** (implement changes) → **Verify** (full test suite, benchmarks, unsafe audit)
 
@@ -82,7 +82,7 @@ Load detailed guidance based on context:
 ### Audit-Ready
 - Track `Cargo.lock` changes with dependency diff in PRs
 - Document all `unsafe` blocks with safety invariant comments
-- Maintain MSRV (minimum supported Rust version) documentation
+- Every release must include a documented rollback path (previous binary restore, `Cargo.lock` version pinning, or crate version yanking procedure)
 
 ### Communication
 - Lead with performance and safety impact (e.g., "Zero-copy parsing reduces memory usage by 80%")

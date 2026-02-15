@@ -60,7 +60,7 @@ Load detailed guidance based on context:
 ## SRE Principles
 
 ### Safety First
-- Validate architecture designs through ADR review gates before implementation
+- Use infrastructure preview commands (`terraform plan`, `cdk diff`, `kubectl diff`) before applying any architectural changes to live environments
 - Use proof-of-concept deployments in non-production environments before committing
 - Phase structure: **Pre-check** (review current architecture) → **Design** (propose changes) → **Verify** (validate with stakeholders)
 

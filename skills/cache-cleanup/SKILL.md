@@ -248,6 +248,33 @@ npm list -g --depth=0
 - **Offline work** - Don't clean if you need tools offline
 - **Shared environments** - Check with team before cleaning shared caches
 
+## SRE Principles
+
+### Safety First
+- Always run with `--dry-run` flag first to preview cleanup actions without executing
+- Verify all managed tools function correctly before AND after cleanup operations
+- Phase structure: **Pre-check** (verify tools work, measure cache sizes) → **Execute** (cleanup with user confirmation per tool) → **Verify** (confirm tools still work, measure space reclaimed)
+
+### Structured Output
+- Present cache analysis using size tables (tool, cache path, size before, size after, reclaimed)
+- Use risk level indicators per cleanup action (tool, action, risk level, reversibility)
+- Include summary totals (total space before, total reclaimed, percentage freed)
+
+### Evidence-Driven
+- Reference actual `du -sh` output for cache sizes before and after cleanup
+- Include tool version verification output (`go version`, `node --version`, etc.) pre and post cleanup
+- Cite specific cache paths and file counts for transparency
+
+### Audit-Ready
+- Log all cleanup actions to a timestamped file (`cleanup-YYYYMMDD-HHMMSS.log`) with operator identity
+- Document recovery procedures for each tool's cache (reinstall commands, rebuild steps)
+- Maintain cleanup history for capacity planning and trend analysis
+
+### Communication
+- Lead with resource impact (e.g., "Reclaimed 15GB of disk space from stale development caches")
+- Present cleanup results in operational terms (disk utilization before/after, runway until full)
+- Summarize tool health status post-cleanup for developer confidence
+
 ## Recovery
 
 If tools stop working after cleanup:

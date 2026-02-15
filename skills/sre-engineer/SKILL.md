@@ -66,7 +66,7 @@ Load detailed guidance based on context:
 ## SRE Principles
 
 ### Safety First
-- Check error budget status before approving changes (freeze changes if budget exhausted)
+- All operational automation (scripts, config changes, runbook executions) MUST include dry-run validation before execution (e.g., `--dry-run`, `--check`, `--noop` flags)
 - Enforce change freeze windows during critical business periods
 - Phase structure: **Pre-check** (error budget status, SLO compliance) → **Execute** (implement reliability improvement) → **Verify** (SLO dashboards, burn rate, error budget delta)
 
