@@ -1,5 +1,63 @@
 # Release Notes
 
+## [3.3.0] - 2026-02-17
+
+### Developer Experience & Safety Enhancements
+
+Added scaffolding tools, learning resources, safety features, and evaluation framework based on community feedback.
+
+#### New Skills (4)
+
+**Learning & Onboarding:**
+- **playground-tutorial** - Safe, local tutorial for learning TDO
+  - Uses local files only (no infrastructure risk)
+  - Demonstrates RED/GREEN/REFACTOR cycle
+  - Practice exercises for verification concepts
+  - Safe environment for beginners
+
+- **environment-health-check** - Verify required tools are installed
+  - Checks kubectl, terraform, aws CLI, etc.
+  - Validates configurations and connectivity
+  - Provides installation guidance
+  - Can run automatically on session start
+
+**Safety:**
+- **safety-validator** - Review commands for high-risk operations
+  - Pattern matching for dangerous commands
+  - Risk classification (🔴🟠🟡🟢)
+  - Requires explicit confirmation for destructive ops
+  - Suggests safer alternatives
+
+#### Developer Tools
+
+**Skill Generator (`scripts/create-skill.py`):**
+- Interactive skill creation wizard
+- Generates SKILL.md with appropriate template
+- Creates command wrapper and test template
+- Updates README.md automatically
+- Supports multiple skill categories
+
+**Evaluation Framework (`evals/`):**
+- Automated output quality testing
+- Pattern matching for required elements
+- Regression detection for skills
+- JSON and Markdown report generation
+- CI/CD integration ready
+
+#### New Test Scripts
+
+- `test-using-git-worktrees-for-infra.sh`
+- `test-finishing-operation-branch.sh`
+- `test-systematic-troubleshooting.sh`
+
+#### Metrics
+
+- Total skills: 41 → 45
+- Total commands: 40 → 44
+- Test scripts: 35 → 38
+
+---
+
 ## [3.2.0] - 2026-02-17
 
 ### Infrastructure Operations Enhancement

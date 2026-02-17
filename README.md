@@ -432,6 +432,11 @@ Quick invoke skills using `/command` syntax:
 - `/requesting-peer-review` - Request human peer review for infrastructure changes
 - `/executing-operation-plans` - Execute plans in separate sessions with checkpoints
 - `/observability-integration` - Verify operations using metrics and alerting data
+- `/safety-validator` - Review commands for high-risk operations
+
+**Learning & Onboarding:**
+- `/playground-tutorial` - Safe, local tutorial for learning TDO
+- `/environment-health-check` - Verify required tools are installed
 
 **Infrastructure Administration:**
 - `/pve-admin` - Proxmox VE/Backup administration
@@ -477,6 +482,44 @@ Quick invoke skills using `/command` syntax:
 - `/code-documenter` - API documentation and docstrings
 - `/test-master` - Testing strategy and automation
 - `/prompt-engineer` - LLM prompt design and evaluation
+
+## Developer Tools
+
+### Skill Generator
+
+Create new skills with the scaffolding tool:
+
+```bash
+# Interactive mode
+python scripts/create-skill.py
+
+# With arguments
+python scripts/create-skill.py \
+  --name my-skill \
+  --description "Use when doing X" \
+  --category core
+```
+
+This generates:
+- `skills/my-skill/SKILL.md` - Skill definition
+- `commands/my-skill.md` - Command wrapper
+- `skills/my-skill/references/` - Reference directory
+- `tests/claude-code/test-my-skill.sh` - Test template
+
+### Evaluation Framework
+
+Run automated evaluations to verify skill output quality:
+
+```bash
+# Run all evals
+python evals/eval-runner.py
+
+# Run specific skill eval
+python evals/eval-runner.py --skill sre-runbook
+
+# Generate report
+python evals/eval-runner.py --report results.md
+```
 
 Commands are thin wrappers that invoke skills directly for quick access.
 
