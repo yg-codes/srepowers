@@ -354,6 +354,13 @@ Quick invoke skills using `/command` syntax:
 - `/verification-before-completion` - Verify before claiming work complete
 - `/sre-runbook` - Create structured SRE runbooks
 
+**Workspace & Lifecycle:**
+- `/using-git-worktrees-for-infra` - Create isolated workspaces for control repos
+- `/finishing-operation-branch` - Complete operations with merge/PR workflow
+
+**Incident Response:**
+- `/systematic-troubleshooting` - 4-phase root cause analysis for incidents
+
 **Infrastructure Administration:**
 - `/pve-admin` - Proxmox VE/Backup administration
 - `/puppet-code-analyzer` - Puppet code quality analysis

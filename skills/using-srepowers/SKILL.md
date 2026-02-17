@@ -113,6 +113,28 @@ The skill itself tells you which.
 - Core principle: Fresh subagent per task + two-stage review (spec compliance then artifact quality)
 - Workflow: Dispatch operator → Execute operations → Spec compliance review → Artifact quality review
 
+### Workspace & Lifecycle Skills
+
+**using-git-worktrees-for-infra** - Create isolated workspaces for infrastructure control repos
+- Use when: Starting infrastructure operations needing isolation from current workspace
+- Core principle: Systematic directory selection + environment verification + safety checks
+- Required before: subagent-driven-operation, writing-operation-plans execution
+- Features: Environment detection, control repo structure verification, baseline validation
+
+**finishing-operation-branch** - Complete infrastructure operations with merge/PR workflow
+- Use when: Infrastructure operations complete, need to integrate changes into control repo
+- Core principle: Verify infrastructure state → Present options → Execute choice → Document rollback
+- Options: Merge & deploy, create MR for review, promote to next environment, keep, discard
+- Features: Environment promotion workflow (sit → uat → prod), rollback documentation
+
+### Incident Response Skills
+
+**systematic-troubleshooting** - 4-phase root cause analysis for infrastructure incidents
+- Use when: Investigating service outages, performance degradation, or unexpected system behavior
+- Core principle: ALWAYS find root cause before attempting remediation
+- Phases: Triage & data gathering → Pattern analysis → Hypothesis & testing → Remediation
+- Features: Log analysis, metrics correlation, distributed tracing, incident timeline reconstruction
+
 ### Planning & Documentation Skills
 
 **brainstorming-operations** - Design infrastructure operations before implementation
