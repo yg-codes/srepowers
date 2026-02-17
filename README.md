@@ -222,6 +222,71 @@ kubectl get pod -n production -l app=api-server
 - Rollback procedures
 - Troubleshooting section
 
+### requesting-peer-review
+
+**Use when:** Infrastructure changes need human peer review before merging to control repo - especially for production-bound changes, high-risk operations, or compliance requirements.
+
+**Core principle:** Human review for infrastructure changes reduces incidents and ensures knowledge sharing.
+
+**Features:**
+- MR templates with risk assessment
+- Pre-review verification checklist
+- Review criteria for security, reliability, observability
+- Feedback response templates
+
+### executing-operation-plans
+
+**Use when:** You have a written infrastructure operation plan to execute in a separate session with review checkpoints - for long-running operations requiring human review between steps.
+
+**Core principle:** Batch execution with checkpoints for safety verification and human review.
+
+**Workflow:**
+- Load and review plan
+- Pre-execution safety check
+- Execute batch (3 tasks or per-environment)
+- Batch verification
+- Report and checkpoint
+- Continue or complete
+
+### observability-integration
+
+**Use when:** Verifying infrastructure operations using metrics and alerting data from Prometheus, Grafana, or other observability platforms.
+
+**Core principle:** Metrics don't lie - use observability data to verify operations and detect issues early.
+
+**Features:**
+- Pre/post operation metric comparison
+- Baseline establishment
+- Alert validation
+- Prometheus query examples
+- Integration with TDO cycles
+
+### incident-commander
+
+**Use when:** Coordinating response to major infrastructure incidents requiring structured incident command.
+
+**Core principle:** Clear command structure + effective communication + systematic troubleshooting = faster incident resolution.
+
+**Features:**
+- ICS-style role assignment (IC, Operations, Communications, Scribe)
+- Severity levels and escalation triggers
+- Communication templates
+- Timeline tracking
+- Multi-phase response process
+
+### post-mortem-writer
+
+**Use when:** Creating blameless post-mortems after infrastructure incidents.
+
+**Core principle:** Blameless post-mortems create a culture of learning and continuous improvement.
+
+**Features:**
+- Structured post-mortem template
+- Timeline reconstruction
+- Root cause analysis framework
+- Action item tracking
+- Blameless writing guidelines
+
 ### architecture-designer
 
 **Use when:** Designing new system architecture, reviewing existing designs, or making architectural decisions.
@@ -360,6 +425,13 @@ Quick invoke skills using `/command` syntax:
 
 **Incident Response:**
 - `/systematic-troubleshooting` - 4-phase root cause analysis for incidents
+- `/incident-commander` - Coordinate major incident response with ICS structure
+- `/post-mortem-writer` - Create blameless post-mortems
+
+**Operations Enhancement:**
+- `/requesting-peer-review` - Request human peer review for infrastructure changes
+- `/executing-operation-plans` - Execute plans in separate sessions with checkpoints
+- `/observability-integration` - Verify operations using metrics and alerting data
 
 **Infrastructure Administration:**
 - `/pve-admin` - Proxmox VE/Backup administration

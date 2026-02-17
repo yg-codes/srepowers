@@ -1,5 +1,61 @@
 # Release Notes
 
+## [3.2.0] - 2026-02-17
+
+### Infrastructure Operations Enhancement
+
+Added 6 new skills to strengthen infrastructure operations workflows, plus completed missing test coverage and structural improvements.
+
+#### New Skills (6)
+
+**Incident Management:**
+- **incident-commander** - Coordinate major incident response with ICS structure
+  - Role assignment (IC, Operations, Communications, Scribe)
+  - Severity levels and escalation triggers
+  - Communication templates and timeline tracking
+  - Multi-phase response process
+
+- **post-mortem-writer** - Create blameless post-mortems
+  - Structured post-mortem template
+  - Timeline reconstruction framework
+  - Root cause analysis guidelines
+  - Action item tracking
+
+**Operations Enhancement:**
+- **requesting-peer-review** - Request human peer review for infrastructure changes
+  - MR templates with risk assessment
+  - Pre-review verification checklist
+  - Review criteria (security, reliability, observability)
+  - Feedback response templates
+
+- **executing-operation-plans** - Execute plans in separate sessions with checkpoints
+  - Batch execution with human review points
+  - Environment promotion workflow (sit → uat → prod)
+  - Metric verification between batches
+  - Rollback decision points
+
+- **observability-integration** - Verify operations using metrics and alerting
+  - Pre/post operation metric comparison
+  - Prometheus query examples
+  - Alert validation
+  - Integration with TDO cycles
+
+#### Test Coverage Improvements
+
+**New Test Scripts (3):**
+- `test-using-git-worktrees-for-infra.sh` - Tests git worktrees skill
+- `test-finishing-operation-branch.sh` - Tests operation completion skill
+- `test-systematic-troubleshooting.sh` - Tests troubleshooting skill
+
+#### Structural Improvements
+
+- Added `references/` directories for `using-git-worktrees-for-infra` and `finishing-operation-branch`
+- Updated README.md with new skills and commands
+- Total skills: 36 → 41
+- Total commands: 34 → 40
+
+---
+
 ## [3.1.0] - 2026-02-15
 
 ### SRE Principles Alignment
