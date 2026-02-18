@@ -1,6 +1,6 @@
 ---
 name: observability-integration
-description: Use when verifying infrastructure operations using metrics and alerting data from Prometheus, Grafana, or other observability platforms - for pre/post operation metric comparison and alert validation
+description: Use when verifying infrastructure operations using metrics and alerting data from Prometheus, Grafana, Datadog, CloudWatch, New Relic, or other observability platforms - for pre/post operation metric comparison and alert validation
 ---
 
 # Observability Integration
@@ -267,6 +267,127 @@ curl -s "http://prometheus:9090/api/v1/query?query=rate(http_requests_total{job=
 ### Alert fatigue blindness
 - **Problem**: Ignoring alerts because "they're always firing"
 - **Fix**: Investigate every alert during operation window
+
+## Multi-Stack Observability
+
+The examples above use Prometheus/Grafana. Use the equivalent queries for your observability stack.
+
+### Datadog
+
+```bash
+# Requires: DD_API_KEY, DD_APP_KEY environment variables
+
+# Query metric (error rate, last 5 min)
+curl -X GET "https://api.datadoghq.com/api/v1/query" \
+  -H "DD-API-KEY: ${DD_API_KEY}" \
+  -H "DD-APPLICATION-KEY: ${DD_APP_KEY}" \
+  -G --data-urlencode \
+  "query=sum:http.requests.error{service:api}.as_count()/sum:http.requests{service:api}.as_count()" \
+  --data-urlencode "from=$(date -d '-5 minutes' +%s)" \
+  --data-urlencode "to=$(date +%s)" | jq '.series[0].pointlist[-1][1]'
+
+# Query p99 latency
+curl -X GET "https://api.datadoghq.com/api/v1/query" \
+  -H "DD-API-KEY: ${DD_API_KEY}" \
+  -H "DD-APPLICATION-KEY: ${DD_APP_KEY}" \
+  -G --data-urlencode \
+  "query=p99:http.request.duration{service:api}" \
+  --data-urlencode "from=$(date -d '-5 minutes' +%s)" \
+  --data-urlencode "to=$(date +%s)" | jq '.series[0].pointlist[-1][1]'
+
+# Check active monitors (Datadog equivalent of Alertmanager alerts)
+curl -X GET "https://api.datadoghq.com/api/v1/monitor" \
+  -H "DD-API-KEY: ${DD_API_KEY}" \
+  -H "DD-APPLICATION-KEY: ${DD_APP_KEY}" \
+  -G --data-urlencode "monitor_tags=service:api" \
+  --data-urlencode "with_downtime=false" | \
+  jq '.[] | select(.overall_state == "Alert") | {name: .name, state: .overall_state}'
+```
+
+### AWS CloudWatch
+
+```bash
+# Requires: AWS CLI configured with appropriate IAM permissions
+
+# Query error rate metric
+aws cloudwatch get-metric-statistics \
+  --namespace "MyApp/API" \
+  --metric-name "ErrorRate" \
+  --dimensions Name=Service,Value=api \
+  --start-time "$(date -u -d '-5 minutes' '+%Y-%m-%dT%H:%M:%SZ')" \
+  --end-time "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+  --period 300 \
+  --statistics Average \
+  --query 'Datapoints[0].Average'
+
+# Query ALB p99 latency (Application Load Balancer)
+aws cloudwatch get-metric-statistics \
+  --namespace "AWS/ApplicationELB" \
+  --metric-name "TargetResponseTime" \
+  --dimensions Name=LoadBalancer,Value=app/[LOAD_BALANCER_NAME]/[SUFFIX] \  # replace with actual LoadBalancer dimension from AWS console
+  --start-time "$(date -u -d '-5 minutes' '+%Y-%m-%dT%H:%M:%SZ')" \
+  --end-time "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+  --period 300 \
+  --extended-statistics p99 \
+  --query 'Datapoints[0].ExtendedStatistics.p99'
+
+# Check CloudWatch alarms in ALARM state
+aws cloudwatch describe-alarms \
+  --state-value ALARM \
+  --query 'MetricAlarms[].{Name:AlarmName,State:StateValue,Reason:StateReason}' \
+  --output table
+```
+
+### New Relic
+
+```bash
+# Requires: NEW_RELIC_API_KEY, NEW_RELIC_ACCOUNT_ID environment variables
+
+# NerdGraph query (New Relic's GraphQL API) — error rate
+curl -X POST "https://api.newrelic.com/graphql" \
+  -H "Content-Type: application/json" \
+  -H "API-Key: ${NEW_RELIC_API_KEY}" \
+  -d "{\"query\": \"{ actor { account(id: ${NEW_RELIC_ACCOUNT_ID}) { nrql(query: \\\"SELECT percentage(count(*), WHERE httpResponseCode >= 500) FROM Transaction WHERE appName = 'MyAPI' SINCE 5 MINUTES AGO\\\") { results } } } }\"}" \
+  | jq '.data.actor.account.nrql.results[0]["percentage(count(*), WHERE httpResponseCode >= 500)"]'
+
+# p99 latency
+curl -X POST "https://api.newrelic.com/graphql" \
+  -H "Content-Type: application/json" \
+  -H "API-Key: ${NEW_RELIC_API_KEY}" \
+  -d "{\"query\": \"{ actor { account(id: ${NEW_RELIC_ACCOUNT_ID}) { nrql(query: \\\"SELECT percentile(duration, 99) FROM Transaction WHERE appName = 'MyAPI' SINCE 5 MINUTES AGO\\\") { results } } } }\"}" \
+  | jq '.data.actor.account.nrql.results[0]["percentile.duration.99"]'
+```
+
+### Stack-Agnostic Baseline Template
+
+Regardless of your observability stack, capture the same four golden signals before any operation:
+
+```markdown
+## Metric Baseline (Pre-Operation) — [Stack Name]
+
+| Signal | Metric Name | Current Value | SLO Target | Rollback Trigger |
+|--------|-------------|---------------|------------|-----------------|
+| **Errors** | [metric] | [value] | < [threshold] | > [trigger] for [duration] |
+| **Latency** | [metric p99] | [value]ms | < [threshold]ms | > [trigger]ms for [duration] |
+| **Traffic** | [metric req/s] | [value] | N/A (reference) | Drop > [pct]% |
+| **Saturation** | [metric cpu/mem] | [value]% | < [threshold]% | > [trigger]% for [duration] |
+```
+
+**Adapt the query tool but keep the same four signals.** If your stack cannot provide one of the four, note it as "not available" and add a rationale.
+
+### Service Mesh Observability (Kiali / Jaeger)
+
+```bash
+# Kiali API — service health
+curl -s "http://kiali:20001/api/namespaces/production/services/api" \
+  -H "Authorization: Bearer $(kubectl create token kiali -n istio-system)" | \
+  jq '{healthScore: .health.requests.errorRatio, requestRate: .health.requests.requestCount}'
+
+# Jaeger — trace latency percentiles for a service
+curl -s "http://jaeger:16686/api/traces?service=api&operation=GET%20/users&limit=100" | \
+  jq '[.data[].spans[0].duration] | sort | .[length * 0.99 | floor] / 1000 | . * 100 | round / 100'
+# Returns p99 latency in milliseconds
+```
 
 ## Integration
 

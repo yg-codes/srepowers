@@ -127,6 +127,20 @@ The skill itself tells you which.
 - Options: Merge & deploy, create MR for review, promote to next environment, keep, discard
 - Features: Environment promotion workflow (sit → uat → prod), rollback documentation
 
+### Delivery & Reliability Skills
+
+**progressive-delivery** - Canary, blue-green, and shadow traffic release workflows
+- Use when: Releasing changes with staged traffic shifting, SLO-based rollback triggers
+- Core principle: Each traffic stage is a TDO cycle: verify SLOs before promoting to next stage
+- Stages: Canary (1% → 5% → 25% → 50% → 100%) with per-stage rollback triggers
+- Features: Blue-green switch, shadow traffic validation, SLO-based rollback automation
+
+**toil-analysis** - Measure and reduce operational toil
+- Use when: Quantifying toil, planning automation investments, making headcount decisions
+- Core principle: Toil > 50% of engineering capacity means freeze feature work and automate
+- Phases: Inventory → Capacity planning → Automation prioritization → Progress measurement
+- Features: Growth projection model, Impact×Ease×Risk scoring, reduction tracking
+
 ### Incident Response Skills
 
 **systematic-troubleshooting** - 4-phase root cause analysis for infrastructure incidents

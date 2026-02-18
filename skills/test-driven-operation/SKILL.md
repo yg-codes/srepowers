@@ -318,6 +318,153 @@ ssh prod-server "systemctl is-active nginx"
 # Output: active
 ```
 
+## Async and Eventual-Consistency Verification
+
+Some operations cannot produce an immediate, deterministic verification result. These fall into three categories:
+
+| Category | Examples | Verification Strategy |
+|----------|----------|-----------------------|
+| **Poll-until-ready** | ArgoCD sync, Terraform apply, DNS propagation | Polling loop with timeout |
+| **Event-based** | Kafka consumer lag, async job completion, webhook delivery | Event log or queue depth query |
+| **Baseline-delta** | Managed cloud services, Route53 propagation, S3 eventual consistency | Before/after comparison with wait |
+
+### Strategy 1: Poll-Until-Ready
+
+Use when the resource will exist eventually and you can query it repeatedly.
+
+**Template:**
+```bash
+# RED: show the condition is not yet met
+kubectl get deployment -n production api-server -o jsonpath='{.status.readyReplicas}' 2>&1
+# Expected: Error: not found  OR  0
+
+# GREEN: execute operation
+kubectl apply -f deployment-api-server.yaml
+
+# Verify GREEN: poll with timeout (max 3 minutes, check every 10s)
+for i in $(seq 1 18); do
+  READY=$(kubectl get deployment -n production api-server \
+    -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  [ "$READY" = "3" ] && echo "PASS: readyReplicas=3" && break
+  echo "Attempt $i/18: readyReplicas=${READY:-0}, waiting 10s..."
+  sleep 10
+done
+[ "$READY" != "3" ] && echo "FAIL: timed out waiting for readyReplicas=3" && exit 1
+# Expected final output: PASS: readyReplicas=3
+```
+
+**Rules:**
+- Set a maximum timeout — never poll indefinitely
+- Log each attempt (shows the operation is progressing)
+- Treat timeout as failure, not success
+
+### Strategy 2: Event-Based Verification
+
+Use when success is signaled by an event, log entry, or queue state change.
+
+**Template (Kafka consumer lag):**
+```bash
+# RED: show lag is high (operation not done)
+kafka-consumer-groups.sh --bootstrap-server kafka:9092 \
+  --group my-consumer --describe | awk '{print $6}'
+# Expected: 50000  (high lag = processing not complete)
+
+# GREEN: trigger reprocessing job
+
+# Verify GREEN: confirm lag reaches 0 within window
+END=$((SECONDS + 300))  # 5 minute timeout
+while [ $SECONDS -lt $END ]; do
+  LAG=$(kafka-consumer-groups.sh --bootstrap-server kafka:9092 \
+    --group my-consumer --describe | awk 'NR>1{sum+=$6} END{print sum}')
+  [ "$LAG" -le "100" ] && echo "PASS: lag=$LAG" && break
+  echo "Lag: $LAG, waiting..."
+  sleep 15
+done
+```
+
+**Template (async job via API):**
+```bash
+# RED: job does not exist
+curl -s https://api.example.com/jobs/export-123 | jq '.status'
+# Expected: null or 404
+
+# GREEN: trigger job
+curl -X POST https://api.example.com/jobs \
+  -d '{"type": "export", "id": "export-123"}'
+
+# Verify GREEN: poll job status
+for i in $(seq 1 20); do
+  STATUS=$(curl -s https://api.example.com/jobs/export-123 | jq -r '.status')
+  [ "$STATUS" = "completed" ] && echo "PASS: status=completed" && break
+  [ "$STATUS" = "failed" ] && echo "FAIL: job failed" && exit 1
+  echo "Attempt $i/20: status=$STATUS"
+  sleep 15
+done
+```
+
+### Strategy 3: Baseline-Delta (Managed Cloud / Eventual Consistency)
+
+Use when you cannot query the target state directly, but can compare before vs after.
+
+**Template (AWS Route53 DNS propagation):**
+```bash
+# RED: capture baseline (record does not resolve yet)
+BASELINE=$(dig +short api.example.com @8.8.8.8)
+echo "Baseline: '${BASELINE}'"
+# Expected: empty string or old IP
+
+# GREEN: update DNS record via Terraform/CLI
+
+# Verify GREEN: wait for propagation, compare to expected value
+EXPECTED_IP="203.0.113.42"
+END=$((SECONDS + 600))  # 10 minute timeout for DNS
+while [ $SECONDS -lt $END ]; do
+  CURRENT=$(dig +short api.example.com @8.8.8.8)
+  [ "$CURRENT" = "$EXPECTED_IP" ] && echo "PASS: DNS resolved to $CURRENT" && break
+  echo "Current: '${CURRENT}', waiting for $EXPECTED_IP..."
+  sleep 30
+done
+```
+
+**Template (S3 object / managed service):**
+```bash
+# RED: object does not exist
+aws s3 ls s3://my-bucket/output/report-YYYY-MM-DD.csv 2>&1
+# Expected: error or empty
+
+# GREEN: trigger report generation
+
+# Verify GREEN: poll for object existence
+REPORT_KEY="output/report-$(date +%Y-%m-%d).csv"
+for i in $(seq 1 12); do
+  aws s3 ls "s3://my-bucket/${REPORT_KEY}" 2>/dev/null && \
+    echo "PASS: object exists at s3://my-bucket/${REPORT_KEY}" && break
+  echo "Attempt $i/12: not yet available, waiting 30s..."
+  sleep 30
+done
+```
+
+### Async TDO Rules
+
+- **Always set a timeout.** No infinite polling. Timeouts are failures.
+- **Always log progress.** Each poll attempt should print current state.
+- **Watch it fail first.** Run the polling loop RED — it must time out or return the wrong value before the operation.
+- **Treat timeout as RED flag.** If the loop times out in Verify GREEN, the operation failed — don't claim success.
+- **Human approval for long waits.** If timeout > 15 minutes, ask your human partner before proceeding.
+
+### When TDO Cannot Apply
+
+Some operations genuinely have no automation-friendly verification:
+
+| Situation | Action |
+|-----------|--------|
+| Visual inspection required (UI, design approval) | Pause TDO. Document human checkpoint. Resume after human confirms. |
+| Success = absence of alerts over N hours | Document expected alert state, set calendar reminder, close loop later. |
+| Cross-system trace required | Use distributed tracing tools (Jaeger, Tempo, Zipkin) to correlate spans; treat trace completion as verification event. |
+| Legacy system with no query API | Add monitoring or logging first; then run TDO. |
+
+For these cases: **document the human checkpoint explicitly in the operation plan.** Do not claim automated verification where none exists.
+
 ## Why Order Matters
 
 **"I'll verify after to confirm it worked"**

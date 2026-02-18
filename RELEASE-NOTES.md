@@ -1,5 +1,62 @@
 # Release Notes
 
+## [3.4.0] - 2026-02-18
+
+### Gap Fixes — Async Verification, Progressive Delivery, Multi-Stack Observability, Toil Analysis, Distributed Incidents
+
+Five gap-fix changes based on comparative analysis against Superpowers. Addresses limitations identified in `comparison-claude.md`.
+
+#### New Skills (2)
+
+**Delivery & Reliability:**
+- **progressive-delivery** - Canary/blue-green/shadow traffic release workflows
+  - Per-stage TDO cycle with SLO-based rollback triggers
+  - Canary stages: 1% → 5% → 25% → 50% → 100%
+  - Blue-green cutover with immediate rollback
+  - Shadow traffic validation (zero user impact)
+  - Inline Prometheus rollback trigger checks (no external scripts)
+
+- **toil-analysis** - Measure and reduce operational toil
+  - 4-phase workflow: Inventory → Capacity Planning → Prioritization → Progress
+  - Python capacity model projecting 5-quarter toil growth vs team size
+  - Impact × Ease × Risk scoring matrix for automation prioritization
+  - Reduction progress tracking with before/after baselines
+
+#### Extended Skills (3)
+
+**test-driven-operation:**
+- Added `## Async and Eventual-Consistency Verification` section
+- Three strategies: Poll-Until-Ready, Event-Based, Baseline-Delta
+- Covers managed cloud services (S3, Route53), Kafka lag, async job APIs
+- Fixed: silent timeout now explicitly fails with exit code 1
+
+**observability-integration:**
+- Added `## Multi-Stack Observability` section
+- Datadog: curl API with `DD_API_KEY`/`DD_APP_KEY` variables
+- AWS CloudWatch: `aws cloudwatch get-metric-statistics` queries
+- New Relic: NerdGraph GraphQL API queries
+- Stack-Agnostic Baseline Template: four golden signals table
+- Service Mesh: Kiali API + Jaeger trace latency queries
+- Fixed: New Relic p99 jq key corrected to `"percentile.duration.99"`
+- Fixed: CloudWatch ALB dimensions placeholder marked as requiring substitution
+
+**incident-commander:**
+- Added `## Distributed and Async Incident Response` section
+- When-to-use table: timezone, duration >8h, >3tz span, no war room
+- Async Incident Command Document template (single source of truth)
+- IC Handoff Protocol: 30-min checklist + handoff/acknowledgment templates
+- Follow-the-Sun IC rotation: APAC/EMEA/Americas windows
+- Async communication patterns: channel update + cross-timezone escalation
+- Long-running incident management: 4-hour checkpoints
+- Escalation Decision Framework: paging thresholds with decision heuristic
+
+#### Metrics
+
+- Total skills: 45 → 47
+- Total commands: 44 → 46
+
+---
+
 ## [3.3.0] - 2026-02-17
 
 ### Developer Experience & Safety Enhancements
@@ -479,6 +536,10 @@ Adapted from the [superpowers](https://github.com/obra/superpowers) plugin by Je
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 3.4.0 | 2026-02-18 | Gap fixes: 2 new skills (progressive-delivery, toil-analysis), 3 extended skills (TDO async, observability multi-stack, incident-commander distributed) |
+| 3.3.0 | 2026-02-17 | Developer tools: playground-tutorial, environment-health-check, safety-validator, skill generator, evaluation framework |
+| 3.2.0 | 2026-02-17 | Infrastructure operations: incident-commander, post-mortem-writer, requesting-peer-review, executing-operation-plans, observability-integration |
+| 3.1.0 | 2026-02-15 | SRE Principles added to all 20 domain expertise skills |
 | 3.0.0 | 2026-02-10 | Major release: 20 domain expertise skills from Jeffallan/claude-skills (architecture, cloud, DevOps, languages, security, SRE) |
 | 2.1.0 | 2026-02-09 | Minor release: Merge 6 skills from yg-claude (sre-runbook, pve-admin, puppet-code-analyzer, gitlab-ecr-pipeline, cache-cleanup, clickup-ticket-creator) + container-cicd-reference docs |
 | 2.0.0 | 2026-02-09 | Major release: 4 new skills (VBC, brainstorming-ops, writing-ops, using-srepowers), command system, hooks, test suite, documentation |

@@ -287,6 +287,31 @@ kubectl get pod -n production -l app=api-server
 - Action item tracking
 - Blameless writing guidelines
 
+### progressive-delivery
+
+**Use when:** Releasing changes with staged traffic shifting, SLO-based rollback triggers, or blue-green cutover.
+
+**Core principle:** Each traffic stage is a TDO cycle — verify SLOs before promoting to the next stage.
+
+**Features:**
+- Canary release workflow (1% → 5% → 25% → 50% → 100%)
+- Blue-green cutover with immediate rollback capability
+- Shadow traffic validation (zero user impact testing)
+- SLO-based rollback triggers at each stage
+- Per-stage verification commands
+
+### toil-analysis
+
+**Use when:** Quantifying operational toil, planning automation investments, or justifying headcount decisions.
+
+**Core principle:** Toil > 50% of engineering capacity means freeze feature work and automate.
+
+**Features:**
+- Toil inventory with time tracking (task × frequency × duration)
+- Capacity planning projection model (5-quarter growth forecast)
+- Automation prioritization matrix (Impact × Ease × Risk scoring)
+- Reduction progress tracking with before/after measurement
+
 ### architecture-designer
 
 **Use when:** Designing new system architecture, reviewing existing designs, or making architectural decisions.
@@ -431,8 +456,10 @@ Quick invoke skills using `/command` syntax:
 **Operations Enhancement:**
 - `/requesting-peer-review` - Request human peer review for infrastructure changes
 - `/executing-operation-plans` - Execute plans in separate sessions with checkpoints
-- `/observability-integration` - Verify operations using metrics and alerting data
+- `/observability-integration` - Verify operations using metrics and alerting data (Prometheus, Datadog, CloudWatch, New Relic)
 - `/safety-validator` - Review commands for high-risk operations
+- `/progressive-delivery` - Canary/blue-green release with SLO-based rollback triggers
+- `/toil-analysis` - Measure toil, plan automation investments, model capacity
 
 **Learning & Onboarding:**
 - `/playground-tutorial` - Safe, local tutorial for learning TDO
