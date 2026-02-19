@@ -129,19 +129,6 @@ kubectl get pod -n production -l app=api-server
 
 **Output:** Execution plan that operators can follow step-by-step.
 
-### verification-before-completion
-
-**Use when:** About to claim work is complete, fixed, or passing.
-
-**Core principle:** Evidence before claims, always.
-
-**Workflow:**
-1. IDENTIFY: What command proves this claim?
-2. RUN: Execute the full command (fresh, complete)
-3. READ: Full output, check exit code
-4. VERIFY: Does output confirm the claim?
-5. ONLY THEN: Make the claim with evidence
-
 ### cache-cleanup
 
 **Use when:** Cleaning up development tool caches interactively with pre/post verification.
@@ -155,16 +142,6 @@ kubectl get pod -n production -l app=api-server
 2. Pre-check: Verify each tool is available and working
 3. Cleanup: Remove cache directories
 4. Post-check: Verify tools still work after cleanup
-
-### clickup-ticket-creator
-
-**Use when:** Creating ClickUp tickets following CCB template format.
-
-**Core principle:** Structured ticket generation with all required sections.
-
-**Sections:** Description, Rationale, Impact, Risk, UAT, Procedure, Verification, Rollback
-
-**Output:** Formatted ClickUp ticket ready for submission
 
 ### gitlab-ecr-pipeline
 
@@ -221,18 +198,6 @@ kubectl get pod -n production -l app=api-server
 - Verification steps
 - Rollback procedures
 - Troubleshooting section
-
-### requesting-peer-review
-
-**Use when:** Infrastructure changes need human peer review before merging to control repo - especially for production-bound changes, high-risk operations, or compliance requirements.
-
-**Core principle:** Human review for infrastructure changes reduces incidents and ensures knowledge sharing.
-
-**Features:**
-- MR templates with risk assessment
-- Pre-review verification checklist
-- Review criteria for security, reliability, observability
-- Feedback response templates
 
 ### executing-operation-plans
 
@@ -441,7 +406,6 @@ Quick invoke skills using `/command` syntax:
 - `/subagent-driven-operation` - Execute operation plans with subagent dispatch
 - `/brainstorming-operations` - Design infrastructure operations
 - `/writing-operation-plans` - Create detailed execution plans
-- `/verification-before-completion` - Verify before claiming work complete
 - `/sre-runbook` - Create structured SRE runbooks
 
 **Workspace & Lifecycle:**
@@ -454,7 +418,6 @@ Quick invoke skills using `/command` syntax:
 - `/post-mortem-writer` - Create blameless post-mortems
 
 **Operations Enhancement:**
-- `/requesting-peer-review` - Request human peer review for infrastructure changes
 - `/executing-operation-plans` - Execute plans in separate sessions with checkpoints
 - `/observability-integration` - Verify operations using metrics and alerting data (Prometheus, Datadog, CloudWatch, New Relic)
 - `/safety-validator` - Review commands for high-risk operations
@@ -474,9 +437,6 @@ Quick invoke skills using `/command` syntax:
 
 **CI/CD & Pipelines:**
 - `/gitlab-ecr-pipeline` - GitLab CI/CD → AWS ECR pipelines
-
-**Project Management:**
-- `/clickup-ticket-creator` - Create CCB-formatted ClickUp tickets
 
 **Architecture & Design:**
 - `/architecture-designer` - System architecture design and review
@@ -508,7 +468,22 @@ Quick invoke skills using `/command` syntax:
 - `/code-reviewer` - Code quality audits and PR reviews
 - `/code-documenter` - API documentation and docstrings
 - `/test-master` - Testing strategy and automation
-- `/prompt-engineer` - LLM prompt design and evaluation
+
+## Skills from Superpowers
+
+SREPowers is designed to work alongside [superpowers](https://github.com/obra/superpowers). The following skills are provided by superpowers and should be used instead of SREPowers equivalents:
+
+| Skill | Source | Description |
+|-------|--------|-------------|
+| `verification-before-completion` | superpowers | Evidence before claims (generic version) |
+| `requesting-code-review` | superpowers | Pre-review checklist for code |
+| `receiving-code-review` | superpowers | Responding to code review feedback |
+| `brainstorming` | superpowers | Socratic design refinement (use `brainstorming-operations` for infrastructure-specific) |
+| `writing-plans` | superpowers | Implementation plans (use `writing-operation-plans` for infrastructure-specific) |
+| `using-git-worktrees` | superpowers | Isolated development branches (use `using-git-worktrees-for-infra` for control repos) |
+| `finishing-a-development-branch` | superpowers | Merge/PR workflow (use `finishing-operation-branch` for environment promotion) |
+
+**Recommendation:** Install both superpowers and SREPowers for complete coverage.
 
 ## Developer Tools
 
