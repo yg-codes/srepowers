@@ -1,5 +1,42 @@
 # Release Notes
 
+## [3.5.0] - 2026-02-19
+
+### Skill Auto-Activation
+
+Introduces automatic skill suggestion via UserPromptSubmit hook, plus refactors skill inventory by delegating non-SRE skills to superpowers plugin.
+
+#### New Features
+
+**Skill Auto-Activation System:**
+- **`hooks/skill-activation-prompt.sh`**: UserPromptSubmit hook that reads `hooks/skill-rules.json` and automatically suggests relevant skills before Claude responds. Pure bash+jq implementation with no Node.js dependency.
+- **`hooks/skill-rules.json`**: Activation rules for all 39 SRE skills with keyword and intent pattern triggers grouped by priority (critical/high/medium/low).
+- Context-aware suggestions based on user message content with minimal overhead (<100ms typical).
+
+#### Refactor (from v3.4.0)
+
+Removed 6 non-SRE or duplicate skills (delegated to superpowers plugin):
+- `verification-before-completion` — generic, not SRE-specific
+- `requesting-peer-review` — generic, not SRE-specific
+- `prompt-engineer` — generic, not SRE-specific
+- `cache-cleanup` — developer tool, not SRE-specific
+- `clickup-ticket-creator` — project management, not SRE-specific
+- `using-srepowers` — delegated to superpowers for cross-plugin coordination
+
+**Remaining skill count: 39** (down from 45)
+
+#### Updated Components
+
+- `plugin.json`: version 3.5.0, description updated to 39 skills, keywords updated (removed cache, clickup, prompt-engineering; added skill-activation, auto-activation)
+- `hooks/hooks.json`: updated to use skill-activation-prompt.sh instead of session-start.sh
+
+#### Metrics
+
+- Total skills: 45 → 39
+- Total commands: 44 → 38
+
+---
+
 ## [3.4.0] - 2026-02-18
 
 ### Gap Fixes — Async Verification, Progressive Delivery, Multi-Stack Observability, Toil Analysis, Distributed Incidents
@@ -536,6 +573,7 @@ Adapted from the [superpowers](https://github.com/obra/superpowers) plugin by Je
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 3.5.0 | 2026-02-19 | Skill auto-activation via UserPromptSubmit hook; removed 6 non-SRE skills (delegated to superpowers); 39 skills remaining |
 | 3.4.0 | 2026-02-18 | Gap fixes: 2 new skills (progressive-delivery, toil-analysis), 3 extended skills (TDO async, observability multi-stack, incident-commander distributed) |
 | 3.3.0 | 2026-02-17 | Developer tools: playground-tutorial, environment-health-check, safety-validator, skill generator, evaluation framework |
 | 3.2.0 | 2026-02-17 | Infrastructure operations: incident-commander, post-mortem-writer, requesting-peer-review, executing-operation-plans, observability-integration |

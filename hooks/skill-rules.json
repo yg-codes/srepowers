@@ -1,0 +1,1060 @@
+{
+  "version": "1.0.0",
+  "description": "Skill auto-activation rules for the srepowers Claude Code plugin",
+  "skills": {
+    "test-driven-operation": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "critical",
+      "description": "Verification-first infrastructure operations using Red-Green-Refactor adapted for infra",
+      "promptTriggers": {
+        "keywords": [
+          "verification",
+          "tdo",
+          "verify before",
+          "kubectl apply",
+          "infrastructure operation",
+          "deploy",
+          "rollout",
+          "helm install",
+          "helm upgrade",
+          "apply changes",
+          "make changes",
+          "change"
+        ],
+        "intentPatterns": [
+          "\\b(deploy|rollout|apply)\\b.*\\b(to|into|on)\\b.*(cluster|namespace|env|environment|prod|staging)",
+          "\\b(verify|validate|confirm)\\b.*(before|prior to|first)\\b.*(deploy|change|operation|apply)",
+          "\\b(kubectl|helm)\\b.*(apply|install|upgrade|delete|rollout)",
+          "\\b(infrastructure|infra)\\b.*(change|operation|update|modify)"
+        ]
+      }
+    },
+    "subagent-driven-operation": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "critical",
+      "description": "Dispatch fresh subagent per task with two-stage spec and quality review",
+      "promptTriggers": {
+        "keywords": [
+          "execute plan",
+          "run plan",
+          "operation plan",
+          "multi-step",
+          "batch operation",
+          "run all",
+          "execute all",
+          "run these steps",
+          "parallel tasks"
+        ],
+        "intentPatterns": [
+          "\\b(execute|run|perform)\\b.*(plan|steps|tasks|operations)\\b",
+          "\\b(multi.?step|batch|parallel)\\b.*(operation|task|execution)",
+          "\\b(dispatch|delegate|spawn)\\b.*(agent|subagent|task)",
+          "\\b(all|each)\\b.*(step|task|operation)\\b.*(independently|separately|in parallel)"
+        ]
+      }
+    },
+    "brainstorming-operations": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "critical",
+      "description": "Design thinking before infrastructure operations — brainstorm approach and tradeoffs",
+      "promptTriggers": {
+        "keywords": [
+          "design",
+          "plan operation",
+          "how should i",
+          "approach",
+          "strategy",
+          "before we start",
+          "thinking through",
+          "brainstorm",
+          "options for",
+          "best way to",
+          "alternatives"
+        ],
+        "intentPatterns": [
+          "\\b(how|what).*(should|would|could|best)\\b.*(approach|way|method|strategy)",
+          "\\b(brainstorm|think through|explore|consider)\\b.*(option|approach|way|alternative)",
+          "\\b(before|prior to)\\b.*(start|begin|do|execute|implement|apply)",
+          "\\b(what|which)\\b.*(option|approach|strategy|method)\\b.*(better|best|recommend|prefer)"
+        ]
+      }
+    },
+    "writing-operation-plans": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "critical",
+      "description": "Create bite-sized, executable operation plans with clear verification steps",
+      "promptTriggers": {
+        "keywords": [
+          "write plan",
+          "create plan",
+          "operation plan",
+          "steps",
+          "procedure",
+          "runbook",
+          "step by step",
+          "instructions for",
+          "how to do",
+          "walk me through"
+        ],
+        "intentPatterns": [
+          "\\b(write|create|draft|generate)\\b.*(plan|procedure|runbook|steps|instructions)",
+          "\\b(step.by.step|step-by-step)\\b.*(guide|procedure|instructions|plan)",
+          "\\b(what|how).*(steps|procedure|process)\\b.*(to|for)\\b.*(do|perform|execute|deploy|configure)",
+          "\\b(walk me through|take me through|guide me through)\\b"
+        ]
+      }
+    },
+    "incident-commander": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Structured incident command and coordination for outages and major service issues",
+      "promptTriggers": {
+        "keywords": [
+          "incident",
+          "outage",
+          "down",
+          "sev",
+          "major issue",
+          "service down",
+          "cascade",
+          "multiple services",
+          "p0",
+          "p1",
+          "critical outage",
+          "production down",
+          "pages",
+          "pagerduty"
+        ],
+        "intentPatterns": [
+          "\\b(sev|severity)\\b.*(1|2|one|two|critical|major)",
+          "\\b(service|system|cluster|database|api)\\b.*(is|are)\\b.*(down|unavailable|unreachable|failing|broken)",
+          "\\b(outage|incident|cascade|multiple).*(detected|started|reported|happening|occurring)",
+          "\\b(production|prod)\\b.*(down|broken|failing|incident|outage|issue)"
+        ]
+      }
+    },
+    "systematic-troubleshooting": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Structured root-cause analysis and debugging methodology for infrastructure issues",
+      "promptTriggers": {
+        "keywords": [
+          "debug",
+          "investigate",
+          "root cause",
+          "why is",
+          "not working",
+          "error",
+          "failure",
+          "broken",
+          "troubleshoot",
+          "diagnose",
+          "what is wrong",
+          "what happened"
+        ],
+        "intentPatterns": [
+          "\\b(debug|troubleshoot|investigate|diagnose)\\b.*(issue|problem|error|failure|bug)",
+          "\\b(why|what).*(is|are|did).*(failing|broken|not working|erroring|crashing)",
+          "\\b(root cause|rca|RCA)\\b.*(of|for|behind|analysis)",
+          "\\b(getting|seeing|encountering)\\b.*(error|exception|failure|crash|timeout|5[0-9]{2})"
+        ]
+      }
+    },
+    "post-mortem-writer": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Blameless post-mortem generation with timeline, contributing factors, and action items",
+      "promptTriggers": {
+        "keywords": [
+          "post-mortem",
+          "postmortem",
+          "blameless",
+          "after incident",
+          "lessons learned",
+          "rca",
+          "what we learned",
+          "incident review",
+          "write up the incident"
+        ],
+        "intentPatterns": [
+          "\\b(write|create|draft|generate)\\b.*(post.?mortem|incident report|RCA|blameless review)",
+          "\\b(post.?mortem|incident review|retrospective)\\b.*(for|on|about)\\b.*(incident|outage|failure)",
+          "\\b(lessons learned|what went wrong|what happened|contributing factors)\\b",
+          "\\b(after|following|once)\\b.*(incident|outage|down|issue)\\b.*(resolved|fixed|over)"
+        ]
+      }
+    },
+    "safety-validator": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Validate dangerous commands and operations before execution to prevent accidental data loss",
+      "promptTriggers": {
+        "keywords": [
+          "dangerous",
+          "rm -rf",
+          "delete all",
+          "drop table",
+          "terraform destroy",
+          "kubectl delete",
+          "risky command",
+          "irreversible",
+          "force delete",
+          "truncate",
+          "wipe",
+          "nuke"
+        ],
+        "intentPatterns": [
+          "\\b(rm|remove)\\b.*(-rf|-r -f|--recursive --force)\\b",
+          "\\b(terraform)\\b.*(destroy|taint)\\b",
+          "\\b(kubectl)\\b.*(delete|purge)\\b.*(all|namespace|pv|pvc|pod|deploy|cluster)",
+          "\\b(drop|truncate|delete from)\\b.*(table|database|schema|all)"
+        ]
+      }
+    },
+    "observability-integration": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Set up and integrate observability tooling — metrics, alerts, dashboards, SLOs",
+      "promptTriggers": {
+        "keywords": [
+          "metrics",
+          "prometheus",
+          "grafana",
+          "alert",
+          "slo",
+          "latency",
+          "error rate",
+          "dashboard",
+          "datadog",
+          "cloudwatch",
+          "newrelic",
+          "traces",
+          "spans",
+          "opentelemetry"
+        ],
+        "intentPatterns": [
+          "\\b(set up|configure|integrate|add)\\b.*(prometheus|grafana|datadog|newrelic|cloudwatch|opentelemetry)",
+          "\\b(create|add|configure)\\b.*(alert|dashboard|metric|panel|SLO|SLI)",
+          "\\b(monitor|track|measure|observe)\\b.*(latency|error rate|throughput|availability|p99|p95)",
+          "\\b(alert|pagerduty|on.?call)\\b.*(when|if|for|on)\\b.*(error|failure|threshold|breach|spike)"
+        ]
+      }
+    },
+    "executing-operation-plans": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Execute a pre-written operation plan step by step with verification gates",
+      "promptTriggers": {
+        "keywords": [
+          "execute plan",
+          "run the plan",
+          "start operations",
+          "batch execute",
+          "follow the plan",
+          "run the steps",
+          "execute the steps",
+          "go through the plan"
+        ],
+        "intentPatterns": [
+          "\\b(execute|run|follow|perform|carry out)\\b.*(plan|steps|runbook|procedure|playbook)",
+          "\\b(start|begin|kick off|initiate)\\b.*(operation|execution|deployment|rollout)",
+          "\\b(go through|work through|proceed with)\\b.*(plan|steps|procedure|runbook)",
+          "\\b(step)\\b.*(1|one|first)\\b.*(of|in|from)\\b.*(plan|procedure|runbook)"
+        ]
+      }
+    },
+    "finishing-operation-branch": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Safely merge and promote completed infrastructure operation branches through environments",
+      "promptTriggers": {
+        "keywords": [
+          "merge",
+          "complete operation",
+          "done with changes",
+          "promote",
+          "push to prod",
+          "finish the branch",
+          "merge to",
+          "promote to",
+          "ship it"
+        ],
+        "intentPatterns": [
+          "\\b(merge|promote|push)\\b.*(to|into)\\b.*(sit|uat|prod|staging|production|main|master)",
+          "\\b(finish|complete|close|wrap up)\\b.*(branch|operation|change|pr|mr)",
+          "\\b(ready|done|finished)\\b.*(to merge|to promote|to ship|to deploy|for review)",
+          "\\b(create|open|submit)\\b.*(merge request|pull request|MR|PR)\\b"
+        ]
+      }
+    },
+    "using-git-worktrees-for-infra": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Use git worktrees to maintain isolated workspaces for concurrent infrastructure operations",
+      "promptTriggers": {
+        "keywords": [
+          "worktree",
+          "isolated workspace",
+          "git worktree",
+          "control repo",
+          "parallel branches",
+          "concurrent changes",
+          "multiple environments"
+        ],
+        "intentPatterns": [
+          "\\b(git worktree|worktrees?)\\b",
+          "\\b(isolated|separate|independent)\\b.*(workspace|directory|checkout|clone)",
+          "\\b(work on|make changes to)\\b.*(multiple|two|several)\\b.*(branch|environment|env)\\b.*(at once|simultaneously|in parallel)",
+          "\\b(control repo|infra repo)\\b.*(multiple|parallel|concurrent)\\b"
+        ]
+      }
+    },
+    "sre-runbook": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Generate structured SRE runbooks and playbooks for operational procedures",
+      "promptTriggers": {
+        "keywords": [
+          "runbook",
+          "playbook",
+          "procedure",
+          "step-by-step guide",
+          "operational procedure",
+          "on-call guide",
+          "troubleshooting guide",
+          "ops guide"
+        ],
+        "intentPatterns": [
+          "\\b(create|write|generate|draft)\\b.*(runbook|playbook|procedure|ops guide|on.call guide)",
+          "\\b(runbook|playbook)\\b.*(for|to handle|to resolve|when)\\b",
+          "\\b(on.?call|operational)\\b.*(procedure|guide|runbook|playbook|documentation)",
+          "\\b(document|write up)\\b.*(how to|steps to|procedure for|process for)\\b.*(handle|resolve|fix|troubleshoot)"
+        ]
+      }
+    },
+    "kubernetes-specialist": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Deep Kubernetes expertise — pods, deployments, helm, GitOps, CRDs, networking",
+      "promptTriggers": {
+        "keywords": [
+          "kubernetes",
+          "k8s",
+          "kubectl",
+          "pod",
+          "deployment",
+          "service",
+          "namespace",
+          "helm",
+          "ingress",
+          "crd",
+          "argocd",
+          "flux",
+          "kustomize",
+          "daemonset",
+          "statefulset",
+          "configmap",
+          "secret",
+          "pvc",
+          "hpa",
+          "vpa"
+        ],
+        "intentPatterns": [
+          "\\b(kubernetes|k8s|kubectl|kube)\\b",
+          "\\b(helm chart|helm release|helmfile|kustomize)\\b",
+          "\\b(argocd|flux cd|gitops)\\b.*(deploy|sync|reconcile|application)",
+          "\\b(pod|deployment|statefulset|daemonset|replicaset)\\b.*(not|is|are)\\b.*(running|ready|healthy|starting|crashing)"
+        ]
+      }
+    },
+    "terraform-engineer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Infrastructure as Code with Terraform — modules, state, providers, plan/apply workflow",
+      "promptTriggers": {
+        "keywords": [
+          "terraform",
+          "tf file",
+          "tfvars",
+          "plan apply",
+          "infrastructure as code",
+          "iac",
+          "module",
+          "provider",
+          "state",
+          "hcl",
+          "terragrunt",
+          "opentofu"
+        ],
+        "intentPatterns": [
+          "\\b(terraform|opentofu|tofu)\\b",
+          "\\b(tf|hcl)\\b.*(file|module|variable|resource|output|provider)",
+          "\\b(terraform)\\b.*(plan|apply|destroy|import|state|init|validate)",
+          "\\b(infrastructure as code|IaC)\\b.*(terraform|tofu|opentofu)"
+        ]
+      }
+    },
+    "cloud-architect": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Cloud architecture design for AWS, GCP, and Azure — well-architected, landing zones, migrations",
+      "promptTriggers": {
+        "keywords": [
+          "aws",
+          "gcp",
+          "azure",
+          "cloud architecture",
+          "landing zone",
+          "well-architected",
+          "cloud migration",
+          "multi-cloud",
+          "vpc",
+          "eks",
+          "gke",
+          "aks",
+          "s3",
+          "iam",
+          "rds",
+          "cloud native"
+        ],
+        "intentPatterns": [
+          "\\b(aws|amazon web services|gcp|google cloud|azure|microsoft azure)\\b",
+          "\\b(cloud|multi.?cloud)\\b.*(architecture|design|migration|strategy|landing zone)",
+          "\\b(well.architected|cloud native|cloud.first)\\b",
+          "\\b(vpc|subnet|route table|security group|iam role|iam policy)\\b"
+        ]
+      }
+    },
+    "devops-engineer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "CI/CD pipelines, containers, GitOps, build and deployment automation",
+      "promptTriggers": {
+        "keywords": [
+          "ci/cd",
+          "pipeline",
+          "docker",
+          "container",
+          "gitops",
+          "build",
+          "deploy pipeline",
+          "jenkins",
+          "github actions",
+          "gitlab ci",
+          "dockerfile",
+          "image build",
+          "container registry"
+        ],
+        "intentPatterns": [
+          "\\b(CI/?CD|pipeline|gitlab.ci|github.actions|jenkins)\\b",
+          "\\b(docker|dockerfile|container image)\\b.*(build|push|pull|run|compose)",
+          "\\b(build|deploy|release)\\b.*(pipeline|automation|workflow|process)",
+          "\\b(gitops|argocd|flux)\\b.*(workflow|pipeline|deploy|sync)"
+        ]
+      }
+    },
+    "monitoring-expert": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Observability stack design — monitoring, alerting, logging, tracing, dashboards",
+      "promptTriggers": {
+        "keywords": [
+          "monitoring",
+          "alerting",
+          "prometheus",
+          "grafana",
+          "logging",
+          "tracing",
+          "observability setup",
+          "dashboard",
+          "loki",
+          "tempo",
+          "jaeger",
+          "elk",
+          "splunk",
+          "victoria metrics"
+        ],
+        "intentPatterns": [
+          "\\b(set up|design|build|implement)\\b.*(monitoring|observability|alerting)\\b.*(stack|system|platform)",
+          "\\b(prometheus|grafana|loki|tempo|jaeger|elasticsearch|splunk)\\b.*(configure|setup|install|deploy)",
+          "\\b(logging|log aggregation|log pipeline)\\b.*(setup|configure|implement|design)",
+          "\\b(distributed tracing|trace|span)\\b.*(opentelemetry|jaeger|zipkin|tempo)"
+        ]
+      }
+    },
+    "sre-engineer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "SRE fundamentals — SLIs, SLOs, SLAs, error budgets, toil reduction, on-call",
+      "promptTriggers": {
+        "keywords": [
+          "sli",
+          "slo",
+          "sla",
+          "error budget",
+          "reliability",
+          "toil",
+          "on-call",
+          "service level",
+          "availability",
+          "nines",
+          "99.9",
+          "99.99",
+          "burn rate"
+        ],
+        "intentPatterns": [
+          "\\b(SLI|SLO|SLA|error budget|burn rate)\\b",
+          "\\b(service level)\\b.*(indicator|objective|agreement)",
+          "\\b(reliability|availability|uptime)\\b.*(target|goal|objective|calculation|budget)",
+          "\\b(on.?call|pagerduty|alerting|incident)\\b.*(rotation|schedule|escalation|policy)"
+        ]
+      }
+    },
+    "architecture-designer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "System architecture design, ADRs, design reviews, and scalability planning",
+      "promptTriggers": {
+        "keywords": [
+          "architecture",
+          "design system",
+          "adr",
+          "architectural decision",
+          "design review",
+          "scalability",
+          "system design",
+          "high level design",
+          "hld",
+          "design document"
+        ],
+        "intentPatterns": [
+          "\\b(design|architect|plan)\\b.*(system|service|platform|solution|infrastructure)",
+          "\\b(ADR|architectural decision record)\\b",
+          "\\b(scalab|scale|capacity)\\b.*(design|architecture|plan|consideration)",
+          "\\b(high.level|system)\\b.*(design|architecture|overview|diagram)"
+        ]
+      }
+    },
+    "microservices-architect": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Distributed systems and microservices — service mesh, event sourcing, saga pattern, DDD",
+      "promptTriggers": {
+        "keywords": [
+          "microservices",
+          "service mesh",
+          "istio",
+          "distributed system",
+          "event sourcing",
+          "saga",
+          "ddd",
+          "domain driven",
+          "linkerd",
+          "envoy",
+          "api gateway",
+          "message queue",
+          "kafka"
+        ],
+        "intentPatterns": [
+          "\\b(microservice|service.oriented|distributed system)\\b",
+          "\\b(service mesh|istio|linkerd|envoy)\\b.*(configure|install|setup|policy)",
+          "\\b(event sourcing|saga pattern|CQRS|domain.driven design|DDD)\\b",
+          "\\b(kafka|rabbitmq|nats|pubsub)\\b.*(message|event|stream|queue|topic)"
+        ]
+      }
+    },
+    "chaos-engineer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Resilience testing through controlled failure injection and game days",
+      "promptTriggers": {
+        "keywords": [
+          "chaos",
+          "failure injection",
+          "game day",
+          "resilience",
+          "fault tolerance",
+          "blast radius",
+          "chaos monkey",
+          "chaos engineering",
+          "litmus",
+          "gremlin",
+          "fault injection"
+        ],
+        "intentPatterns": [
+          "\\b(chaos engineering|chaos experiment|chaos test)\\b",
+          "\\b(inject|simulate|test)\\b.*(failure|fault|latency|partition|outage)",
+          "\\b(game day|gameday|fire drill)\\b",
+          "\\b(resilience|fault tolerance|blast radius)\\b.*(test|validate|measure|improve)"
+        ]
+      }
+    },
+    "toil-analysis": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Identify and reduce operational toil through automation and process improvement",
+      "promptTriggers": {
+        "keywords": [
+          "toil",
+          "repetitive work",
+          "manual work",
+          "automation opportunity",
+          "capacity planning",
+          "headcount",
+          "automate this",
+          "tired of doing",
+          "keep having to",
+          "every time"
+        ],
+        "intentPatterns": [
+          "\\b(toil|repetitive|manual|tedious)\\b.*(task|work|process|operation)",
+          "\\b(automate|automation)\\b.*(this|it|process|task|workflow|repetitive)",
+          "\\b(keep|always|every time)\\b.*(having to|need to|do|run|execute)\\b.*(manually|by hand)",
+          "\\b(capacity planning|headcount|scale|growth)\\b.*(model|projection|plan|estimation)"
+        ]
+      }
+    },
+    "progressive-delivery": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Canary releases, blue-green deployments, traffic splitting, and feature flags",
+      "promptTriggers": {
+        "keywords": [
+          "canary",
+          "blue-green",
+          "traffic splitting",
+          "shadow traffic",
+          "staged rollout",
+          "feature flag",
+          "progressive delivery",
+          "rollout strategy",
+          "dark launch",
+          "ring deployment"
+        ],
+        "intentPatterns": [
+          "\\b(canary|blue.green|a/b|ring)\\b.*(deploy|release|rollout|strategy)",
+          "\\b(traffic|weight|percentage)\\b.*(split|route|shift|control)\\b",
+          "\\b(feature flag|feature toggle|dark launch)\\b",
+          "\\b(staged|gradual|progressive|phased)\\b.*(rollout|release|deploy|delivery)"
+        ]
+      }
+    },
+    "postgres-pro": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "PostgreSQL operations — query optimization, explain analyze, replication, vacuum",
+      "promptTriggers": {
+        "keywords": [
+          "postgresql",
+          "postgres",
+          "pg",
+          "psql",
+          "query optimization",
+          "explain analyze",
+          "replication",
+          "vacuum",
+          "pg_stat",
+          "bloat",
+          "autovacuum",
+          "pg_dump"
+        ],
+        "intentPatterns": [
+          "\\b(postgresql|postgres|psql|pg_)\\b",
+          "\\b(explain|explain analyze|query plan)\\b.*(slow|query|optimization|performance)",
+          "\\b(replication|replica|standby|streaming replication|logical replication)\\b.*(postgres|pg|postgresql)",
+          "\\b(vacuum|autovacuum|bloat|dead tuples|table bloat)\\b"
+        ]
+      }
+    },
+    "sql-pro": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "SQL optimization — query tuning, indexes, window functions, CTEs, schema design",
+      "promptTriggers": {
+        "keywords": [
+          "sql",
+          "query",
+          "join",
+          "index",
+          "database schema",
+          "window function",
+          "cte",
+          "slow query",
+          "query performance",
+          "execution plan",
+          "optimize query"
+        ],
+        "intentPatterns": [
+          "\\b(SQL|query)\\b.*(slow|optimize|performance|tuning|plan)",
+          "\\b(index|composite index|covering index|partial index)\\b.*(create|add|missing|needed)",
+          "\\b(window function|CTE|common table expression|subquery|lateral join)\\b",
+          "\\b(schema|table design|normalization|denormalization)\\b"
+        ]
+      }
+    },
+    "golang-pro": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Go development — goroutines, channels, gRPC, modules, testing, performance",
+      "promptTriggers": {
+        "keywords": [
+          "golang",
+          "go lang",
+          "goroutine",
+          "channel",
+          "grpc",
+          "go module",
+          "go test",
+          "go build",
+          "go routine",
+          "sync.waitgroup",
+          "context cancellation"
+        ],
+        "intentPatterns": [
+          "\\b(golang|go lang|go programming)\\b",
+          "\\b(goroutine|channel|select|sync\\.|context)\\b.*(go|golang)",
+          "\\b(gRPC|protobuf|proto)\\b.*(go|golang|service|client)",
+          "\\b(go module|go.mod|go.sum|go test|go build|go run)\\b"
+        ]
+      }
+    },
+    "python-pro": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Python development — pytest, async/await, type hints, FastAPI, Django, Pydantic",
+      "promptTriggers": {
+        "keywords": [
+          "python",
+          "pytest",
+          "async await",
+          "type hints",
+          "pydantic",
+          "fastapi",
+          "django",
+          "pip",
+          "venv",
+          "mypy",
+          "uv"
+        ],
+        "intentPatterns": [
+          "\\b(python|pytest|pydantic|fastapi|django|flask)\\b",
+          "\\b(async|await|asyncio|coroutine|event loop)\\b.*(python)",
+          "\\b(type hints|mypy|type checking|annotation)\\b.*(python)",
+          "\\b(pip|uv|poetry|venv|virtualenv|conda)\\b.*(install|manage|package)"
+        ]
+      }
+    },
+    "rust-engineer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Rust systems programming — ownership, lifetimes, tokio, async, cargo, error handling",
+      "promptTriggers": {
+        "keywords": [
+          "rust",
+          "cargo",
+          "ownership",
+          "lifetimes",
+          "tokio",
+          "async rust",
+          "systems programming",
+          "borrow checker",
+          "trait",
+          "crate"
+        ],
+        "intentPatterns": [
+          "\\b(rust|cargo|rustc|rustup)\\b",
+          "\\b(ownership|borrow|lifetime|borrow checker)\\b.*(rust|error|issue)",
+          "\\b(tokio|async.std|async)\\b.*(rust|await|runtime|task)",
+          "\\b(trait|impl|struct|enum|match|pattern matching)\\b.*(rust)"
+        ]
+      }
+    },
+    "secure-code-guardian": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Application security — OWASP, injection prevention, secrets management, auth patterns",
+      "promptTriggers": {
+        "keywords": [
+          "authentication",
+          "authorization",
+          "owasp",
+          "injection",
+          "xss",
+          "secrets",
+          "credentials",
+          "jwt",
+          "oauth",
+          "rbac",
+          "zero trust",
+          "least privilege"
+        ],
+        "intentPatterns": [
+          "\\b(authentication|authorization|authn|authz)\\b",
+          "\\b(OWASP|injection|XSS|CSRF|SQL injection|command injection)\\b",
+          "\\b(JWT|OAuth|OIDC|SAML|SSO|mTLS)\\b.*(implement|secure|configure|validate)",
+          "\\b(secrets|credentials|api key|password)\\b.*(manage|store|rotate|secure|vault)"
+        ]
+      }
+    },
+    "security-reviewer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Security audits, vulnerability assessment, CVE analysis, SAST, DevSecOps",
+      "promptTriggers": {
+        "keywords": [
+          "security audit",
+          "penetration test",
+          "cve",
+          "vulnerability",
+          "sast",
+          "devsecops",
+          "security review",
+          "threat model",
+          "pentest",
+          "security scan"
+        ],
+        "intentPatterns": [
+          "\\b(security audit|security review|security assessment)\\b",
+          "\\b(CVE|vulnerability|exploit|patch)\\b.*(found|detected|fix|remediate|update)",
+          "\\b(SAST|DAST|pentest|penetration test|threat model)\\b",
+          "\\b(DevSecOps|shift.left|security scanning|image scan|dependency scan)\\b"
+        ]
+      }
+    },
+    "code-reviewer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Code review — PR reviews, quality checks, anti-pattern detection, best practices",
+      "promptTriggers": {
+        "keywords": [
+          "code review",
+          "pr review",
+          "pull request",
+          "review code",
+          "quality check",
+          "review this",
+          "look at this code",
+          "check this code"
+        ],
+        "intentPatterns": [
+          "\\b(code review|PR review|pull request review|merge request review)\\b",
+          "\\b(review|check|look at|examine)\\b.*(this code|this file|this function|this class|this module)",
+          "\\b(quality|best practices|anti.pattern|code smell|improvement)\\b.*(code|implementation)",
+          "\\b(is this|what do you think of|any issues with)\\b.*(code|implementation|approach)"
+        ]
+      }
+    },
+    "code-documenter": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "API documentation, docstrings, Swagger/OpenAPI, README generation",
+      "promptTriggers": {
+        "keywords": [
+          "documentation",
+          "docstring",
+          "api docs",
+          "swagger",
+          "openapi",
+          "readme",
+          "document this",
+          "add docs",
+          "write docs",
+          "generate docs"
+        ],
+        "intentPatterns": [
+          "\\b(write|create|generate|add|update)\\b.*(documentation|docs|docstring|README|API docs)",
+          "\\b(swagger|openapi|api documentation)\\b.*(generate|create|write|update)",
+          "\\b(document|annotate)\\b.*(this function|this class|this API|this endpoint|this module)",
+          "\\b(README|changelog|contributing guide|api reference)\\b.*(write|create|generate|update)"
+        ]
+      }
+    },
+    "test-master": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Testing strategy — unit tests, integration tests, end-to-end, coverage, TDD",
+      "promptTriggers": {
+        "keywords": [
+          "testing",
+          "unit test",
+          "integration test",
+          "end-to-end",
+          "test coverage",
+          "tdd",
+          "write tests",
+          "add tests",
+          "test this",
+          "e2e test"
+        ],
+        "intentPatterns": [
+          "\\b(write|add|create|generate)\\b.*(test|tests|test suite|test coverage)",
+          "\\b(unit test|integration test|e2e test|end.to.end test|acceptance test)\\b",
+          "\\b(test coverage|code coverage|coverage report)\\b",
+          "\\b(TDD|test.driven development|red.green.refactor)\\b"
+        ]
+      }
+    },
+    "pve-admin": {
+      "type": "utility",
+      "enforcement": "suggest",
+      "priority": "low",
+      "description": "Proxmox VE and PBS administration — VMs, containers, ZFS, clustering",
+      "promptTriggers": {
+        "keywords": [
+          "proxmox",
+          "pve",
+          "pbs",
+          "vm",
+          "virtual machine",
+          "container proxmox",
+          "zfs",
+          "cluster proxmox",
+          "qemu",
+          "lxc",
+          "pct",
+          "qm"
+        ],
+        "intentPatterns": [
+          "\\b(proxmox|PVE|PBS|Proxmox VE|Proxmox Backup)\\b",
+          "\\b(qm|pct|pvesh|pvecm)\\b.*(create|start|stop|migrate|snapshot|backup)",
+          "\\b(ZFS|zpool|zfs dataset|zfs snapshot)\\b.*(proxmox|pve|backup|storage)",
+          "\\b(VM|virtual machine|LXC container)\\b.*(proxmox|pve|migrate|snapshot|template)"
+        ]
+      }
+    },
+    "puppet-code-analyzer": {
+      "type": "utility",
+      "enforcement": "suggest",
+      "priority": "low",
+      "description": "Puppet code quality analysis — manifests, Hiera, modules, style, common issues",
+      "promptTriggers": {
+        "keywords": [
+          "puppet",
+          "manifests",
+          "hiera",
+          "puppet module",
+          "puppet code",
+          "r10k",
+          "puppetfile",
+          "facter",
+          "catalog"
+        ],
+        "intentPatterns": [
+          "\\b(puppet|puppetserver|puppet agent|puppet apply)\\b",
+          "\\b(hiera|hiera.yaml|eyaml|puppet data)\\b",
+          "\\b(puppet module|puppetfile|r10k|g10k|control.repo)\\b",
+          "\\b(manifest|class|defined type|resource|catalog|fact)\\b.*(puppet)"
+        ]
+      }
+    },
+    "gitlab-ecr-pipeline": {
+      "type": "utility",
+      "enforcement": "suggest",
+      "priority": "low",
+      "description": "GitLab CI/CD pipelines for building and pushing container images to AWS ECR",
+      "promptTriggers": {
+        "keywords": [
+          "ecr",
+          "elastic container registry",
+          "gitlab pipeline",
+          "container registry",
+          "image push",
+          "push image",
+          "aws ecr",
+          "docker push ecr",
+          "ecr login"
+        ],
+        "intentPatterns": [
+          "\\b(ECR|elastic container registry)\\b",
+          "\\b(gitlab|gitlab.ci)\\b.*(push|build|deploy)\\b.*(ecr|container|image)",
+          "\\b(docker|container image)\\b.*(push|build.and.push)\\b.*(ECR|registry|aws)",
+          "\\b(aws ecr|ecr login|ecr repository)\\b.*(create|push|pull|authenticate)"
+        ]
+      }
+    },
+    "playground-tutorial": {
+      "type": "utility",
+      "enforcement": "suggest",
+      "priority": "low",
+      "description": "Interactive tutorial for learning srepowers skills and workflows",
+      "promptTriggers": {
+        "keywords": [
+          "tutorial",
+          "learn",
+          "practice",
+          "getting started",
+          "how to use srepowers",
+          "new to srepowers",
+          "introduce me",
+          "show me how",
+          "walk me through srepowers"
+        ],
+        "intentPatterns": [
+          "\\b(tutorial|learn|practice|getting started|introduction)\\b.*(srepowers|skills|plugin)",
+          "\\b(how|where)\\b.*(do I|should I|can I)\\b.*(start|begin|use|learn)\\b.*(srepowers|skill)",
+          "\\b(new to|unfamiliar with|just installed)\\b.*(srepowers|this plugin|these skills)",
+          "\\b(show|teach|explain|demonstrate)\\b.*(srepowers|how to use|what skills|what commands)"
+        ]
+      }
+    },
+    "environment-health-check": {
+      "type": "utility",
+      "enforcement": "suggest",
+      "priority": "low",
+      "description": "Verify development environment tools, prerequisites, and setup are correctly installed",
+      "promptTriggers": {
+        "keywords": [
+          "health check",
+          "verify tools",
+          "check installed",
+          "prerequisites",
+          "setup check",
+          "environment check",
+          "check my env",
+          "is everything installed",
+          "tool versions"
+        ],
+        "intentPatterns": [
+          "\\b(health check|healthcheck)\\b.*(environment|env|tools|setup)",
+          "\\b(verify|check|validate)\\b.*(tools|installed|setup|environment|prerequisites|dependencies)",
+          "\\b(is|are)\\b.*(everything|all tools|prerequisites)\\b.*(installed|ready|set up|configured)",
+          "\\b(tool|binary|command)\\b.*(version|installed|available|missing|not found)"
+        ]
+      }
+    }
+  }
+}
