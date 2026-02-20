@@ -391,6 +391,61 @@ kubectl get pod -n production -l app=api-server
 
 **Focus:** Module development, state management, provider configuration, multi-environment workflows.
 
+### terragrunt-expert
+
+**Use when:** Orchestrating Terraform/OpenTofu modules with Terragrunt - DRY configurations, stack architecture, dependency management.
+
+**Core principle:** Eliminate duplication across environments with Terragrunt's include blocks, dependency management, and remote state automation.
+
+**Features:**
+- DRY configurations across environments
+- Stack architecture (implicit/explicit)
+- Dependency graph management with mock outputs
+- Remote state automation with backend configuration
+- Multi-environment deployment workflows
+
+### docker-expert
+
+**Use when:** Building, optimizing, or securing Docker container images and orchestration for production environments.
+
+**Core principle:** Build lean, secure, and maintainable container images with multi-stage builds, security hardening, and supply chain security.
+
+**Features:**
+- Multi-stage Dockerfile patterns
+- Image size optimization and layer caching
+- Security hardening (non-root, read-only filesystem, capabilities)
+- Supply chain security (SBOM, cosign, SLSA)
+- Docker Compose for orchestration
+- Vulnerability scanning and remediation
+
+### network-engineer
+
+**Use when:** Designing, optimizing, or troubleshooting cloud and hybrid network infrastructures.
+
+**Core principle:** Design networks that are scalable, secure, and highly available with proper segmentation and zero-trust principles.
+
+**Features:**
+- VPC architecture (single/multi-region)
+- Load balancing strategies (Layer 4/7, global, internal)
+- DNS management and failover routing
+- VPN, Direct Connect, ExpressRoute, Cloud Interconnect
+- Zero-trust network architecture
+- Network segmentation and security groups
+
+### platform-engineer
+
+**Use when:** Building or improving internal developer platforms (IDPs), designing self-service infrastructure, or optimizing developer workflows.
+
+**Core principle:** Treat the platform as a product with developers as customers - reduce cognitive load through self-service and golden paths.
+
+**Features:**
+- Internal Developer Platforms (IDPs)
+- Self-service infrastructure capabilities
+- Golden path templates for services
+- Backstage developer portal implementation
+- Service catalogs and software templates
+- Platform metrics and adoption tracking
+
 ### test-master
 
 **Use when:** Writing tests, creating test strategies, or building automation frameworks.
@@ -446,8 +501,12 @@ Quick invoke skills using `/command` syntax:
 **DevOps & Infrastructure:**
 - `/devops-engineer` - CI/CD pipelines, containers, infrastructure as code
 - `/terraform-engineer` - Infrastructure as code with Terraform
+- `/terragrunt-expert` - Terragrunt orchestration for Terraform/OpenTofu
+- `/docker-expert` - Docker containerization and optimization
+- `/network-engineer` - Network infrastructure and architecture
 - `/kubernetes-specialist` - Kubernetes operations depth
 - `/chaos-engineer` - Resilience testing and failure injection
+- `/platform-engineer` - Internal Developer Platforms (IDPs)
 
 **Monitoring & Reliability:**
 - `/monitoring-expert` - Observability stack setup and management

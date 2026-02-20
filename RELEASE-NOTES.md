@@ -1,5 +1,58 @@
 # Release Notes
 
+## [3.6.0] - 2026-02-20
+
+### Infrastructure Skills Expansion
+
+Adds 4 new infrastructure skills covering container orchestration, networking, Terragrunt, and platform engineering.
+
+#### New Skills (4)
+
+**Container & Orchestration:**
+- **docker-expert** - Docker containerization and optimization
+  - Multi-stage builds, layer optimization, .dockerignore patterns
+  - Security hardening (non-root, read-only filesystem, capability dropping)
+  - Supply chain security (SBOM generation, cosign signing, SLSA provenance)
+  - Docker Compose for local development and production
+  - Vulnerability scanning and remediation
+
+**Networking:**
+- **network-engineer** - Cloud and hybrid network infrastructure
+  - VPC architecture (AWS, Azure, GCP)
+  - Load balancing strategies (Layer 4/7, global, internal)
+  - DNS management, zone design, failover routing
+  - VPN, Direct Connect, ExpressRoute, Cloud Interconnect
+  - Zero-trust network architecture
+  - Network segmentation and security groups
+
+**Infrastructure Orchestration:**
+- **terragrunt-expert** - Terragrunt orchestration for Terraform/OpenTofu
+  - DRY configurations across environments
+  - Stack architecture (implicit directory-based, explicit blueprint-based)
+  - Dependency management with mock outputs
+  - Remote state automation
+  - Multi-environment deployment workflows
+
+**Platform Engineering:**
+- **platform-engineer** - Internal Developer Platforms (IDPs)
+  - Self-service infrastructure design
+  - Golden path templates for services
+  - Backstage developer portal implementation
+  - Service catalogs and software templates
+  - Platform metrics and adoption tracking
+  - Developer experience optimization
+
+#### Updated Components
+
+- `plugin.json`: version 3.6.0, description updated to 43 skills, keywords updated (added terragrunt, docker, networking, platform-engineering, idp, backstage, vpc, load-balancing, dns)
+
+#### Metrics
+
+- Total skills: 39 → 43
+- Total commands: 38 → 43
+
+---
+
 ## [3.5.0] - 2026-02-19
 
 ### Skill Auto-Activation
@@ -573,6 +626,7 @@ Adapted from the [superpowers](https://github.com/obra/superpowers) plugin by Je
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 3.6.0 | 2026-02-20 | 4 new infrastructure skills: docker-expert, network-engineer, terragrunt-expert, platform-engineer |
 | 3.5.0 | 2026-02-19 | Skill auto-activation via UserPromptSubmit hook; removed 6 non-SRE skills (delegated to superpowers); 39 skills remaining |
 | 3.4.0 | 2026-02-18 | Gap fixes: 2 new skills (progressive-delivery, toil-analysis), 3 extended skills (TDO async, observability multi-stack, incident-commander distributed) |
 | 3.3.0 | 2026-02-17 | Developer tools: playground-tutorial, environment-health-check, safety-validator, skill generator, evaluation framework |
