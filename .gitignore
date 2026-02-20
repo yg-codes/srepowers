@@ -9,6 +9,9 @@ CLAUDE.md
 .claude/shell-snapshots/
 .claude/transcripts/
 
+# Serena MCP
+.serena/
+
 # OS
 .DS_Store
 .DS_Store?
