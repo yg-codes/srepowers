@@ -1,5 +1,30 @@
 # Release Notes
 
+## [3.7.1] - 2026-02-25
+
+### Bug Fix — Skill Tool Compatibility
+
+Fixed an issue where 12 command files had `disable-model-invocation: true` in their frontmatter, preventing the Skill tool from invoking them when recommended by the UserPromptSubmit hook.
+
+#### Fixed Commands (12)
+
+- `/systematic-troubleshooting`
+- `/incident-commander`
+- `/post-mortem-writer`
+- `/safety-validator`
+- `/observability-integration`
+- `/executing-operation-plans`
+- `/finishing-operation-branch`
+- `/using-git-worktrees-for-infra`
+- `/progressive-delivery`
+- `/toil-analysis`
+- `/environment-health-check`
+- `/playground-tutorial`
+
+These skills can now be properly invoked via the Skill tool when auto-suggested by the hook.
+
+---
+
 ## [3.7.0] - 2026-02-24
 
 ### Skill Consolidation, Naming Standardization, and Cost Optimization
@@ -682,6 +707,7 @@ Adapted from the [superpowers](https://github.com/obra/superpowers) plugin by Je
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 3.7.1 | 2026-02-25 | Bug fix: removed disable-model-invocation from 12 commands for Skill tool compatibility |
 | 3.7.0 | 2026-02-24 | Skill consolidation (sql-pro → postgresql-engineer), naming standardization (-engineer suffix), cost-optimizer skill |
 | 3.6.0 | 2026-02-20 | 4 new infrastructure skills: docker-expert, network-engineer, terragrunt-expert, platform-engineer |
 | 3.5.0 | 2026-02-19 | Skill auto-activation via UserPromptSubmit hook; removed 6 non-SRE skills (delegated to superpowers); 39 skills remaining |
