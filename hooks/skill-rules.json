@@ -470,11 +470,11 @@
         ]
       }
     },
-    "monitoring-expert": {
+    "observability-engineer": {
       "type": "domain",
       "enforcement": "suggest",
       "priority": "medium",
-      "description": "Observability stack design — monitoring, alerting, logging, tracing, dashboards",
+      "description": "Observability stack design — monitoring, alerting, logging, tracing, dashboards, OpenTelemetry",
       "promptTriggers": {
         "keywords": [
           "monitoring",
@@ -490,13 +490,16 @@
           "jaeger",
           "elk",
           "splunk",
-          "victoria metrics"
+          "victoria metrics",
+          "opentelemetry",
+          "otel"
         ],
         "intentPatterns": [
           "\\b(set up|design|build|implement)\\b.*(monitoring|observability|alerting)\\b.*(stack|system|platform)",
           "\\b(prometheus|grafana|loki|tempo|jaeger|elasticsearch|splunk)\\b.*(configure|setup|install|deploy)",
           "\\b(logging|log aggregation|log pipeline)\\b.*(setup|configure|implement|design)",
-          "\\b(distributed tracing|trace|span)\\b.*(opentelemetry|jaeger|zipkin|tempo)"
+          "\\b(distributed tracing|trace|span)\\b.*(opentelemetry|jaeger|zipkin|tempo)",
+          "\\b(opentelemetry|otel)\\b.*(collector|instrumentation|sdk|agent)"
         ]
       }
     },
@@ -663,11 +666,42 @@
         ]
       }
     },
-    "postgres-pro": {
+    "cost-optimizer": {
       "type": "domain",
       "enforcement": "suggest",
       "priority": "medium",
-      "description": "PostgreSQL operations — query optimization, explain analyze, replication, vacuum",
+      "description": "Cloud cost optimization — billing analysis, right-sizing, reserved capacity, FinOps",
+      "promptTriggers": {
+        "keywords": [
+          "cost",
+          "billing",
+          "aws cost",
+          "gcp cost",
+          "azure cost",
+          "cloud cost",
+          "right-size",
+          "reserved instance",
+          "savings plan",
+          "spot instance",
+          "finops",
+          "cost allocation",
+          "reduce spend",
+          "optimize cost",
+          "cost dashboard"
+        ],
+        "intentPatterns": [
+          "\\b(cost|billing|spend)\\b.*(optimization|analysis|reduce|save|lower|cut)",
+          "\\b(aws|gcp|azure|cloud)\\b.*(cost|billing|pricing|spend|budget)",
+          "\\b(right.?size|reserved instance|savings plan|spot instance)\\b",
+          "\\b(finops|cost allocation|chargeback|showback|cost center)\\b"
+        ]
+      }
+    },
+    "postgresql-engineer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "PostgreSQL operations — query optimization, explain analyze, replication, vacuum, complex SQL patterns",
       "promptTriggers": {
         "keywords": [
           "postgresql",
@@ -681,40 +715,19 @@
           "pg_stat",
           "bloat",
           "autovacuum",
-          "pg_dump"
+          "pg_dump",
+          "sql query",
+          "window function",
+          "cte",
+          "common table expression",
+          "sql optimization"
         ],
         "intentPatterns": [
           "\\b(postgresql|postgres|psql|pg_)\\b",
           "\\b(explain|explain analyze|query plan)\\b.*(slow|query|optimization|performance)",
           "\\b(replication|replica|standby|streaming replication|logical replication)\\b.*(postgres|pg|postgresql)",
-          "\\b(vacuum|autovacuum|bloat|dead tuples|table bloat)\\b"
-        ]
-      }
-    },
-    "sql-pro": {
-      "type": "domain",
-      "enforcement": "suggest",
-      "priority": "medium",
-      "description": "SQL optimization — query tuning, indexes, window functions, CTEs, schema design",
-      "promptTriggers": {
-        "keywords": [
-          "sql",
-          "query",
-          "join",
-          "index",
-          "database schema",
-          "window function",
-          "cte",
-          "slow query",
-          "query performance",
-          "execution plan",
-          "optimize query"
-        ],
-        "intentPatterns": [
-          "\\b(SQL|query)\\b.*(slow|optimize|performance|tuning|plan)",
-          "\\b(index|composite index|covering index|partial index)\\b.*(create|add|missing|needed)",
-          "\\b(window function|CTE|common table expression|subquery|lateral join)\\b",
-          "\\b(schema|table design|normalization|denormalization)\\b"
+          "\\b(vacuum|autovacuum|bloat|dead tuples|table bloat)\\b",
+          "\\b(SQL|query)\\b.*(slow|optimize|performance|tuning|plan|window|cte|recursive)"
         ]
       }
     },

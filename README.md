@@ -6,6 +6,37 @@ SRE infrastructure skills for Claude Code: Test-Driven Operations and Subagent-D
 
 SREPowers adapts proven software development workflows (TDD, subagent-driven development) for infrastructure operations. These skills help you execute infrastructure changes systematically with verification-first discipline.
 
+## Skill Workflow Diagram
+
+```mermaid
+graph TD
+    Start([Need to perform<br/>infrastructure operation]) --> Decision{Have a plan?}
+    Decision -->|No| Brainstorm[brainstorming-operations]
+    Decision -->|Yes, detailed| WritePlan[writing-operation-plans]
+    Decision -->|Yes, ready to execute| ExecMode{Execution mode?}
+
+    Brainstorm --> WritePlan
+    WritePlan --> ExecMode
+
+    ExecMode -->|Same session,<br/>continuous| Subagent[subagent-driven-operation]
+    ExecMode -->|Separate session,<br/>checkpoints| Execute[executing-operation-plans]
+
+    Subagent --> TDO[test-driven-operation]
+    Execute --> TDO
+
+    TDO --> More{More tasks?}
+    More -->|Yes| TDO
+    More -->|No| Finish[finishing-operation-branch]
+
+    Finish --> End([Complete])
+
+    style Start fill:#e1f5e1
+    style End fill:#e1f5e1
+    style TDO fill:#fff4e1
+    style Subagent fill:#e1f0ff
+    style Execute fill:#e1f0ff
+```
+
 ## SRE Principles
 
 All skills in SREPowers are bound by five core principles:
@@ -47,6 +78,36 @@ git clone https://github.com/yg-codes/srepowers.git ~/.claude/plugins/srepowers
 # Or copy skills directly
 cp -r srepowers/skills/* ~/.claude/skills/
 ```
+
+## Skill Selection Guide
+
+| Situation | Recommended Skill | Alternative |
+|-----------|-------------------|-------------|
+| **Planning phase** | | |
+| Need to design an infrastructure operation | `brainstorming-operations` | - |
+| Have a design, need detailed steps | `writing-operation-plans` | - |
+| **Execution phase** | | |
+| Ready to execute, want continuous flow | `subagent-driven-operation` | - |
+| Long operation, need checkpoints | `executing-operation-plans` | - |
+| Single operation with verification | `test-driven-operation` | - |
+| **Kubernetes** | | |
+| Deploy workloads, configure cluster | `kubernetes-specialist` | - |
+| Build container images | `container-engineer` | - |
+| Progressive deployment | `progressive-delivery` | - |
+| **Infrastructure as Code** | | |
+| Write Terraform modules | `terraform-engineer` | - |
+| Orchestrate with Terragrunt | `terragrunt-expert` | - |
+| **Databases** | | |
+| PostgreSQL operations | `postgresql-engineer` | - |
+| **Incident Response** | | |
+| Production incident | `incident-commander` | `systematic-troubleshooting` |
+| Write post-mortem | `post-mortem-writer` | - |
+| **Cost & Optimization** | | |
+| Analyze cloud costs | `cost-optimizer` | - |
+| Reduce operational toil | `toil-analysis` | - |
+| **Observability** | | |
+| Set up monitoring | `observability-engineer` | - |
+| Verify with metrics | `observability-integration` | - |
 
 ## Available Skills
 
@@ -331,17 +392,17 @@ kubectl get pod -n production -l app=api-server
 
 **Focus:** Service boundaries, DDD, saga patterns, event sourcing, service mesh, distributed tracing.
 
-### monitoring-expert
+### observability-engineer
 
-**Use when:** Setting up monitoring systems, logging, metrics, tracing, or alerting.
+**Use when:** Setting up observability systems including monitoring, logging, metrics, tracing, or alerting.
 
-**Focus:** Dashboards, Prometheus/Grafana, load testing, profiling, capacity planning.
+**Focus:** Dashboards, Prometheus/Grafana, OpenTelemetry, load testing, profiling, capacity planning, SLO-based alerting.
 
-### postgres-pro
+### postgresql-engineer
 
 **Use when:** Optimizing PostgreSQL queries, configuring replication, or implementing advanced database features.
 
-**Focus:** EXPLAIN analysis, JSONB operations, extension usage, VACUUM tuning, performance monitoring.
+**Focus:** EXPLAIN analysis, JSONB operations, extension usage, VACUUM tuning, performance monitoring, complex SQL patterns, query migration.
 
 ### prompt-engineer
 
@@ -373,11 +434,11 @@ kubectl get pod -n production -l app=api-server
 
 **Focus:** SAST scans, penetration testing, DevSecOps practices, cloud security reviews.
 
-### sql-pro
+### cost-optimizer
 
-**Use when:** Optimizing SQL queries, designing database schemas, or tuning database performance.
+**Use when:** Analyzing cloud costs, optimizing resource spending, or planning reserved capacity.
 
-**Focus:** Window functions, CTEs, indexing strategies, query plan analysis.
+**Focus:** AWS/GCP/Azure cost analysis, right-sizing, reserved instances, spot instances, cost allocation, FinOps practices.
 
 ### sre-engineer
 
@@ -404,9 +465,9 @@ kubectl get pod -n production -l app=api-server
 - Remote state automation with backend configuration
 - Multi-environment deployment workflows
 
-### docker-expert
+### container-engineer
 
-**Use when:** Building, optimizing, or securing Docker container images and orchestration for production environments.
+**Use when:** Building, optimizing, or securing container images and orchestration for production environments.
 
 **Core principle:** Build lean, secure, and maintainable container images with multi-stage builds, security hardening, and supply chain security.
 
@@ -416,6 +477,7 @@ kubectl get pod -n production -l app=api-server
 - Security hardening (non-root, read-only filesystem, capabilities)
 - Supply chain security (SBOM, cosign, SLSA)
 - Docker Compose for orchestration
+- Kubernetes runtime (containerd, CRI-O)
 - Vulnerability scanning and remediation
 
 ### network-engineer
@@ -502,22 +564,25 @@ Quick invoke skills using `/command` syntax:
 - `/devops-engineer` - CI/CD pipelines, containers, infrastructure as code
 - `/terraform-engineer` - Infrastructure as code with Terraform
 - `/terragrunt-expert` - Terragrunt orchestration for Terraform/OpenTofu
-- `/docker-expert` - Docker containerization and optimization
+- `/container-engineer` - Container builds, optimization, and security
 - `/network-engineer` - Network infrastructure and architecture
 - `/kubernetes-specialist` - Kubernetes operations depth
 - `/chaos-engineer` - Resilience testing and failure injection
 - `/platform-engineer` - Internal Developer Platforms (IDPs)
 
-**Monitoring & Reliability:**
-- `/monitoring-expert` - Observability stack setup and management
+**Observability & Reliability:**
+- `/observability-engineer` - Observability stack setup and management
 - `/sre-engineer` - SLO/SLI management and reliability at scale
+
+**Cost & Optimization:**
+- `/cost-optimizer` - Cloud cost analysis and optimization
+- `/toil-analysis` - Measure toil and plan automation
 
 **Languages & Development:**
 - `/golang-pro` - Go application development
 - `/python-pro` - Python application development
 - `/rust-engineer` - Rust systems programming
-- `/sql-pro` - SQL query optimization and schema design
-- `/postgres-pro` - PostgreSQL operations and optimization
+- `/postgresql-engineer` - PostgreSQL operations and SQL optimization
 
 **Security:**
 - `/secure-code-guardian` - Application security and OWASP prevention
@@ -534,7 +599,6 @@ SREPowers is designed to work alongside [superpowers](https://github.com/obra/su
 
 | Skill | Source | Description |
 |-------|--------|-------------|
-| `verification-before-completion` | superpowers | Evidence before claims (generic version) |
 | `requesting-code-review` | superpowers | Pre-review checklist for code |
 | `receiving-code-review` | superpowers | Responding to code review feedback |
 | `brainstorming` | superpowers | Socratic design refinement (use `brainstorming-operations` for infrastructure-specific) |

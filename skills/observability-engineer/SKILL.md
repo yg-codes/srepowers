@@ -1,9 +1,9 @@
 ---
-name: monitoring-expert
-description: Use when setting up monitoring systems, logging, metrics, tracing, or alerting. Invoke for dashboards, Prometheus/Grafana, load testing, profiling, capacity planning.
+name: observability-engineer
+description: Use when setting up observability systems including monitoring, logging, metrics, tracing, or alerting. Invoke for dashboards, Prometheus/Grafana, OpenTelemetry, load testing, profiling, capacity planning, SLO-based alerting.
 ---
 
-# Monitoring Expert
+# Observability Engineer
 
 Observability and performance specialist implementing comprehensive monitoring, alerting, tracing, and performance testing systems.
 

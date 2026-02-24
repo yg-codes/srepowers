@@ -1,5 +1,60 @@
 # Release Notes
 
+## [3.7.0] - 2026-02-24
+
+### Skill Consolidation, Naming Standardization, and Cost Optimization
+
+Consolidated overlapping skills, standardized naming conventions, and added cloud cost optimization skill.
+
+#### New Skills (1)
+
+**Cost & Optimization:**
+- **cost-optimizer** - Cloud cost analysis and optimization
+  - AWS/GCP/Azure cost analysis and billing data review
+  - Right-sizing recommendations for over-provisioned resources
+  - Reserved instance and savings plans planning
+  - Spot instance strategies for non-critical workloads
+  - Cost allocation and chargeback models
+  - FinOps best practices and tooling
+
+#### Skill Consolidation
+
+**Merged Skills:**
+- **sql-pro** → **postgresql-engineer** (consolidated SQL expertise into PostgreSQL skill)
+  - Added cross-database SQL patterns (CTEs, window functions, recursive queries)
+  - Added multi-database considerations and query migration guidance
+  - Updated skill name from `postgres-pro` to `postgresql-engineer`
+
+#### Naming Standardization
+
+**Renamed Skills (consistent -engineer suffix):**
+| Old Name | New Name |
+|----------|----------|
+| `postgres-pro` | `postgresql-engineer` |
+| `docker-expert` | `container-engineer` |
+| `monitoring-expert` | `observability-engineer` |
+
+**Updated Commands:**
+- `/postgres-pro` → `/postgresql-engineer`
+- `/docker-expert` → `/container-engineer`
+- `/monitoring-expert` → `/observability-engineer`
+- `/sql-pro` → removed (functionality merged)
+
+#### Documentation Improvements
+
+**README.md Updates:**
+- Added **Skill Workflow Diagram** (Mermaid) showing operation flow
+- Added **Skill Selection Guide** table for quick reference
+- Updated all skill references to use new naming
+- Removed `verification-before-completion` from superpowers comparison (already removed in v3.5.0)
+
+#### Metrics
+
+- Total skills: 43 → 43 (net: -1 merged, +1 new)
+- Total commands: 43 → 43 (net: -1 merged, +1 new)
+
+---
+
 ## [3.6.0] - 2026-02-20
 
 ### Infrastructure Skills Expansion
@@ -9,11 +64,12 @@ Adds 4 new infrastructure skills covering container orchestration, networking, T
 #### New Skills (4)
 
 **Container & Orchestration:**
-- **docker-expert** - Docker containerization and optimization
+- **container-engineer** - Container builds, optimization, and security
   - Multi-stage builds, layer optimization, .dockerignore patterns
   - Security hardening (non-root, read-only filesystem, capability dropping)
   - Supply chain security (SBOM generation, cosign signing, SLSA provenance)
   - Docker Compose for local development and production
+  - Kubernetes runtime support (containerd, CRI-O)
   - Vulnerability scanning and remediation
 
 **Networking:**
@@ -626,6 +682,7 @@ Adapted from the [superpowers](https://github.com/obra/superpowers) plugin by Je
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 3.7.0 | 2026-02-24 | Skill consolidation (sql-pro → postgresql-engineer), naming standardization (-engineer suffix), cost-optimizer skill |
 | 3.6.0 | 2026-02-20 | 4 new infrastructure skills: docker-expert, network-engineer, terragrunt-expert, platform-engineer |
 | 3.5.0 | 2026-02-19 | Skill auto-activation via UserPromptSubmit hook; removed 6 non-SRE skills (delegated to superpowers); 39 skills remaining |
 | 3.4.0 | 2026-02-18 | Gap fixes: 2 new skills (progressive-delivery, toil-analysis), 3 extended skills (TDO async, observability multi-stack, incident-commander distributed) |
