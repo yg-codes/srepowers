@@ -384,7 +384,7 @@ git worktree remove <worktree-path>
 - Any infrastructure skill needing completion workflow
 
 **Pairs with:**
-- **using-git-worktrees-for-infra** - Cleans up worktree created by that skill
+- **using-git-worktrees-sre** - Cleans up worktree created by that skill
 - **writing-operation-plans** - References verification commands from plan
 - **test-driven-operation** - Uses verification commands for final check
 

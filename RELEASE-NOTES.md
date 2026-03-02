@@ -15,7 +15,7 @@ Fixed an issue where 12 command files had `disable-model-invocation: true` in th
 - `/observability-integration`
 - `/executing-operation-plans`
 - `/finishing-operation-branch`
-- `/using-git-worktrees-for-infra`
+- `/using-git-worktrees-sre`
 - `/progressive-delivery`
 - `/toil-analysis`
 - `/environment-health-check`
@@ -274,7 +274,7 @@ Added scaffolding tools, learning resources, safety features, and evaluation fra
 
 #### New Test Scripts
 
-- `test-using-git-worktrees-for-infra.sh`
+- `test-using-git-worktrees-sre.sh`
 - `test-finishing-operation-branch.sh`
 - `test-systematic-troubleshooting.sh`
 
@@ -329,13 +329,13 @@ Added 6 new skills to strengthen infrastructure operations workflows, plus compl
 #### Test Coverage Improvements
 
 **New Test Scripts (3):**
-- `test-using-git-worktrees-for-infra.sh` - Tests git worktrees skill
+- `test-using-git-worktrees-sre.sh` - Tests git worktrees skill
 - `test-finishing-operation-branch.sh` - Tests operation completion skill
 - `test-systematic-troubleshooting.sh` - Tests troubleshooting skill
 
 #### Structural Improvements
 
-- Added `references/` directories for `using-git-worktrees-for-infra` and `finishing-operation-branch`
+- Added `references/` directories for `using-git-worktrees-sre` and `finishing-operation-branch`
 - Updated README.md with new skills and commands
 - Total skills: 36 → 41
 - Total commands: 34 → 40

@@ -74,7 +74,7 @@ SREPowers is notably broader in scope, with significant investment in domain-spe
 - `executing-operation-plans` — batch execution across environments
 - `requesting-peer-review` — human review before production changes
 - `observability-integration` — verify operations using metrics/alerting
-- `using-git-worktrees-for-infra` — isolated worktrees for control repos
+- `using-git-worktrees-sre` — isolated worktrees for control repos
 
 **Infrastructure Administration (4):**
 - `pve-admin` — Proxmox VE/PBS management

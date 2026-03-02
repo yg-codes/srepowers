@@ -526,7 +526,7 @@ Quick invoke skills using `/command` syntax:
 - `/sre-runbook` - Create structured SRE runbooks
 
 **Workspace & Lifecycle:**
-- `/using-git-worktrees-for-infra` - Create isolated workspaces for control repos
+- `/using-git-worktrees-sre` - Create isolated workspaces for control repos
 - `/finishing-operation-branch` - Complete operations with merge/PR workflow
 
 **Incident Response:**
@@ -603,7 +603,7 @@ SREPowers is designed to work alongside [superpowers](https://github.com/obra/su
 | `receiving-code-review` | superpowers | Responding to code review feedback |
 | `brainstorming` | superpowers | Socratic design refinement (use `brainstorming-operations` for infrastructure-specific) |
 | `writing-plans` | superpowers | Implementation plans (use `writing-operation-plans` for infrastructure-specific) |
-| `using-git-worktrees` | superpowers | Isolated development branches (use `using-git-worktrees-for-infra` for control repos) |
+| `using-git-worktrees` | superpowers | Isolated development branches (use `using-git-worktrees-sre` for control repos) |
 | `finishing-a-development-branch` | superpowers | Merge/PR workflow (use `finishing-operation-branch` for environment promotion) |
 
 **Recommendation:** Install both superpowers and SREPowers for complete coverage.

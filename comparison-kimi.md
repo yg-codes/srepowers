@@ -118,7 +118,7 @@ Skills include concrete examples for:
 
 | Superpowers Skill | SREPowers Equivalent | Status |
 |-------------------|----------------------|--------|
-| `using-git-worktrees` | `using-git-worktrees-for-infra` | ✅ Created |
+| `using-git-worktrees` | `using-git-worktrees-sre` | ✅ Created |
 | `finishing-a-development-branch` | `finishing-operation-branch` | ✅ Created |
 | `requesting-code-review` | None | ⬜ Lower priority |
 | `systematic-debugging` | `systematic-troubleshooting` | ✅ Created |
@@ -172,7 +172,7 @@ Many SREPowers "skills" are still reference collections without executable workf
 
 | Skill Type | Examples | Status |
 |------------|----------|--------|
-| **Executable** | `pve-admin`, `puppet-code-analyzer`, `cache-cleanup`, `using-git-worktrees-for-infra`, `finishing-operation-branch`, `systematic-troubleshooting` | Clear procedures, scripts, commands |
+| **Executable** | `pve-admin`, `puppet-code-analyzer`, `cache-cleanup`, `using-git-worktrees-sre`, `finishing-operation-branch`, `systematic-troubleshooting` | Clear procedures, scripts, commands |
 | **Reference-only** | `cloud-architect`, `chaos-engineer`, `microservices-architect` | Knowledge bases without process - **still needs work** |
 
 **Comparison:**
@@ -203,7 +203,7 @@ Many SREPowers "skills" are still reference collections without executable workf
 ### High Priority
 
 1. **Add infrastructure lifecycle skills:**
-   - `using-git-worktrees-for-infra` - Branch isolation for control repos
+   - `using-git-worktrees-sre` - Branch isolation for control repos
    - `finishing-operation-branch` - MR/PR workflow for infrastructure changes
    - `requesting-peer-review` - Peer review checklist for ops changes
 
@@ -392,13 +392,13 @@ Based on the gap analysis in this document, the following improvements have been
 
 #### 1. Infrastructure Lifecycle Skills ✅ ADDRESSED
 
-**Created `using-git-worktrees-for-infra`:**
+**Created `using-git-worktrees-sre`:**
 - Adapts Superpowers' git-worktrees pattern for infrastructure control repos
 - Adds environment detection (sit/uat/prod) with production warnings
 - Includes control repo structure verification (K8s, Terraform, Ansible)
 - Provides baseline state validation before operations
-- File: `skills/using-git-worktrees-for-infra/SKILL.md`
-- Command: `/using-git-worktrees-for-infra`
+- File: `skills/using-git-worktrees-sre/SKILL.md`
+- Command: `/using-git-worktrees-sre`
 
 **Created `finishing-operation-branch`:**
 - Adapts finishing-a-development-branch for infrastructure workflows
@@ -458,7 +458,7 @@ Based on the gap analysis in this document, the following improvements have been
 
 **Updated `README.md`:**
 - Added new commands to Commands section:
-  - `/using-git-worktrees-for-infra`
+  - `/using-git-worktrees-sre`
   - `/finishing-operation-branch`
   - `/systematic-troubleshooting`
 - Organized into logical groups:
@@ -497,7 +497,7 @@ The following improvements are still recommended but lower priority:
 
 The four major gaps identified in the initial evaluation have been addressed:
 
-1. ✅ **Missing infrastructure lifecycle skills** - Now have `using-git-worktrees-for-infra` and `finishing-operation-branch`
+1. ✅ **Missing infrastructure lifecycle skills** - Now have `using-git-worktrees-sre` and `finishing-operation-branch`
 2. ✅ **No systematic troubleshooting skill** - Now have `systematic-troubleshooting` with 3 reference files
 3. ✅ **Reference-heavy vs executable imbalance** - Partly addressed, still room for improvement
 4. ✅ **TDO anti-patterns need development** - Now have comprehensive anti-patterns document

@@ -218,7 +218,7 @@ Complete
 ## Integration
 
 **Required workflow skills:**
-- **using-git-worktrees-for-infra** - Set up isolated workspace
+- **using-git-worktrees-sre** - Set up isolated workspace
 - **writing-operation-plans** - Creates the plan this skill executes
 - **test-driven-operation** - Execute each operation with verification
 - **finishing-operation-branch** - Complete after all batches

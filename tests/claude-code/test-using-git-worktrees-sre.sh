@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# Test: using-git-worktrees-for-infra skill
+# Test: using-git-worktrees-sre skill
 # Verifies that the skill is loaded and follows correct workflow
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/test-helpers.sh"
 
-echo "=== Test: using-git-worktrees-for-infra skill ==="
+echo "=== Test: using-git-worktrees-sre skill ==="
 echo ""
 
 # Test 1: Verify skill can be loaded
 echo "Test 1: Skill loading..."
 
-output=$(run_claude "What is the using-git-worktrees-for-infra skill? Describe its purpose briefly." 30)
+output=$(run_claude "What is the using-git-worktrees-sre skill? Describe its purpose briefly." 30)
 
-if assert_contains "$output" "using-git-worktrees-for-infra\|git worktrees\|worktree" "Skill is recognized"; then
+if assert_contains "$output" "using-git-worktrees-sre\|git worktrees\|worktree" "Skill is recognized"; then
     : # pass
 else
     exit 1
@@ -31,7 +31,7 @@ echo ""
 # Test 2: Verify safety verification emphasis
 echo "Test 2: Safety verification emphasis..."
 
-output=$(run_claude "In using-git-worktrees-for-infra, what safety check must be done before creating a project-local worktree?" 30)
+output=$(run_claude "In using-git-worktrees-sre, what safety check must be done before creating a project-local worktree?" 30)
 
 if assert_contains "$output" "ignored\|gitignore\|check-ignore" "Mentions gitignore verification"; then
     : # pass
@@ -50,7 +50,7 @@ echo ""
 # Test 3: Verify environment detection
 echo "Test 3: Environment detection..."
 
-output=$(run_claude "In using-git-worktrees-for-infra, how is the target environment detected and why does it matter?" 30)
+output=$(run_claude "In using-git-worktrees-sre, how is the target environment detected and why does it matter?" 30)
 
 if assert_contains "$output" "branch\|sit\|uat\|prod" "Mentions environment detection"; then
     : # pass
@@ -69,7 +69,7 @@ echo ""
 # Test 4: Verify directory selection priority
 echo "Test 4: Directory selection priority..."
 
-output=$(run_claude "In using-git-worktrees-for-infra, what is the priority order for selecting a worktree directory?" 30)
+output=$(run_claude "In using-git-worktrees-sre, what is the priority order for selecting a worktree directory?" 30)
 
 if assert_contains "$output" "existing\|CLAUDE.md\|ask" "Mentions priority order"; then
     : # pass
@@ -88,7 +88,7 @@ echo ""
 # Test 5: Verify SRE Principles section exists
 echo "Test 5: SRE Principles integration..."
 
-output=$(run_claude "What are the SRE Principles in the using-git-worktrees-for-infra skill? List them." 30)
+output=$(run_claude "What are the SRE Principles in the using-git-worktrees-sre skill? List them." 30)
 
 if assert_contains "$output" "Safety First\|Structured Output\|Evidence-Driven\|Audit-Ready\|Communication" "Lists SRE Principles"; then
     : # pass
@@ -101,7 +101,7 @@ echo ""
 # Test 6: Verify control repo detection
 echo "Test 6: Control repo type detection..."
 
-output=$(run_claude "In using-git-worktrees-for-infra, how is the control repo type detected? Give examples." 30)
+output=$(run_claude "In using-git-worktrees-sre, how is the control repo type detected? Give examples." 30)
 
 if assert_contains "$output" "manifests\|terraform\|ansible\|k8s" "Mentions repo type indicators"; then
     : # pass

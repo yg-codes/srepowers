@@ -34,7 +34,7 @@ SREPowers directly adapts several Superpowers skills with infrastructure-specifi
 | `writing-plans` | `writing-operation-plans` | Good - Focuses on verification commands vs code structure |
 | `verification-before-completion` | `verification-before-completion` | Identical - Universal principle |
 | `finishing-a-development-branch` | `finishing-operation-branch` | Good - Adapts for control repos vs feature branches |
-| `using-git-worktrees` | `using-git-worktrees-for-infra` | Good - Same concept, different context |
+| `using-git-worktrees` | `using-git-worktrees-sre` | Good - Same concept, different context |
 
 ### 2.1 Key Adaptation: Test-Driven Development → Test-Driven Operation
 
@@ -283,7 +283,7 @@ All high and medium priority improvements have been completed in v3.2.0. Remaini
 #### ✅ Completed Improvements
 
 1. **Added Missing Test Scripts** (3 tests)
-   - ✅ `test-using-git-worktrees-for-infra.sh`
+   - ✅ `test-using-git-worktrees-sre.sh`
    - ✅ `test-finishing-operation-branch.sh`
    - ✅ `test-systematic-troubleshooting.sh`
 
@@ -291,7 +291,7 @@ All high and medium priority improvements have been completed in v3.2.0. Remaini
    - ✅ Not needed - Claude Code 2.1.x+ auto-handles .sh files on Windows
 
 3. **Created Missing References Directories**
-   - ✅ `skills/using-git-worktrees-for-infra/references/`
+   - ✅ `skills/using-git-worktrees-sre/references/`
    - ✅ `skills/finishing-operation-branch/references/`
 
 4. **New Skills Created** (5 skills)
@@ -371,7 +371,7 @@ The 41-skill coverage provides comprehensive support for infrastructure operatio
 | gitlab-ecr-pipeline | ✅ | - |
 | clickup-ticket-creator | ✅ | - |
 | All 20 domain expertise skills | ✅ | - |
-| using-git-worktrees-for-infra | ❌ | High |
+| using-git-worktrees-sre | ❌ | High |
 | finishing-operation-branch | ❌ | High |
 | systematic-troubleshooting | ❌ | High |
 
@@ -431,7 +431,7 @@ The 41-skill coverage provides comprehensive support for infrastructure operatio
 ### ✅ Completed Improvements
 
 #### Immediate (High Priority)
-- [x] Add `test-using-git-worktrees-for-infra.sh`
+- [x] Add `test-using-git-worktrees-sre.sh`
 - [x] Add `test-finishing-operation-branch.sh`
 - [x] Add `test-systematic-troubleshooting.sh`
 - [x] Add `references/` directories for consistency

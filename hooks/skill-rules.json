@@ -298,7 +298,7 @@
         ]
       }
     },
-    "using-git-worktrees-for-infra": {
+    "using-git-worktrees-sre": {
       "type": "workflow",
       "enforcement": "suggest",
       "priority": "high",
