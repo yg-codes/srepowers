@@ -1,5 +1,5 @@
 ---
-name: using-git-worktrees-for-infra
+name: using-git-worktrees-sre
 description: Use when starting infrastructure operations that need isolation from current workspace - creates isolated git worktrees for control repos with environment-aware directory selection and safety verification
 ---
 
@@ -11,7 +11,7 @@ Git worktrees create isolated workspaces sharing the same repository, allowing w
 
 **Core principle:** Systematic directory selection + environment verification + safety checks = reliable infrastructure isolation.
 
-**Announce at start:** "I'm using the using-git-worktrees-for-infra skill to set up an isolated workspace for infrastructure operations."
+**Announce at start:** "I'm using the using-git-worktrees-sre skill to set up an isolated workspace for infrastructure operations."
 
 ## When to Use
 
@@ -275,7 +275,7 @@ Next steps:
 ## Example Workflow
 
 ```
-You: I'm using the using-git-worktrees-for-infra skill to set up an isolated workspace.
+You: I'm using the using-git-worktrees-sre skill to set up an isolated workspace.
 
 [Check .worktrees/ - exists]
 [Verify ignored - git check-ignore confirms .worktrees/ is ignored]
