@@ -1,5 +1,26 @@
 # Release Notes
 
+## [3.7.2] - 2026-03-09
+
+### Bug Fix — Infinite Loop Prevention
+
+Fixed a critical bug where command files were missing `disable-model-invocation: true` in their frontmatter. This caused Claude to treat command output ("Invoke the ... skill") as meta-instructions, resulting in infinite skill invocation loops.
+
+#### Fixed
+
+- Added `disable-model-invocation: true` to all 43 command files that were missing this flag
+- Updated `observability-integration.md` description to include Datadog, CloudWatch, New Relic
+
+#### Root Cause
+
+Command files follow a pattern where they instruct Claude to invoke the skill. Without the `disable-model-invocation: true` flag, Claude would:
+1. Invoke the skill via Skill tool
+2. Receive "Invoke the ... skill" as output
+3. Treat this as a meta-instruction and invoke again
+4. Repeat infinitely
+
+---
+
 ## [3.7.1] - 2026-02-25
 
 ### Bug Fix — Skill Tool Compatibility
