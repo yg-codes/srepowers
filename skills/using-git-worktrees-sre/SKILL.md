@@ -67,7 +67,6 @@ Which would you prefer?
 **MUST verify directory is ignored before creating worktree:**
 
 ```bash
-# Check if directory is ignored (respects local, global, and system gitignore)
 git check-ignore -q .worktrees 2>/dev/null || git check-ignore -q worktrees 2>/dev/null
 ```
 
@@ -78,7 +77,7 @@ Per safety-first principle:
 2. Commit the change
 3. Proceed with worktree creation
 
-**Why critical:** Prevents accidentally committing worktree contents to control repo, which could trigger unintended deployments.
+**Why critical:** Prevents accidentally committing worktree contents into control repo, which could trigger unintended deployments.
 
 ### For Global Directory (~/.config/srepowers/worktrees)
 
@@ -94,13 +93,13 @@ current_branch=$(git branch --show-current)
 
 # Common patterns
 if [[ "$current_branch" == "sit" ]] || [[ "$current_branch" == *"sit"* ]]; then
-    environment="sit"
+ environment="sit"
 elif [[ "$current_branch" == "uat" ]] || [[ "$current_branch" == *"uat"* ]]; then
-    environment="uat"
+ environment="uat"
 elif [[ "$current_branch" == "prod" ]] || [[ "$current_branch" == *"prod"* ]]; then
-    environment="prod"
+ environment="prod"
 else
-    environment="unknown"
+ environment="unknown"
 fi
 ```
 
@@ -143,16 +142,14 @@ Check for expected infrastructure directories:
 # Kubernetes control repo
 if [ -d manifests/ ] || [ -d k8s/ ] || [ -d clusters/ ]; then
     echo "Kubernetes control repo detected"
-    # Verify structure
     ls -la manifests/ 2>/dev/null || ls -la k8s/ 2>/dev/null
-fi
+ fi
 
 # Terraform repo
 if [ -d terraform/ ] || [ -f main.tf ]; then
     echo "Terraform repo detected"
-    # Verify state backend configuration
     grep -l "backend" *.tf 2>/dev/null | head -5
-fi
+ fi
 
 # Ansible repo
 if [ -d playbooks/ ] || [ -d roles/ ]; then
@@ -227,74 +224,14 @@ Next steps:
 | Target is production | Warn + require explicit confirmation |
 | Uncommitted changes in main | Warn about state consistency |
 
-## SRE Principles
-
-### Safety First
-- Verify worktree directory is ignored before creation (prevents accidental commits)
-- Detect target environment and warn for production operations
-- Check for uncommitted changes in main worktree that could affect isolation
-
-### Structured Output
-- Present directory selection decision with rationale
-- Show environment detection results in tabular format
-- Report control repo type and baseline status clearly
-
-### Evidence-Driven
-- Use `git check-ignore` to verify directory is properly ignored
-- Reference specific branch names and environment indicators
-- Show actual directory contents when detecting repo type
-
-### Audit-Ready
-- Record worktree location and base branch for each operation
-- Note environment target in operation documentation
-- Track branch creation timestamp and operator identity
-
-### Communication
-- Lead with safety considerations (environment detection, production warnings)
-- Provide clear next steps after worktree creation
-- Explain why isolation matters for infrastructure operations
-
 ## Common Mistakes
 
-### Skipping ignore verification
-- **Problem:** Worktree contents get tracked, could trigger unintended deployments
-- **Fix:** Always use `git check-ignore` before creating project-local worktree
-
-### Ignoring environment context
-- **Problem:** Operating on production without awareness, causing incidents
-- **Fix:** Always detect environment from branch name and structure, warn appropriately
-
-### Assuming repo type
-- **Problem:** Using wrong verification commands for repo type
-- **Fix:** Auto-detect from directory structure (manifests/, terraform/, etc.)
-
-### Not checking baseline state
-- **Problem:** Starting from dirty state, conflating existing issues with new changes
-- **Fix:** Verify main worktree is clean, validate YAML/JSON in new worktree
-
-## Example Workflow
-
-```
-You: I'm using the using-git-worktrees-sre skill to set up an isolated workspace.
-
-[Check .worktrees/ - exists]
-[Verify ignored - git check-ignore confirms .worktrees/ is ignored]
-[Detect environment - current branch is 'sit', target branch contains 'uat']
-[Create worktree: git worktree add .worktrees/cu_add_keycloak_client -b cu_add_keycloak_client]
-[Detect repo type - Kubernetes control repo (manifests/ directory present)]
-[Check baseline - main worktree clean, YAML files valid]
-
-Infrastructure worktree ready at /home/yg/src/github/control-repo/.worktrees/cu_add_keycloak_client
-Environment: uat (detected from branch name)
-Control repo type: Kubernetes (manifests/ directory)
-Clean baseline: verified
-Ready to implement Keycloak client provisioning
-
-Next steps:
-1. Use /writing-operation-plans to create detailed steps
-2. Use /test-driven-operation for each change
-3. Use /finishing-operation-branch when complete
-```
+| Mistake | Problem | Fix |
+|-------|---------|-----|
+| Skipping ignore verification | Worktree contents get tracked, could trigger unintended deployments | Always use `git check-ignore` before creating project-local worktree |
+| Ignoring environment context | Operating on production without awareness, causing incidents | Always detect environment from branch name and structure, warn appropriately |
+| Assuming repo type | Using wrong verification commands for Use `find` to auto-detect from directory structure |
+| Not checking baseline state | Starting from dirty state, conflates existing issues | Verify main worktree is clean, validate YAML/JSON in new worktree |
 
 ## Red Flags
 
@@ -328,7 +265,7 @@ Next steps:
 ## Differences from Software Development Worktrees
 
 | Aspect | Software (Superpowers) | Infrastructure (SREPowers) |
-|--------|------------------------|---------------------------|
+|-------|----------------------|---------------------------|
 | **Primary concern** | Test isolation | Environment isolation |
 | **Baseline check** | Run test suite | Verify YAML/JSON validity |
 | **Key detection** | package.json, Cargo.toml | manifests/, terraform/, etc. |
