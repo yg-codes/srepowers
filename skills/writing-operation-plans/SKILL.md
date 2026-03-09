@@ -7,24 +7,13 @@ description: Use when you have a design for a multi-step infrastructure operatio
 
 ## Overview
 
-Write comprehensive infrastructure operation plans assuming the operator has zero context for your infrastructure and limited SRE experience. Document everything they need to know: which resources to touch for each step, exact commands to run, verification commands, how to confirm success, and rollback steps. Give them the whole plan as bite-sized tasks.
-
-Assume they are a skilled operator, but know almost nothing about your infrastructure, tooling, or problem domain. Assume they don't know what "verification" means or how to write good tests.
+Write comprehensive infrastructure operation plans assuming the operator has zero context for your infrastructure and limited SRE experience. Document everything they need: exact commands, verification, rollback steps. Give them the whole plan as bite-sized tasks.
 
 **Announce at start:** "I'm using the writing-operation-plans skill to create the infrastructure operation plan."
 
 **Context:** This should be run after brainstorming-operations has created a design.
 
 **Save plans to:** `docs/plans/YYYY-MM-DD-<operation-name>.md`
-
-## Bite-Sized Task Granularity
-
-**Each step is one action (2-5 minutes):**
-- "Write the verification command" - step
-- "Run it to make sure it fails" - step
-- "Execute minimal operation" - step
-- "Run verification to confirm it passes" - step
-- "Document in runbook/commit" - step
 
 ## Plan Document Header
 
@@ -36,18 +25,11 @@ Assume they are a skilled operator, but know almost nothing about your infrastru
 > **For Claude:** REQUIRED SUB-SKILL: Use srepowers:subagent-driven-operation to implement this plan task-by-task.
 
 **Goal:** [One sentence describing what this achieves]
-
 **Risk Level:** [Low/Medium/High with rationale]
-
-**Rollback Plan:** [Brief rollback strategy - what command or action reverts the operation]
-
-**Verification Commands:** [List of commands that prove success]
+**Rollback Plan:** [Brief rollback strategy]
+**Stakeholder Notification:** [Who to inform before/during/after]
 
 ---
-
-## Context
-
-[Brief description of current infrastructure state and why this operation is needed]
 
 ## Prerequisites
 
@@ -60,19 +42,15 @@ Assume they are a skilled operator, but know almost nothing about your infrastru
 
 ## Task Structure
 
+**Each step is one action (2-5 minutes). Infrastructure adds dry-run and side-effect verification:**
+
 ```markdown
 ### Task N: [Component/Operation Name]
 
-**Goal:** [One sentence describing what this task achieves]
-
-**Files/Resources:**
-- Create/Modify: `exact/resource/name.yaml`
-- Namespace: `namespace-name`
-- Related resources: [list related infrastructure]
+**Goal:** [One sentence]
+**Files/Resources:** Create/Modify `exact/resource/name.yaml`, Namespace: `namespace-name`
 
 **Step 1: RED - Write failing verification**
-
-[EXACT verification command - copy-pasteable]
 
 ```bash
 kubectl get [resource] -n [namespace] [name] -o jsonpath='{.status.field}'
@@ -82,47 +60,41 @@ kubectl get [resource] -n [namespace] [name] -o jsonpath='{.status.field}'
 **Step 2: Verify RED - Run verification, watch it fail**
 
 Run: [verification command]
-Expected: [exact failure message or output]
+Expected: [exact failure message]
 
-**Step 3: GREEN - Execute minimal operation**
+**Step 3: Dry-run (validate before live)**
+
+```bash
+kubectl apply -f [filename].yaml --dry-run=client
+```
+**Expected:** "configured" or "created" (dry-run)
+
+**Step 4: GREEN - Execute minimal operation**
 
 ```yaml
-apiVersion: [api-version]
-kind: [kind]
-metadata:
-  name: [name]
-  namespace: [namespace]
-  [labels/annotations]
-spec:
-  [exact spec - complete, no "..."]
+[Complete YAML - no placeholders, no "..."]
 ```
 
-Apply command:
-```bash
-kubectl apply -f [filename].yaml
-```
+Apply: `kubectl apply -f [filename].yaml`
 
-**Step 4: Verify GREEN - Run verification, confirm it passes**
+**Step 5: Verify GREEN - Run verification, confirm it passes**
 
 Run: [verification command]
-Expected: [exact output that proves success - e.g., "Running", "true", "3"]
+Expected: [exact output that proves success]
 
-**Step 5: Verify no side effects**
+**Step 6: Verify no side effects**
 
-[Commands to check other resources weren't affected]
 ```bash
 kubectl get pods -n namespace -l app=other-app
 ```
 
-**Step 6: Commit to control repo (if applicable)**
+**Step 7: Commit**
 
 ```bash
-git add [files]
-git commit -m "[commit message]"
-git push
+git add [files] && git commit -m "[commit message]"
 ```
 
-**Rollback for this task:**
+**Rollback:**
 ```bash
 kubectl delete -f [filename].yaml
 # OR
@@ -130,88 +102,21 @@ git revert HEAD
 ```
 ```
 
-## Example Task
+## Key Principles
 
-```markdown
-### Task 1: Create ConfigMap for application configuration
-
-**Goal:** Add ConfigMap with DATABASE_URL and LOG_LEVEL for app-v1
-
-**Files/Resources:**
-- Create: `manifests/production/app-config-v1.yaml`
-- Namespace: `production`
-- Related resources: Deployment `app-deployment` (will reference this ConfigMap)
-
-**Step 1: RED - Write failing verification**
-
-```bash
-kubectl get configmap -n production app-config-v1 -o jsonpath='{.data.DATABASE_URL}'
-```
-**Expected:** Error: not found
-
-**Step 2: Verify RED - Run verification, watch it fail**
-
-Run: `kubectl get configmap -n production app-config-v1 -o jsonpath='{.data.DATABASE_URL}'`
-Expected: "Error from server (NotFound)" or similar
-
-**Step 3: GREEN - Execute minimal operation**
-
-Create `manifests/production/app-config-v1.yaml`:
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: app-config-v1
-  namespace: production
-  labels:
-    app: myapp
-    version: v1
-data:
-  DATABASE_URL: postgresql://prod-db.example.com:5432/app
-  LOG_LEVEL: info
-  MAX_CONNECTIONS: "20"
-```
-
-Apply command:
-```bash
-kubectl apply -f manifests/production/app-config-v1.yaml
-```
-
-**Step 4: Verify GREEN - Run verification, confirm it passes**
-
-Run: `kubectl get configmap -n production app-config-v1 -o jsonpath='{.data.DATABASE_URL}'`
-Expected: "postgresql://prod-db.example.com:5432/app"
-
-Verify all data:
-```bash
-kubectl get configmap -n production app-config-v1 -o yaml
-```
-
-**Step 5: Verify no side effects**
-
-Check existing ConfigMaps weren't affected:
-```bash
-kubectl get configmap -n production
-```
-
-**Step 6: Commit to control repo**
-
-```bash
-git add manifests/production/app-config-v1.yaml
-git commit -m "Add production ConfigMap for app-v1"
-git push origin cu_add_app_config_v1
-```
-
-**Rollback for this task:**
-```bash
-kubectl delete configmap app-config-v1 -n production
-git revert HEAD
-```
-```
+| Principle | What It Means |
+|-----------|---------------|
+| **Exact commands** | No "check the pods" → `kubectl get pods -n namespace` |
+| **Complete YAML** | No "add labels" → full YAML with all fields |
+| **Expected outputs** | Show what success looks like for every command |
+| **Rollback per task** | Each task must be reversible |
+| **Dry-run first** | Validate with `--dry-run=client` before live |
+| **Side-effect check** | Verify adjacent systems weren't affected |
+| **TDO discipline** | RED → Verify RED → Dry-run → GREEN → Verify GREEN → Side effects → Commit |
 
 ## Final Verification Section
 
-After all tasks, add:
+After all tasks:
 
 ```markdown
 ## Final Verification
@@ -225,89 +130,15 @@ After completing all tasks, run these commands to verify overall success:
 Expected outputs:
 - [Expected output 1]
 - [Expected output 2]
-- [Expected smoke test result]
 
 If any verification fails:
-- Check task-specific rollbacks
 - Run rollback for affected tasks
 - Re-run failed verification to confirm rollback
 ```
 
-## Remember
-
-- **Exact commands always** - no "check the pods", use "kubectl get pods -n namespace"
-- **Complete YAML in plan** - not "add labels", include full YAML
-- **Expected outputs** - show what success looks like
-- **Rollback per task** - each task must be reversible
-- **Verification before operation** - always RED step first
-- **No placeholders** - complete, copy-pasteable content
-- **TDO discipline** - RED → Verify RED → GREEN → Verify GREEN → REFACTOR
-- **Safety first** - rollback plans, verification commands, risk assessment
-
-## Common Mistakes
-
-**❌ Vague instructions:**
-"Update the deployment with the new ConfigMap"
-
-**✅ Exact, complete:**
-"Patch the deployment to add envFrom reference to ConfigMap app-config-v1:
-```yaml
-spec:
-  template:
-    spec:
-      containers:
-      - name: app
-        envFrom:
-        - configMapRef:
-            name: app-config-v1
-```"
-
-**❌ Missing verification:**
-"Apply the manifest"
-
-**✅ Full TDO cycle:**
-"Step 1: RED - Write verification (kubectl get deployment -n production app -o jsonpath='{.spec.replicas}')
-Step 2: Verify RED - Run, expect 'Error: not found'
-Step 3: GREEN - Apply manifest
-Step 4: Verify GREEN - Run verification, expect '3'"
-
-**❌ No rollback:**
-"Delete the old resources"
-
-**✅ Rollback plan:**
-"Rollback: kubectl apply -f backup/app-v1-old.yaml
-Verify: kubectl get pods -n production -l app=app,version=v1"
-
-## SRE Principles
-
-### Safety First
-- Include a dry-run step in every task: run the operation command with `--dry-run=client` (or equivalent) to validate before live execution
-- Every task must have an explicit rollback section with tested rollback commands
-- Phase structure per task: **RED** (failing verification) → **Dry-run** (validate command) → **GREEN** (execute) → **Verify GREEN** → **Verify no side effects** → **Commit**
-
-### Structured Output
-- Present plans using the standardized task template: RED → Verify RED → GREEN → Verify GREEN → Side-effect check → Commit
-- Use plan header with Goal, Risk Level, Rollback Plan, and Final Verification sections
-- Include a task summary table (task #, name, risk, status) for progress tracking
-
-### Evidence-Driven
-- Every step must include exact commands and expected outputs showing what success looks like
-- Reference specific resource names, namespaces, config values, and metric thresholds
-- Side-effect verification (Step 5) must check adjacent systems with concrete commands
-
-### Audit-Ready
-- Save plans with date-stamped filenames in `docs/plans/` and commit to version control
-- Include git commit messages per task with descriptive change summaries
-- Document rollback per task with exact commands (e.g., `kubectl delete -f`, `git revert HEAD`)
-
-### Communication
-- Include "Stakeholder Notification" in plan header: who should be informed before/during/after execution
-- Add "Business Impact" to plan header: services affected, expected downtime, customer impact
-- After plan execution, generate a completion summary suitable for change management review
-
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After saving the plan:
 
 **"Plan complete and saved to `docs/plans/<filename>.md`. Two execution options:**
 
