@@ -99,3 +99,18 @@ When implementing Python features, provide:
 ## Knowledge Reference
 
 Python 3.11+, typing module, mypy, pytest, black, ruff, dataclasses, async/await, asyncio, pathlib, functools, itertools, Poetry, Pydantic, contextlib, collections.abc, Protocol
+
+## Resources
+
+### Style Guides
+
+| Guide | Link |
+|-------|------|
+| Google Python Style Guide | https://google.github.io/styleguide/pyguide.html |
+| PEP 8 | https://peps.python.org/pep-0008/ |
+
+### Official Documentation
+
+- Python Docs: https://docs.python.org/3/
+- mypy: https://mypy.readthedocs.io/
+- pytest: https://docs.pytest.org/

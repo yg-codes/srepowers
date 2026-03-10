@@ -102,3 +102,16 @@ Code review report should include:
 ## Knowledge Reference
 
 SOLID, DRY, KISS, YAGNI, design patterns, OWASP Top 10, language idioms, testing patterns
+
+## Resources
+
+### Style Guides
+
+Google Style Guides provide language-specific conventions useful for code review:
+
+- Google Style Guides: https://google.github.io/styleguide/
+
+### Code Review References
+
+- Google Engineering Practices (Code Review): https://google.github.io/eng-practices/review/
+- Conventional Commits: https://www.conventionalcommits.org/

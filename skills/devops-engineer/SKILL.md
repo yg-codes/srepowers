@@ -101,3 +101,19 @@ Provide: CI/CD pipeline config, Dockerfile, K8s/Terraform files, deployment veri
 ## Knowledge Reference
 
 GitHub Actions, GitLab CI, Jenkins, CircleCI, Docker, Kubernetes, Helm, ArgoCD, Flux, Terraform, Pulumi, Crossplane, AWS/GCP/Azure, Prometheus, Grafana, PagerDuty, Backstage, LaunchDarkly, Flagger
+
+## Resources
+
+### Style Guides
+
+| Guide | Link | Use When |
+|-------|------|----------|
+| Google Shell Style Guide | https://google.github.io/styleguide/shellguide.html | Writing bash scripts, CI/CD pipelines |
+| Google JSON Style Guide | https://google.github.io/styleguide/jsoncstyleguide.html | API responses, config files |
+
+### Official Documentation
+
+- GitHub Actions: https://docs.github.com/en/actions
+- Docker: https://docs.docker.com/
+- Kubernetes: https://kubernetes.io/docs/
+- Terraform: https://developer.hashicorp.com/terraform/docs

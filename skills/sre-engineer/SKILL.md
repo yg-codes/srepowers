@@ -102,3 +102,13 @@ When implementing SRE practices, provide:
 ## Knowledge Reference
 
 SLO/SLI design, error budgets, golden signals (latency/traffic/errors/saturation), Prometheus/Grafana, chaos engineering (Chaos Monkey, Gremlin), toil reduction, incident management, blameless postmortems, capacity planning, on-call best practices
+
+## Authoritative References
+
+Google SRE book series (free online):
+
+| Book | URL | Focus |
+|------|-----|-------|
+| **SRE Book** | https://sre.google/sre-book/table-of-contents/ | Foundational SRE principles, SLOs, incident response, on-call |
+| **SRE Workbook** | https://sre.google/workbook/table-of-contents/ | Practical implementation, case studies, SLO construction |
+| **Building Secure & Reliable Systems** | https://google.github.io/building-secure-and-reliable-systems/raw/toc.html | Security + reliability integration, design patterns |

@@ -99,3 +99,18 @@ When implementing Go features, provide:
 ## Knowledge Reference
 
 Go 1.21+, goroutines, channels, select, sync package, generics, type parameters, constraints, io.Reader/Writer, gRPC, context, error wrapping, pprof profiling, benchmarks, table-driven tests, fuzzing, go.mod, internal packages, functional options
+
+## Resources
+
+### Style Guides
+
+| Guide | Link |
+|-------|------|
+| Google Go Style Guide | https://google.github.io/styleguide/go/guide.html |
+| Effective Go | https://go.dev/doc/effective_go |
+| Go Code Review Comments | https://github.com/golang/go/wiki/CodeReviewComments |
+
+### Official Documentation
+
+- Go Docs: https://go.dev/doc/
+- Go by Example: https://gobyexample.com/

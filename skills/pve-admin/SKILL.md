@@ -529,9 +529,14 @@ apt dist-upgrade
 
 This skill includes official Proxmox documentation in `references/`:
 
-- `pve-admin-guide-84.pdf` - PVE 8.4 Administration Guide
-- `pve-admin-guide-9.1.pdf` - PVE 9.1 Administration Guide
-- `proxmox-backup-3-4.pdf` - Proxmox Backup Server 3.4 Guide
+| Local File | Description | Web Link |
+|------------|-------------|----------|
+| `pve-admin-guide-8.4.pdf` | PVE 8.4 Administration Guide | https://pve.proxmox.com/pve-docs-8/pve-admin-guide.pdf |
+| `pve-admin-guide-9.1.2.pdf` | PVE 9.1.2 Administration Guide | https://pve.proxmox.com/pve-docs/pve-admin-guide.html |
+| `proxmox-backup-3-4.pdf` | Proxmox Backup Server 3.4 Guide | https://www.proxmox.com/images/download/pbs/docs/proxmox-backup-3-4.pdf |
+| `proxmox-datacenter-manager-1-0.pdf` | Proxmox Datacenter Manager 1.0 Guide | https://www.proxmox.com/images/download/pdm/docs/proxmox-datacenter-manager-1-0.pdf |
+
+**Prefer local PDFs first** - they work offline during incidents and avoid network dependencies. Use web links only when local docs are unavailable or outdated.
 
 To search these documents:
 ```bash
