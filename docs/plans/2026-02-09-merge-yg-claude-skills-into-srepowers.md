@@ -73,7 +73,6 @@ Create command files for each new skill:
 ```markdown
 ---
 description: "Interactive cleanup for development tool caches (mise, npm, Go, Cargo, uv, pipx, pip) with pre/post verification"
-disable-model-invocation: true
 ---
 
 Invoke the srepowers:cache-cleanup skill and follow it exactly as presented to you
@@ -83,7 +82,6 @@ Invoke the srepowers:cache-cleanup skill and follow it exactly as presented to y
 ```markdown
 ---
 description: "Create ClickUp tickets following CCB template format with Description, Rationale, Impact, Risk sections"
-disable-model-invocation: true
 ---
 
 Invoke the srepowers:clickup-ticket-creator skill and follow it exactly as presented to you
@@ -93,7 +91,6 @@ Invoke the srepowers:clickup-ticket-creator skill and follow it exactly as prese
 ```markdown
 ---
 description: "Generate GitLab CI/CD pipelines that push container images to AWS ECR - supports Containerfile or image mirroring"
-disable-model-invocation: true
 ---
 
 Invoke the srepowers:gitlab-ecr-pipeline skill and follow it exactly as presented to you
@@ -103,7 +100,6 @@ Invoke the srepowers:gitlab-ecr-pipeline skill and follow it exactly as presente
 ```markdown
 ---
 description: "Automated Puppet code quality analysis for control repos and modules - linting, dependency analysis, best practices"
-disable-model-invocation: true
 ---
 
 Invoke the srepowers:puppet-code-analyzer skill and follow it exactly as presented to you
@@ -113,7 +109,6 @@ Invoke the srepowers:puppet-code-analyzer skill and follow it exactly as present
 ```markdown
 ---
 description: "Proxmox VE and Proxmox Backup Server administration - cluster management, VM/CT operations, ZFS, networking, HA, backup/restore"
-disable-model-invocation: true
 ---
 
 Invoke the srepowers:pve-admin skill and follow it exactly as presented to you
@@ -123,7 +118,6 @@ Invoke the srepowers:pve-admin skill and follow it exactly as presented to you
 ```markdown
 ---
 description: "Create structured SRE runbooks with step-by-step procedures containing Command, Expected, and Result sections"
-disable-model-invocation: true
 ---
 
 Invoke the srepowers:sre-runbook skill and follow it exactly as presented to you

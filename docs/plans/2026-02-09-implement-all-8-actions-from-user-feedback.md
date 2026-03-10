@@ -63,7 +63,6 @@ Create: `commands/test-driven-operation.md`
 ```markdown
 ---
 description: "Use when executing infrastructure operations with verification commands - API calls, kubectl, Keycloak CRDs, Git MRs, Linux server operations"
-disable-model-invocation: true
 ---
 
 Invoke the srepowers:test-driven-operation skill and follow it exactly as presented to you
@@ -76,7 +75,6 @@ Create: `commands/subagent-driven-operation.md`
 ```markdown
 ---
 description: "Execute infrastructure operation plans with independent tasks in the current session"
-disable-model-invocation: true
 ---
 
 Invoke the srepowers:subagent-driven-operation skill and follow it exactly as presented to you
