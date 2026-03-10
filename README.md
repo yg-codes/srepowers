@@ -771,4 +771,4 @@ Adapted from the excellent [superpowers](https://github.com/obra/superpowers) pl
 
 ## Release Notes
 
-See [RELEASE-NOTES.md](RELEASE-NOTES.md) for version history and changes.
+See [RELEASE-NOTES.md](docs/RELEASE-NOTES.md) for version history and changes.
