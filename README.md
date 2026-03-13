@@ -190,20 +190,6 @@ kubectl get pod -n production -l app=api-server
 
 **Output:** Execution plan that operators can follow step-by-step.
 
-### cache-cleanup
-
-**Use when:** Cleaning up development tool caches interactively with pre/post verification.
-
-**Core principle:** Clean caches safely - verify tools work before cleanup, verify tools still work after cleanup.
-
-**Supported Tools:** mise-managed tools (Go, Rust, Node.js, Python), npm, Cargo, uv, pipx, pip
-
-**Workflow:**
-1. Select caches to clean (mise, npm, Go, Cargo, uv, pipx, pip)
-2. Pre-check: Verify each tool is available and working
-3. Cleanup: Remove cache directories
-4. Post-check: Verify tools still work after cleanup
-
 ### gitlab-ecr-pipeline
 
 **Use when:** Creating GitLab CI/CD pipelines that push container images to AWS ECR.
@@ -404,12 +390,6 @@ kubectl get pod -n production -l app=api-server
 
 **Focus:** EXPLAIN analysis, JSONB operations, extension usage, VACUUM tuning, performance monitoring, complex SQL patterns, query migration.
 
-### prompt-engineer
-
-**Use when:** Designing prompts for LLMs, optimizing model performance, building evaluation frameworks.
-
-**Focus:** Chain-of-thought, few-shot learning, structured outputs, prompt evaluation.
-
 ### python-pro
 
 **Use when:** Building Python 3.11+ applications requiring type safety, async programming, or production-grade patterns.
@@ -514,6 +494,37 @@ kubectl get pod -n production -l app=api-server
 
 **Focus:** Unit tests, integration tests, E2E, coverage analysis, performance testing, security testing.
 
+## Private Skills
+
+Private skills are personal skills stored in `private-skills/` that are not published to the marketplace plugin. They work exactly like public skills but are excluded from plugin releases.
+
+### Available Private Skills
+
+| Skill | Description |
+|-------|-------------|
+| `cache-cleanup` | Interactive dev tool cache cleanup with pre/post verification |
+| `clickup-ticket-creator` | Create ClickUp tickets following CCB template format |
+| `kubernetes-control-readme` | Create README.md for Kubernetes control/ components |
+| `prompt-engineer` | Design prompts for LLMs, optimize model performance |
+| `puppet-doc-sync` | Daily documentation sync for Puppet multi-repo projects |
+
+### Private Skills Commands
+
+- `/cache-cleanup` - Interactive dev tool cache cleanup
+- `/clickup-ticket-creator` - ClickUp ticket creation
+- `/kubernetes-control-readme` - K8s control README generation
+- `/prompt-engineer` - LLM prompt design
+- `/puppet-doc-sync` - Puppet documentation sync
+
+### Adding Private Skills
+
+1. Create `private-skills/<skill-name>/SKILL.md`
+2. Create `private-commands/<skill-name>.md` wrapper
+3. Update this README with the new skill
+4. Commit to srepowers repo
+
+To publish a private skill to the marketplace, move it from `private-skills/` to `skills/` and add a command wrapper to `commands/`.
+
 ## Commands
 
 Quick invoke skills using `/command` syntax:
@@ -548,9 +559,6 @@ Quick invoke skills using `/command` syntax:
 **Infrastructure Administration:**
 - `/pve-admin` - Proxmox VE/Backup administration
 - `/puppet-code-analyzer` - Puppet code quality analysis
-
-**Development Tools:**
-- `/cache-cleanup` - Interactive dev tool cache cleanup
 
 **CI/CD & Pipelines:**
 - `/gitlab-ecr-pipeline` - GitLab CI/CD → AWS ECR pipelines

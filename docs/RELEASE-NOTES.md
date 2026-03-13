@@ -1,5 +1,23 @@
 # Release Notes
 
+## [3.8.0] - 2026-03-13
+
+### Added
+- `private-skills/` directory for personal skills not published to marketplace
+- `private-commands/` directory for command wrappers of private skills
+- Migrated 5 skills from private claude repo:
+  - `cache-cleanup` - Interactive dev tool cache cleanup with pre/post verification
+  - `clickup-ticket-creator` - ClickUp ticket creation with CCB template
+  - `kubernetes-control-readme` - K8s control README generation
+  - `prompt-engineer` - LLM prompt design and optimization
+  - `puppet-doc-sync` - Puppet documentation sync
+- Updated documentation to explain private skills structure
+
+### Changed
+- `cache-cleanup` and `prompt-engineer` moved from public skills to private skills
+
+---
+
 ## [3.7.2] - 2026-03-09
 
 ### Bug Fix — Infinite Loop Prevention
