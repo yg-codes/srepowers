@@ -1,13 +1,13 @@
 ---
 name: kubernetes-control-readme
-description: Use when creating README.md for Kubernetes control/ components (helmfile or manifest-based), specifically when documenting components in FSX infrastructure with environment-specific configurations across d8/t8/m8/p8 clusters
+description: Use when creating README.md for Kubernetes control/ components (helmfile or manifest-based) with environment-specific configurations across dev/sit/uat/mgmt/prod clusters
 ---
 
 # Kubernetes Control README
 
 ## Overview
 
-Standardized README structure for `control/` components in FSX Kubernetes infrastructure. Control components include helmfile-based deployments and operator/CR-based manifest deployments.
+Standardized README structure for `control/` components in Kubernetes infrastructure. Control components include helmfile-based deployments and operator/CR-based manifest deployments.
 
 **Core principle:** Follow the template structure consistently across all control components for discoverability and maintainability.
 
@@ -98,11 +98,11 @@ Include ALL environments, even if planned:
 
 | Environment | kubeContext | Namespace | Domain | [Config columns] | Notes |
 |-------------|-------------|-----------|--------|------------------|-------|
-| **d8 (SIT)** | d8 | namespace | d8.fsx.zone | [...] | [notes] |
-| **d9 (Dev)** | d9 | namespace | d9.fsx.zone | [...] | Suspended (if applicable) |
-| **t8 (UAT)** | t8 | namespace | t8.fsx.zone | [...] | [notes] |
-| **m8 (MGMT)** | m8 | namespace | m8.fsx.zone | - | Planned |
-| **p8 (PROD)** | p8 | namespace | p8.fsx.zone | - | Planned |
+| **sit** | sit | namespace | sit.example.com | [...] | [notes] |
+| **dev** | dev | namespace | dev.example.com | [...] | Suspended (if applicable) |
+| **uat** | uat | namespace | uat.example.com | [...] | [notes] |
+| **mgmt** | mgmt | namespace | mgmt.example.com | - | Planned |
+| **prod** | prod | namespace | prod.example.com | - | Planned |
 
 **Notes column:** Include environment-specific differences (resource limits, memory_limiter, etc.)
 
@@ -244,7 +244,7 @@ kubectl --context=<env> apply -f manifests/<component>-<env>-cr.yaml
 ```markdown
 # [Component Name]
 
-[Brief 1-2 sentence description of what this component does and its purpose in FSX infrastructure.]
+[Brief 1-2 sentence description of what this component does and its purpose in the Kubernetes infrastructure.]
 
 **Key Features:**
 - **Feature 1** - Brief description
@@ -303,11 +303,11 @@ graph TB
 
 | Environment | kubeContext | Namespace | Domain | Specific Config | Notes |
 |-------------|-------------|-----------|--------|-----------------|-------|
-| **d8 (SIT)** | d8 | namespace | d8.fsx.zone | [config] | [notes] |
-| **d9 (Dev)** | d9 | namespace | d9.fsx.zone | [config] | Suspended (if applicable) |
-| **t8 (UAT)** | t8 | namespace | t8.fsx.zone | [config] | [notes] |
-| **m8 (MGMT)** | m8 | namespace | m8.fsx.zone | - | Planned |
-| **p8 (PROD)** | p8 | namespace | p8.fsx.zone | - | Planned |
+| **sit** | sit | namespace | sit.example.com | [config] | [notes] |
+| **dev** | dev | namespace | dev.example.com | [config] | Suspended (if applicable) |
+| **uat** | uat | namespace | uat.example.com | [config] | [notes] |
+| **mgmt** | mgmt | namespace | mgmt.example.com | - | Planned |
+| **prod** | prod | namespace | prod.example.com | - | Planned |
 
 > **Note:** Document any important configuration differences between environments.
 
@@ -397,9 +397,9 @@ resources:
 **values/env/d8.yaml**
 ```yaml
 # SIT-specific overrides
-environment: d8
-domain: d8.fsx.zone
-endpoint: https://sit-endpoint.fsx.zone
+environment: sit
+domain: sit.example.com
+endpoint: https://sit-endpoint.example.com
 ```
 
 #### t8 (UAT)
@@ -407,9 +407,9 @@ endpoint: https://sit-endpoint.fsx.zone
 **values/env/t8.yaml**
 ```yaml
 # UAT-specific overrides
-environment: t8
-domain: t8.fsx.zone
-endpoint: https://uat-endpoint.fsx.zone
+environment: uat
+domain: uat.example.com
+endpoint: https://uat-endpoint.example.com
 ```
 
 ## Verification
