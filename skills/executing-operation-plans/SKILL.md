@@ -24,6 +24,17 @@ Load infrastructure operation plan, review critically, execute tasks in batches 
 
 ## The Process
 
+### Step 0: Set Up Isolated Workspace
+
+Before loading the plan:
+
+```bash
+git branch --show-current
+kubectl config current-context
+```
+
+**REQUIRED:** Use srepowers:using-git-worktrees-sre to create an isolated worktree for this operation. Do not execute on the main branch without explicit user consent.
+
 ### Step 1: Load and Review Plan
 
 1. Read operation plan file
@@ -109,7 +120,7 @@ For multi-environment operations (sit → uat → prod):
 | From | To | Verification Required | Approval |
 |------|-----|----------------------|----------|
 | sit | uat | All checks pass in sit | Standard |
-| uat | prod | All checks pass in uat | **Explicit required** |
+| uat | prod | All checks pass in uat | **Explicit required** — ask user directly: "All UAT checks passed. Confirm promotion to prod?" |
 
 ## Stop and Rollback
 

@@ -11,6 +11,8 @@ When you have multiple unrelated infrastructure failures (different services, re
 
 **Core principle:** Dispatch one agent per independent problem domain. Let them work concurrently.
 
+**Announce at start:** "I'm using the dispatching-parallel-agents-sre skill to coordinate parallel infrastructure investigations."
+
 ## When to Use
 
 ```dot
@@ -119,7 +121,7 @@ Always include in infrastructure agent prompts:
 
 ```markdown
 ## Safety Rules:
-- Do NOT make changes to production without explicit approval
+- Do NOT make changes to production without explicit approval (ticket approval, Slack confirmation from team lead, or direct user instruction in this session)
 - Do NOT delete resources without confirmation
 - Always capture current state before changes
 - Document all commands executed
@@ -141,6 +143,33 @@ Always include in infrastructure agent prompts:
 | No safety constraints | Agent changes production | Add approval requirements |
 | No context | "Fix the timeout" | Include error messages, resource names |
 | No rollback plan | Can't undo changes | Require rollback in summary |
+
+## Real Example
+
+**Scenario:** 3 unrelated alerts fire simultaneously after a cluster upgrade
+
+**Failures:**
+- `api-prod` namespace: 4 pods in CrashLoopBackOff (OOMKilled)
+- `data-staging` namespace: liveness probe failures on all worker pods
+- `monitoring` namespace: Prometheus PVC at 95% capacity
+
+**Decision:** Independent domains — memory limits, liveness config, and storage are unrelated
+
+**Dispatch:**
+```
+Agent 1 → Investigate api-prod CrashLoopBackOff (memory limits)
+Agent 2 → Fix data-staging liveness probe failures
+Agent 3 → Resolve monitoring PVC capacity issue
+```
+
+**Results:**
+- Agent 1: Memory limits were 256Mi; usage spiked to 300Mi after upgrade — raised to 512Mi
+- Agent 2: Liveness probe path changed from `/healthz` to `/health` in new image — updated probe config
+- Agent 3: Old Prometheus WAL data not compacted — triggered compaction, freed 40%
+
+**Integration:** All changes independent, applied cleanly, cluster healthy in parallel not serially
+
+**Time saved:** 3 parallel investigations vs ~45 min sequential
 
 ## Key Benefits
 

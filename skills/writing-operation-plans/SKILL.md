@@ -140,11 +140,13 @@ If any verification fails:
 
 After saving the plan:
 
-**"Plan complete and saved to `docs/plans/<filename>.md`. Two execution options:**
+**"Plan complete and saved to `docs/plans/<filename>.md`. Three execution options:**
 
 **1. Subagent-Driven (this session)** - I dispatch fresh subagent per task, review between tasks, fast iteration
 
-**2. Manual execution** - You execute each task manually following the plan
+**2. Separate session** - Open new session with executing-operation-plans, batch execution with human checkpoints — good for high-risk or multi-environment operations
+
+**3. Manual execution** - You execute each task manually following the plan
 
 **Which approach?"**
 
@@ -152,3 +154,7 @@ After saving the plan:
 - **REQUIRED SUB-SKILL:** Use srepowers:subagent-driven-operation
 - Stay in this session
 - Fresh subagent per task + two-stage review
+
+**If Separate session chosen:**
+- Guide user to open new session in git worktree
+- **REQUIRED SUB-SKILL:** New session uses srepowers:executing-operation-plans

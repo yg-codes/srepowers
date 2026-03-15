@@ -13,6 +13,8 @@ Write the verification command first. Run it and watch it fail. Execute minimal 
 
 **Violating the letter of the rules is violating the spirit of the rules.**
 
+**Announce at start:** "I'm using the test-driven-operation skill to execute this infrastructure operation."
+
 ## When to Use
 
 **Always:**
@@ -369,6 +371,16 @@ Can't check all boxes? You skipped TDO. Rollback and start over.
 | Don't know how to verify | Write desired end state. Query for it first. Ask your human partner. |
 | Verification too complicated | Operation too complicated. Break into smaller ops. |
 | Must verify everything manually | Operation not observable. Add metrics/labels. |
+
+## Anti-Patterns Reference
+
+See `testing-anti-patterns.md` in this skill directory for detailed examples of what to avoid:
+- Command success ≠ actual state verified
+- Ignoring eventual consistency (CRDs, controllers)
+- Skipping rollback testing
+- Hardcoded `sleep` instead of condition-based waiting
+- Environment-specific verification that breaks in prod
+- Incomplete verification (pod exists ≠ pod healthy)
 
 ## Incident Response Integration
 

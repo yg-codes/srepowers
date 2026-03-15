@@ -1,5 +1,24 @@
 # Release Notes
 
+## [3.9.0] - 2026-03-15
+
+### Added
+- `using-srepowers` meta-skill — bootstraps skill usage at session start via hooks; was missing from the repository despite being referenced by `hooks/session-start.sh`
+
+### Fixed
+- `test-driven-operation` — added missing "Announce at start" line
+- `dispatching-parallel-agents-sre` — added missing "Announce at start" line; clarified "explicit approval" definition in safety constraints
+- `executing-operation-plans` — clarified UAT→prod promotion approval: now explicitly prompts user for confirmation
+- `writing-operation-plans` — execution handoff now offers three options (subagent-driven, separate session via executing-operation-plans, manual); previously only offered two
+- `CLAUDE.md` — updated repository structure to reflect current state: 18 missing commands, new `scripts/` and `evals/` dirs, `clickup-ticket-searcher` private skill
+
+### Improved
+- `test-driven-operation` — added Anti-Patterns Reference section pointing to `testing-anti-patterns.md`
+- `dispatching-parallel-agents-sre` — added concrete "Real Example" scenario (3-alert cluster upgrade walkthrough)
+- `executing-operation-plans` — added Step 0 with mandatory `using-git-worktrees-sre` requirement before execution
+
+---
+
 ## [3.8.0] - 2026-03-13
 
 ### Added
