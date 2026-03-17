@@ -26,7 +26,8 @@ graph TD
 
     TDO --> More{More tasks?}
     More -->|Yes| TDO
-    More -->|No| Finish[finishing-operation-branch]
+    More -->|No| Verify[verification-before-completion]
+    Verify --> Finish[finishing-operation-branch]
 
     Finish --> End([Complete])
 
@@ -35,6 +36,7 @@ graph TD
     style TDO fill:#fff4e1
     style Subagent fill:#e1f0ff
     style Execute fill:#e1f0ff
+    style Verify fill:#ffe1e1
 ```
 
 ## SRE Principles
@@ -90,6 +92,7 @@ cp -r srepowers/skills/* ~/.claude/skills/
 | Ready to execute, want continuous flow | `subagent-driven-operation` | - |
 | Long operation, need checkpoints | `executing-operation-plans` | - |
 | Single operation with verification | `test-driven-operation` | - |
+| About to claim work is done/deployed/healthy | `verification-before-completion` | - |
 | **Kubernetes** | | |
 | Deploy workloads, configure cluster | `kubernetes-specialist` | - |
 | Build container images | `container-engineer` | - |
@@ -259,6 +262,20 @@ kubectl get pod -n production -l app=api-server
 - Batch verification
 - Report and checkpoint
 - Continue or complete
+
+### verification-before-completion
+
+**Use when:** About to claim infrastructure work is complete, deployed, fixed, or healthy — before any commit, PR, or status update.
+
+**Core principle:** Evidence before claims, always. No completion claims without fresh verification command output.
+
+**Gate function:** Identify verification command → Run it → Read full output → Verify → Only then claim.
+
+**Common SRE failures prevented:**
+- Helm exit 0 ≠ deployment succeeded (run `kubectl rollout status`)
+- Pod Running ≠ service healthy (check health endpoint)
+- `kubectl apply` exit 0 ≠ config applied (read back the value)
+- Agent reports success ≠ verified (check VCS diff)
 
 ### observability-integration
 
@@ -548,6 +565,7 @@ Quick invoke skills using `/command` syntax:
 **Operations Enhancement:**
 - `/executing-operation-plans` - Execute plans in separate sessions with checkpoints
 - `/observability-integration` - Verify operations using metrics and alerting data (Prometheus, Datadog, CloudWatch, New Relic)
+- `/verification-before-completion` - Enforce evidence-before-claims before any completion status
 - `/safety-validator` - Review commands for high-risk operations
 - `/progressive-delivery` - Canary/blue-green release with SLO-based rollback triggers
 - `/toil-analysis` - Measure toil, plan automation investments, model capacity
