@@ -1,5 +1,19 @@
 # Release Notes
 
+## [3.10.0] - 2026-03-17
+
+### Added
+- `verification-before-completion` — new skill (adapted from superpowers) enforcing evidence-before-claims for infrastructure: no completion/deploy/healthy claims without fresh verification command output; includes SRE-specific failure table (helm exit 0 ≠ deployed, Running ≠ healthy, agent success report ≠ verified)
+- `systematic-troubleshooting/defense-in-depth.md` — reference for adding validation at every layer (input, policy, admission, observability) to make misconfigurations structurally impossible; adapted for infra context (Helm schema, OPA/Gatekeeper, env guards, structured logging)
+- `systematic-troubleshooting/root-cause-tracing.md` — reference for backward causation-chain tracing; adapted for infra context (kubectl events, helm history, GitOps commits); includes certificate expiry cascade example
+- `writing-skills-sre/testing-skills-with-subagents.md` — reference for TDD-applied-to-skill-testing; infra-specific pressure scenarios (incident urgency, sunk cost, authority, exhaustion), pressure scenario templates, and rationalization patterns
+
+### Changed
+- `using-srepowers` — added `verification-before-completion` to skill workflow sequence and skill tables; added 3 new red flags ("Exit 0 means success", "This doesn't count as a task", "Agent reported success")
+- `systematic-troubleshooting` SKILL.md — added references to new `root-cause-tracing.md` and `defense-in-depth.md` in Supporting Techniques section
+
+---
+
 ## [3.9.0] - 2026-03-15
 
 ### Added

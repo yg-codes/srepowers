@@ -53,7 +53,7 @@ digraph skill_flow {
 Infrastructure operations follow this sequence:
 
 ```
-brainstorming-operations → writing-operation-plans → (subagent-driven-operation OR executing-operation-plans) → finishing-operation-branch
+brainstorming-operations → writing-operation-plans → (subagent-driven-operation OR executing-operation-plans) → [verification-before-completion] → finishing-operation-branch
 ```
 
 Each skill hands off explicitly to the next. Do NOT skip steps.
@@ -74,6 +74,7 @@ Each skill hands off explicitly to the next. Do NOT skip steps.
 | Skill | Use When |
 |-------|----------|
 | `srepowers:safety-validator` | Reviewing proposed commands before execution |
+| `srepowers:verification-before-completion` | About to claim work is done, deployed, or healthy |
 | `srepowers:receiving-code-review-sre` | Processing code review feedback on infra changes |
 | `srepowers:environment-health-check` | Verifying SREPowers environment is configured |
 
@@ -153,6 +154,9 @@ Each skill hands off explicitly to the next. Do NOT skip steps.
 | "This doesn't need brainstorming" | All operations need design. Use brainstorming-operations. |
 | "I'll verify after" | Verification-first is the rule. |
 | "The skill is overkill here" | Simple things become complex. Use it. |
+| "Exit 0 means success" | Exit code ≠ correct result. Use verification-before-completion. |
+| "This doesn't count as a task" | Action = task. Check for skills. |
+| "Agent reported success" | Verify independently. Trust output, not reports. |
 
 ## Skill Priority
 

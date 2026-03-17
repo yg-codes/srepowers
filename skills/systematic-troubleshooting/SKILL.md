@@ -501,7 +501,8 @@ See reference files in this directory:
 - **`log-analysis.md`** - Structured log parsing and correlation
 - **`metrics-correlation.md`** - Using Prometheus/Grafana for root cause
 - **`distributed-tracing.md`** - Following requests across services
-- **`incident-timeline.md`** - Reconstructing event sequences
+- **`root-cause-tracing.md`** - Backward call chain tracing to find original trigger
+- **`defense-in-depth.md`** - Prevent recurrence by validating at every layer
 
 ## Real-World Impact
 

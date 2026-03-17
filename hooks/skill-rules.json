@@ -191,6 +191,35 @@
         ]
       }
     },
+    "verification-before-completion": {
+      "type": "workflow",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Enforce evidence-before-claims for infrastructure operations — no completion claims without fresh verification",
+      "promptTriggers": {
+        "keywords": [
+          "done",
+          "complete",
+          "finished",
+          "deployed",
+          "fixed",
+          "healthy",
+          "all good",
+          "looks good",
+          "should work",
+          "it's working",
+          "ready to merge",
+          "ready to commit",
+          "seems to be"
+        ],
+        "intentPatterns": [
+          "\\b(done|complete|finished|ready)\\b.*(deploy|operation|task|migration|fix|change)",
+          "\\b(deployment|rollout|migration|fix)\\b.*(succeeded|complete|done|finished|worked)",
+          "\\b(service|pod|cluster|database)\\b.*(is|are)\\b.*(healthy|up|running|working|fixed)",
+          "\\b(should|probably|seems|looks like)\\b.*(work|pass|be fine|be up|be healthy)"
+        ]
+      }
+    },
     "safety-validator": {
       "type": "workflow",
       "enforcement": "suggest",
