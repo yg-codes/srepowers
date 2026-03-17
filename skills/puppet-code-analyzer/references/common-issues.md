@@ -7,6 +7,7 @@ This document catalogs frequently encountered Puppet issues in the FSX infrastru
 - [Dependency Issues](#dependency-issues)
 - [Syntax Errors](#syntax-errors)
 - [Hiera Data Issues](#hiera-data-issues)
+- [Class Design Issues](#class-design-issues)
 - [Package Management](#package-management)
 - [File and Template Issues](#file-and-template-issues)
 - [Service Management](#service-management)
@@ -290,6 +291,105 @@ data/
 └── nodes/
     └── web01.yaml        # Node-specific overrides
 ```
+
+## Class Design Issues
+
+### Missing Parameter Defaults (Bootstrap Failure)
+
+**Error Message:**
+```
+Error: Could not find value for <class>::<parameter>
+Error: Evaluation Error: Resource type parameter <parameter> expects a <type> value, got Undef
+```
+
+**Root Cause:**
+Class parameters are declared without default values, and no Hiera data matches the current node's hierarchy. This is a **critical bootstrap issue** - the class fails before any resources can be managed.
+
+**Why This Is a Problem:**
+
+1. **Bootstrap Chicken-and-Egg**: Classes that configure package repositories (e.g., `fsx_repo`) must compile successfully on first run. If they fail, Puppet can't install packages to fix anything.
+
+2. **Tight Coupling**: The class requires Hiera data to exist, violating the "safe defaults" pattern.
+
+3. **Non-Portable**: The module won't work on untested platforms or OS versions.
+
+**Anti-Pattern (Bad):**
+```puppet
+# manifests/init.pp - NO DEFAULTS
+class fsx_repo (
+  Fsx_repo::Main_config $main,                         # ← Required, no default
+  Hash[String, Fsx_repo::Repofile_config] $repofiles,  # ← Required, no default
+  Hash[String, Fsx_repo::Repo_config] $repos,          # ← Required, no default
+) {
+  include fsx_repo::config
+  include fsx_repo::main
+}
+```
+
+```yaml
+# common/all.yaml - class is included everywhere
+classes:
+  - fsx_repo
+
+# But data only exists in os/RedHat*.yaml
+# If a node doesn't match os/RedHat*, Puppet FAILS
+```
+
+**Best Practice Pattern (Good):**
+```puppet
+# manifests/init.pp - SAFE DEFAULTS
+class fsx_repo (
+  Fsx_repo::Main_config $main = {
+    gpgcheck            => true,
+    installonly_limit   => 3,
+    skip_if_unavailable => true,
+  },
+  Hash[String, Fsx_repo::Repofile_config] $repofiles = {},
+  Hash[String, Fsx_repo::Repo_config] $repos = {},
+) {
+  # Guard clause - do nothing if no repos configured
+  if $repofiles.empty and $repos.empty {
+    info("${module_name}: No repository data provided, skipping configuration")
+    return
+  }
+
+  include fsx_repo::config
+  include fsx_repo::main
+}
+```
+
+**Alternative: Conditional Class Inclusion**
+
+Move class inclusion to where data exists:
+```yaml
+# os/RedHat.yaml - only include where data exists
+classes:
+  - fsx_repo
+
+fsx_repo::repofiles:
+  elrepo: { ... }
+```
+
+**Key Principles:**
+
+| Principle | Violation | Correct Approach |
+|-----------|-----------|------------------|
+| **Safe Defaults** | No parameter defaults | All parameters have defaults |
+| **Graceful Degradation** | Class fails hard | Class does nothing if no data |
+| **Data/Code Separation** | Class requires data | Data enhances class behavior |
+| **Portability** | OS-specific data required | Works on any OS (may be minimal) |
+
+**Detection:**
+
+Look for class declarations where parameters lack `= <default>` syntax:
+```bash
+# Find classes with required parameters (potential issue)
+grep -r "class.*(" modules/*/manifests/init.pp | grep -v "= "
+```
+
+**Reference:** Puppet Best Practices (O'Reilly), Chapter 4: Module Design, pages 75-110
+
+---
 
 ## Package Management
 

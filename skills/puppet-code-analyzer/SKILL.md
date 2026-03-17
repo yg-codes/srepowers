@@ -120,8 +120,10 @@ scripts/check_best_practices.py --json ~/src/fsx/puppet/modules/fsx_dns > practi
 - **Naming conventions**: Class names, resource types, variables (lowercase with underscores)
 - **String quotes**: Prefer single quotes for static strings
 - **Parameter handling**: Type specifications, default values
+- **Required parameters without defaults**: CRITICAL - causes bootstrap failures when Hiera data doesn't match
 - **Hiera lookups**: Automatic parameter lookup vs. `hiera()` function
 - **Resource ordering**: Implicit ordering issues, missing explicit relationships
+- **Class inclusion patterns**: Classes in `common/all.yaml` must have safe defaults
 - **Custom rules**: Load team-specific rules from `references/puppet-style-guide.md`
 
 **Integration:**
