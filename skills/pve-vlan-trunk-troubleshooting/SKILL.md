@@ -73,21 +73,26 @@ If `bridge-vlan-aware yes` is missing or VLAN not in table → bridge config is 
 
 **This is the decisive test.**
 
-```bash
-# Ping VLAN gateway from PVE host
-ping -c 5 -I vmbr1.<VLANID> <GATEWAY_IP>
+> **WARNING:** `ping -I vmbr1.<VLANID> <GW>` is **unreliable** when the PVE host has no IP assigned in the VLAN subnet (common). The source IP falls back to the management IP, which is outside the subnet — the gateway correctly drops the reply. This gives a false "100% loss" even when VLAN is fully trunked. Use tcpdump instead.
 
-# Check ARP
-ip neigh show | grep <VLAN_SUBNET>
+```bash
+# RELIABLE: Watch for VLAN-tagged frames on bond1 uplink (10s)
+# If switch is trunking VLAN, you will see STP/HSRP/ARP frames immediately
+timeout 10 tcpdump -i bond1 -n -e vlan <VLANID> -c 10 2>&1
+
+# Cross-check: arping from bridge subinterface to gateway
+# arping uses L2 directly — not affected by IP subnet mismatch
+arping -I vmbr1.<VLANID> -c 3 <GATEWAY_IP> 2>&1
 ```
 
 **Interpret results:**
 
 | Result | Meaning |
 |--------|---------|
-| Ping works | Host can reach VLAN — go to Phase 4 (guest OS) |
-| 100% loss + ARP FAILED | Switch not trunking VLAN on this node's uplink → **Phase 3b** |
-| 100% loss + ARP STALE | Switch issue or IP conflict |
+| tcpdump sees STP/HSRP/ARP frames tagged with VLANID | Switch IS trunking VLAN — go to Phase 4 (guest OS) |
+| tcpdump: 0 packets captured | Switch NOT trunking VLAN on this uplink → **Phase 3b** |
+| arping gets reply | L2 reachable — issue is guest OS |
+| arping no reply + tcpdump empty | Switch not trunking VLAN → **Phase 3b** |
 
 ### Phase 3b — Switch Uplink Verification (lldpcli)
 
@@ -159,10 +164,10 @@ Check guest via console if agent unavailable.
 ## Quick Verification After Fix
 
 ```bash
-# Confirm VLAN reachable from host
-ping -c 3 -I vmbr1.<VLANID> <GATEWAY_IP>
+# Confirm VLAN frames flowing on uplink (reliable — works without host IP in subnet)
+timeout 5 tcpdump -i bond1 -n vlan <VLANID> -c 5 2>&1
 
-# Confirm VM reachable
+# Confirm VM reachable (from another node or external host)
 ping -c 3 <VM_IP>
 ```
 
@@ -183,6 +188,7 @@ qm migrate <VMID> <working-node> --online
 | Blaming the VM when tap traffic exists | If tap has traffic but bond1 has none, the bridge or switch is the cause |
 | Asking network team without port IDs | Always run `lldpcli show neighbors detail` first — it gives exact switch/port |
 | Forgetting to check reference node | Always compare with a working node on same VLAN |
+| Using `ping -I vmbr1.<VLAN>` as the reachability test | PVE hosts rarely have an IP in the VLAN subnet — ping source falls back to mgmt IP, gateway drops reply, giving false "100% loss". Use tcpdump on bond1 instead. |
 
 ## Evidence to Collect (for escalation)
 
@@ -191,7 +197,8 @@ qm migrate <VMID> <working-node> --online
 lldpcli show neighbors detail > /tmp/lldp-<node>.log
 bridge vlan show > /tmp/bridge-vlan-<node>.log
 qm config <VMID> > /tmp/vm-config-<VMID>.log
-ping -c 5 -I vmbr1.<VLANID> <GW> > /tmp/ping-gw.log
+timeout 10 tcpdump -i bond1 -n -e vlan <VLANID> -c 10 > /tmp/tcpdump-bond1-vlan<VLANID>.log 2>&1
+arping -I vmbr1.<VLANID> -c 3 <GW> > /tmp/arping-gw.log 2>&1
 ip neigh show > /tmp/arp.log
 timeout 30 tcpdump -i bond1 -w /tmp/bond1-vlan<ID>.pcap vlan <VLANID>
 timeout 30 tcpdump -i tap<VMID>i0 -w /tmp/tap-<VMID>.pcap
