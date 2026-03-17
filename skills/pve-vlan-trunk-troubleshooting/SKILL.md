@@ -22,6 +22,28 @@ VLAN connectivity failures on PVE are almost never VM configuration problems. Th
 - All VLANs broken on a node (likely physical link down — check bond status first)
 - VM cannot reach internet but can reach local subnet (routing/firewall issue)
 
+## Interactive Session Setup
+
+**ALWAYS start by collecting these inputs from the user before running any checks.**
+
+Ask the user:
+
+```
+1. Target PVE node FQDN (e.g. fsx-mgmt-pve11.fsx.zone)?
+2. VLAN tag to check (e.g. 227)?
+3. VMID to check (optional — skip Phase 1 if not provided)?
+4. Reference node where this VLAN works (optional — used for comparison)?
+5. Is SSHPASS set in your shell? (required for remote commands)
+```
+
+Do not proceed until you have at least **node FQDN** and **VLAN tag**. If the user already provided them in their message, confirm and proceed without re-asking.
+
+Store as session variables for all subsequent commands:
+- `NODE` = target PVE node FQDN
+- `VLANID` = VLAN tag number
+- `VMID` = VM ID (if provided)
+- `REF_NODE` = reference node FQDN (if provided)
+
 ## The Four-Phase Method
 
 Complete phases in order. Stop when root cause is found.
