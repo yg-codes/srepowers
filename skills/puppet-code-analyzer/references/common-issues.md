@@ -159,14 +159,14 @@ class profile::web (
 }
 ```
 
-2. **Use fully qualified variable names:**
+2. **Use facts hash for system facts (Puppet 6+):**
 ```puppet
-# Top scope variable
-$::global_variable = 'value'
+# Modern - use facts hash
+$os_family = $facts['os']['family']
 
 # Access from class
 class example {
-  $local_value = $::global_variable  # Works
+  $local_value = $facts['os']['family']
 }
 ```
 
@@ -239,6 +239,56 @@ profile::web_server::enable_ssl: "true"  # String, not Boolean
 2. **Use explicit type conversion:**
 ```puppet
 $port = Integer(hiera('profile::web_server::port', 80))
+```
+
+### Hardcoded Values in Hiera Data
+
+**Symptoms:**
+- IP addresses, passwords, or tokens committed to version control
+- Data that works in one environment but fails in another
+- Secrets visible in `git log` or `git diff`
+
+**Solutions:**
+
+1. **Replace hardcoded IPs with facts or correct hierarchy level:**
+```yaml
+# Bad - in common.yaml
+profile::app::db_host: '10.0.1.45'
+
+# Good - in data/nodes/<nodename>.yaml or data/env/production.yaml
+profile::app::db_host: 'db01.prod.example.com'
+```
+
+2. **Encrypt secrets with hiera-eyaml:**
+```bash
+# Encrypt a value
+eyaml encrypt -s 'S3cr3tP@ssw0rd'
+
+# Result in Hiera YAML
+profile::app::db_password: >
+  ENC[PKCS7,MIIBe...]
+```
+
+3. **Use Puppet Sensitive type to prevent secret logging:**
+```puppet
+class profile::app (
+  Sensitive[String] $db_password = Sensitive('changeme'),
+) {
+  # $db_password is redacted in reports and logs
+}
+```
+
+4. **Use the correct Hiera hierarchy level** — don't put environment-specific data in `common.yaml`:
+```
+data/
+├── common.yaml           # Only truly global defaults
+├── env/
+│   ├── production.yaml   # Production-specific values
+│   └── staging.yaml      # Staging-specific values
+├── datacenter/
+│   └── dc1.yaml          # Datacenter-specific IPs/endpoints
+└── nodes/
+    └── web01.yaml        # Node-specific overrides
 ```
 
 ## Package Management
@@ -467,8 +517,8 @@ Puppet::Node <<| |>>
 # Instead of
 Puppet::Node <<| |>>  # All nodes
 
-# Or use:
-Puppet::Node <<| title == $::hostname |>>
+# Or use facts for hostname:
+Puppet::Node <<| title == $facts['networking']['hostname'] |>>
 ```
 
 2. **Optimize Hiera lookups:**
@@ -482,10 +532,10 @@ $config_b = hiera('profile::config_b')
 $config_c = hiera('profile::config_c')
 ```
 
-3. **Use future parser:**
+3. **Use modern Puppet features (6+):**
 ```puppet
-# Enable in environment.conf
-parser = future
+# Modern Puppet has all "future parser" features enabled by default
+# Ensure you're using Puppet 6+ for best performance and features
 ```
 
 ### Agent Run Slow

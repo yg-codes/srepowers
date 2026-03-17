@@ -82,10 +82,10 @@ class fsx_module_name (
 ```puppet
 # manifests/install.pp
 class fsx_module_name::install (
-  String $package_name      = $fsx_module_name::package_name,
-  String $package_ensure    = $fsx_module_name::package_ensure,
-) inherits fsx_module_name::params {
-
+  String $package_name   = $fsx_module_name::package_name,
+  String $package_ensure = $fsx_module_name::package_ensure,
+) {
+  # Note: Modern Puppet uses Hiera for defaults instead of inheriting params class
   package { $package_name:
     ensure => $package_ensure,
   }
@@ -97,10 +97,10 @@ class fsx_module_name::install (
 ```puppet
 # manifests/config.pp
 class fsx_module_name::config (
-  String $config_file = $fsx_module_name::params::config_file,
-  Hash $config      = $fsx_module_name::params::config,
-) inherits fsx_module_name::params {
-
+  String $config_file = $fsx_module_name::config_file,
+  Hash $config        = $fsx_module_name::config,
+) {
+  # Note: Modern Puppet uses Hiera for defaults instead of inheriting params class
   file { $config_file:
     ensure  => file,
     mode    => '0644',
@@ -120,11 +120,11 @@ class fsx_module_name::config (
 ```puppet
 # manifests/service.pp
 class fsx_module_name::service (
-  String $service_name   = $fsx_module_name::params::service_name,
-  Boolean $service_enable = $fsx_module_name::params::service_enable,
-  Enum['running', 'stopped'] $service_ensure = $fsx_module_name::params::service_ensure,
-) inherits fsx_module_name::params {
-
+  String $service_name                     = $fsx_module_name::service_name,
+  Boolean $service_enable                  = $fsx_module_name::service_enable,
+  Enum['running', 'stopped'] $service_ensure = $fsx_module_name::service_ensure,
+) {
+  # Note: Modern Puppet uses Hiera for defaults instead of inheriting params class
   service { $service_name:
     ensure     => $service_ensure,
     enable     => $service_enable,
@@ -138,19 +138,21 @@ class fsx_module_name::service (
 }
 ```
 
-### Parameters Class
+### Parameters Class (Legacy Pattern)
+
+> ⚠️ **Note:** The `params` class pattern with `inherits` is considered **legacy** in modern Puppet (6+). Prefer **Hiera automatic parameter lookup** for setting defaults. The params class is shown here for compatibility with existing codebases.
 
 ```puppet
-# manifests/params.pp
+# manifests/params.pp - LEGACY PATTERN
 class fsx_module_name::params {
-  # OS-specific defaults
-  $package_name = $::os.family ? {
+  # OS-specific defaults (use Hiera hierarchy instead for new modules)
+  $package_name = $facts['os']['family'] ? {
     'Debian' => 'module_name',
     'RedHat' => 'module_name',
     default  => 'module_name',
   }
 
-  $service_name = $::os.family ? {
+  $service_name = $facts['os']['family'] ? {
     'Debian' => 'module_name',
     'RedHat' => 'module_named',
     default  => 'module_name',
@@ -170,22 +172,37 @@ class fsx_module_name::params {
 }
 ```
 
-## Template Organization
+**Modern Alternative - Hiera Data Binding:**
 
-### ERB Templates (Legacy)
+Instead of a params class, use Hiera for OS-specific defaults:
 
-```erb
-<%# templates/config.erb - Legacy ERB syntax %>
-# Configuration file for <%= @module_name %>
-server_port = <%= @port %>
-server_host = <%= @host %>
+```yaml
+# data/os/Debian.yaml
+fsx_module_name::package_name: 'module_name'
+fsx_module_name::service_name: 'module_name'
 
-<% if @enable_ssl -%>
-ssl_cert = /etc/ssl/certs/<%= @cert_file %>
-<% end -%>
+# data/os/RedHat.yaml
+fsx_module_name::package_name: 'module_name'
+fsx_module_name::service_name: 'module_named'
 ```
 
-### EPP Templates (Modern)
+```puppet
+# manifests/init.pp - Modern approach with Hiera
+class fsx_module_name (
+  String $package_name   = 'module_name',  # Hiera provides OS-specific value
+  String $service_name   = 'module_name',
+  String $config_file    = '/etc/module_name/config.conf',
+  String $package_ensure = 'installed',
+) {
+  # No params class needed - Hiera handles defaults
+}
+```
+
+## Template Organization
+
+### EPP Templates (Recommended)
+
+**EPP is the preferred template format for Puppet 5+** with better security, syntax validation, and parameter typing:
 
 ```epp
 <%# templates/config.epp - Modern EPP syntax %>
@@ -198,12 +215,22 @@ ssl_cert = /etc/ssl/certs/<%= $cert_file %>
 <% } -%>
 ```
 
+### ERB Templates (Deprecated)
+
+> ⚠️ **ERB templates are deprecated** - avoid for new code. Use EPP templates instead for better type safety and parameter validation.
+
+```erb
+<%# templates/config.erb - LEGACY: Do not use for new code %>
+# Configuration file for <%= @module_name %>
+server_port = <%= @port %>
+```
+
 ### Template Best Practices
 
-1. **Use EPP for new templates** (better security and syntax)
-2. **Keep templates simple** - move complex logic to Puppet
-3. **Document template variables** at the top
-4. **Use safe navigation** for optional variables
+1. **Use EPP for all new templates** - ERB is deprecated
+2. **Keep templates simple** - move complex logic to Puppet manifests
+3. **Document template parameters** at the top of EPP files
+4. **Use typed parameters** in EPP for validation
 
 ```epp
 <%# | $module_name = 'module',

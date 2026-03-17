@@ -1,5 +1,21 @@
 # Release Notes
 
+## [3.11.0] - 2026-03-17
+
+### Changed
+- `puppet-code-analyzer` — modernized all references for Puppet 6+/7/8 best practices:
+  - Updated fact syntax throughout: `$::os.family` → `$facts['os']['family']`
+  - Removed obsolete "future parser" section (default since Puppet 4)
+  - Marked `params` class pattern as legacy; added Hiera data binding as modern alternative
+  - Marked ERB templates as deprecated; EPP promoted as the only recommended format
+  - Added "Puppet 7/8 Compatibility" section: deprecated features table, modern facts/`lookup()` syntax, Puppet 8 breaking changes
+  - Added "Hardcoded Hiera" anti-pattern coverage: hardcoded IPs, plaintext secrets, version pinning, wrong hierarchy level, eYAML guidance
+  - Added `puppetbestpractices.pdf` (O'Reilly, Barbour & Rhett, 2018) as authoritative reference
+  - Added mandatory Reference Loading Protocol to SKILL.md: auto-loads relevant PDF chapters before every analysis based on file type (`.pp`, Hiera, module, resources, Puppetfile)
+  - Findings now cite book chapter and page number for traceability
+
+---
+
 ## [3.10.0] - 2026-03-17
 
 ### Added

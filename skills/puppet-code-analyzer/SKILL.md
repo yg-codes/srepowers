@@ -20,6 +20,26 @@ This skill activates automatically when:
 - Explicitly requesting Puppet analysis (e.g., "analyze this module", "check for issues")
 - Encountering Puppet errors during development or deployment
 
+## Reference Loading Protocol
+
+**Always load the following before starting any analysis**, based on what is being reviewed:
+
+| Target | Load immediately |
+|--------|-----------------|
+| Any `.pp` manifest file | `references/puppetbestpractices.pdf` pages 37–72 (Ch3: Coding Practices) |
+| Module directory | `references/puppetbestpractices.pdf` pages 75–110 (Ch4: Module Design) |
+| `hiera.yaml` or Hiera data (`*.yaml` under `data/`) | `references/puppetbestpractices.pdf` pages 151–170 (Ch6: Hiera Data) |
+| Resource declarations (`package`, `file`, `service`, `exec`) | `references/puppetbestpractices.pdf` pages 113–148 (Ch5: Resources) |
+| `Puppetfile` or environment-level code | `references/puppetbestpractices.pdf` pages 21–34 (Ch2: Code and Data Design) |
+| Any Puppet code (catch-all) | `references/puppet-style-guide.md` |
+
+**Additionally load on demand:**
+- `references/common-issues.md` — when diagnosing errors or anti-patterns
+- `references/module-structure.md` — when reviewing module layout or class structure
+- `references/puppetbestpractices.pdf` pages 1–20 (Ch1: Design Philosophy) — when evaluating idempotency or declarative correctness
+
+**Do not skip reference loading** — the PDF chapters are the authoritative source for best practice judgements. Always cite the chapter and page when raising a finding that comes from the book.
+
 ## Core Capabilities
 
 ### 1. Code Linting
@@ -241,8 +261,15 @@ Documentation loaded into context as needed:
 - **`puppet-style-guide.md`** - Team-specific Puppet conventions and standards
 - **`common-issues.md`** - Catalog of frequently encountered issues and solutions
 - **`module-structure.md`** - Expected module layout and patterns
+- **`puppetbestpractices.pdf`** - *Puppet Best Practices: Design Patterns for Maintainable Code* by Chris Barbour & Jo Rhett (O'Reilly, 2018, ISBN 978-1-491-92300-9). Authoritative reference for:
+  - Ch1: Design philosophy — declarative code, idempotency, stateless design
+  - Ch2: High-level code and data design — roles/profiles, Hiera data sources
+  - Ch3: Coding practices — KISS/DRY/SRP principles, variables, EPP vs ERB templates
+  - Ch4: Module design — PDK, module structure, params.pp pattern, input validation
+  - Ch5: Resources — resource declaration, virtual resources, metaparameters, chaining
+  - Ch6: Hiera data — hierarchy design, automatic parameter lookups, eYAML, backends
 
-**Usage:** Claude loads these files when detailed reference material is needed for analysis or recommendations.
+**Usage:** Claude reads PDF pages when deep authoritative guidance is needed. Use `pages:` parameter to target specific chapters — e.g., pages 151–170 for Hiera, pages 37–73 for coding practices, pages 75–110 for module design.
 
 ## Quick Start Examples
 
