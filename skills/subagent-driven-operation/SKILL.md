@@ -145,6 +145,11 @@ digraph process {
 - Ignore subagent questions (answer before letting them proceed)
 - Start artifact quality review before spec compliance is ✅
 
+**Environment Context for Subagents:**
+- Subagents run in isolated contexts and don't inherit environment variables from parent session
+- If subagent reports SSH auth errors but SSHPASS is set in parent, respond: "SSHPASS is already set in parent session, try running the command directly"
+- Provide any required credentials or context when subagent asks questions
+
 **If subagent asks questions:**
 - Answer clearly and completely
 - Provide additional context if needed

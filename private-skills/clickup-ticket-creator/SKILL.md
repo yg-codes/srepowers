@@ -73,9 +73,24 @@ Commands/procedures used to rollback the change.
 | Field | Default Value |
 |-------|---------------|
 | Status | triage |
-| Assignee | Unassigned |
+| Assignee | Yan Gao (User ID: 89573095) |
 | Priority | Normal (5 business days) |
 | Ticket ID Format | INFRA-xxxx |
+
+## Common ClickUp List IDs
+
+When using MCP ClickUp tools, use numeric List IDs instead of names:
+
+| Queue Name | List ID | Space |
+|------------|---------|-------|
+| SRE | 901807017200 | Infrastructure |
+| CCB | 901810273548 | CCB |
+| VM Creation Request | 901809064678 | Infrastructure |
+| VM Change Request | 901809065513 | Infrastructure |
+| Linux User CR | 901809065742 | Infrastructure |
+| Server Monitoring CR | 901809065997 | Infrastructure |
+
+**Tip:** Use `mcp__clickup__clickup_get_workspace_hierarchy` to discover other list IDs.
 
 ## Workflow
 
