@@ -17,12 +17,14 @@ Write comprehensive infrastructure operation plans assuming the operator has zer
 
 ## Plan Document Header
 
-**Every plan MUST start with this header:**
+**Every plan MUST start with this header (include ClickUp ticket link if available):**
 
 ```markdown
 # [Operation Name] Execution Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use srepowers:subagent-driven-operation to implement this plan task-by-task.
+
+**ClickUp Ticket:** [TICKET-ID](https://app.clickup.com/t/9002217639/TICKET-ID) <!-- Optional: include if ticket exists -->
 
 **Goal:** [One sentence describing what this achieves]
 **Risk Level:** [Low/Medium/High with rationale]
