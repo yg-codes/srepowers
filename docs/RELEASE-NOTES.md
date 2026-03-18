@@ -1,5 +1,16 @@
 # Release Notes
 
+## [3.12.0] - 2026-03-18
+
+### Removed
+- `private-skills/` directory — personal skills archived to separate claude repo
+- `private-commands/` directory — command wrappers for private skills removed
+- Private Skills section from README.md — no longer hosting private skills in this repo
+
+Private skills (cache-cleanup, clickup-ticket-creator, clickup-ticket-searcher, kubernetes-control-readme, prompt-engineer, puppet-doc-sync) are now maintained separately in the user's personal claude repository.
+
+---
+
 ## [3.11.0] - 2026-03-17
 
 ### Changed

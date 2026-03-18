@@ -511,37 +511,6 @@ kubectl get pod -n production -l app=api-server
 
 **Focus:** Unit tests, integration tests, E2E, coverage analysis, performance testing, security testing.
 
-## Private Skills
-
-Private skills are personal skills stored in `private-skills/` that are not published to the marketplace plugin. They work exactly like public skills but are excluded from plugin releases.
-
-### Available Private Skills
-
-| Skill | Description |
-|-------|-------------|
-| `cache-cleanup` | Interactive dev tool cache cleanup with pre/post verification |
-| `clickup-ticket-creator` | Create ClickUp tickets following CCB template format |
-| `kubernetes-control-readme` | Create README.md for Kubernetes control/ components |
-| `prompt-engineer` | Design prompts for LLMs, optimize model performance |
-| `puppet-doc-sync` | Daily documentation sync for Puppet multi-repo projects |
-
-### Private Skills Commands
-
-- `/cache-cleanup` - Interactive dev tool cache cleanup
-- `/clickup-ticket-creator` - ClickUp ticket creation
-- `/kubernetes-control-readme` - K8s control README generation
-- `/prompt-engineer` - LLM prompt design
-- `/puppet-doc-sync` - Puppet documentation sync
-
-### Adding Private Skills
-
-1. Create `private-skills/<skill-name>/SKILL.md`
-2. Create `private-commands/<skill-name>.md` wrapper
-3. Update this README with the new skill
-4. Commit to srepowers repo
-
-To publish a private skill to the marketplace, move it from `private-skills/` to `skills/` and add a command wrapper to `commands/`.
-
 ## Commands
 
 Quick invoke skills using `/command` syntax:
