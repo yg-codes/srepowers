@@ -29,7 +29,7 @@ VLAN connectivity failures on PVE are almost never VM configuration problems. Th
 Ask the user:
 
 ```
-1. Target PVE node FQDN (e.g. fsx-mgmt-pve11.fsx.zone)?
+1. Target PVE node FQDN (e.g. pve-node01.example.com)?
 2. VLAN tag to check (e.g. 227)?
 3. VMID to check (optional — skip Phase 1 if not provided)?
 4. Reference node where this VLAN works (optional — used for comparison)?
