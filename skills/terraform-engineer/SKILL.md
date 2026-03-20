@@ -5,12 +5,6 @@ description: Use when implementing infrastructure as code with Terraform across 
 
 # Terraform Engineer
 
-Senior Terraform engineer specializing in infrastructure as code across AWS, Azure, and GCP with expertise in modular design, state management, and production-grade patterns.
-
-## Role Definition
-
-You are a senior DevOps engineer with 10+ years of infrastructure automation experience. You specialize in Terraform 1.5+ with multi-cloud providers, focusing on reusable modules, secure state management, and enterprise compliance. You build scalable, maintainable infrastructure code.
-
 ## When to Use This Skill
 
 - Building Terraform modules for reusability
@@ -40,54 +34,20 @@ Load detailed guidance based on context:
 | Testing | `references/testing.md` | terraform plan, terratest, policy as code |
 | Best Practices | `references/best-practices.md` | DRY patterns, naming, security, cost tracking |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Use semantic versioning for modules
-- Enable remote state with locking
-- Validate inputs with validation blocks
-- Use consistent naming conventions
-- Tag all resources for cost tracking
-- Document module interfaces
-- Pin provider versions
-- Run terraform fmt and validate
-
-### MUST NOT DO
-- Store secrets in plain text
-- Use local state for production
-- Skip state locking
-- Hardcode environment-specific values
-- Mix provider versions without constraints
-- Create circular module dependencies
-- Skip input validation
-- Commit .terraform directories
+| Thought | Reality |
+|---------|--------|
+| "Just terraform apply, I reviewed the plan" | Always `terraform plan` → review → `terraform apply`. Every time. |
+| "State file is fine without locking" | Enable state locking. Concurrent applies corrupt state. |
+| "Hardcode this value, it won't change" | Variables for everything. Today's constant is tomorrow's parameter. |
+| "One big module is easier" | Small, composable modules. Blast radius matters. |
+| "Skip the import, just recreate" | Recreating resources causes downtime. Import first. |
+| "Drift doesn't matter for this resource" | All drift matters. Unmanaged drift causes incidents. |
 
 ## SRE Principles
 
-### Safety First
-- Always run `terraform plan` and review output before `terraform apply`
-- Back up state file before migrations or imports; use state locking
-- Phase structure: **Pre-check** (validate, plan, policy check) → **Execute** (apply with approval) → **Verify** (output values, resource status, drift detection)
-
-### Structured Output
-- Present plan output using resource change tables (action, resource, attribute changes)
-- Use comparison tables for module evaluations (module, inputs, outputs, dependencies)
-- Include cost estimation summaries (resource type, count, monthly cost, total)
-
-### Evidence-Driven
-- Reference actual `terraform plan` output diffs showing exact resource changes
-- Include `terraform state list` output to verify resource tracking
-- Cite cost estimation tool output (Infracost, AWS Calculator) with specific numbers
-
-### Audit-Ready
-- Version all Terraform code with meaningful commit messages referencing change tickets
-- Maintain state file version history with apply logs
-- Document resource change history with who applied, when, and what changed
-
-### Communication
-- Lead with infrastructure impact (e.g., "This module provisions a 3-AZ HA cluster reducing RTO from 4h to 15min")
-- Present cost implications in monthly/annual business terms
-- Summarize drift detection findings for operations review
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

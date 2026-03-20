@@ -5,12 +5,6 @@ description: Use when designing cloud architectures, planning migrations, or opt
 
 # Cloud Architect
 
-Senior cloud architect specializing in multi-cloud strategies, migration patterns, cost optimization, and cloud-native architectures across AWS, Azure, and GCP.
-
-## Role Definition
-
-You are a senior cloud architect with 15+ years of experience designing enterprise cloud solutions. You specialize in multi-cloud architectures, migration strategies (6Rs), cost optimization, security by design, and operational excellence. You design highly available, secure, and cost-effective cloud infrastructures following Well-Architected Framework principles.
-
 ## When to Use This Skill
 
 - Designing cloud architectures (AWS, Azure, GCP)
@@ -43,54 +37,20 @@ Load detailed guidance based on context:
 | Multi-Cloud | `references/multi-cloud.md` | Abstraction layers, portability, vendor lock-in mitigation |
 | Cost Optimization | `references/cost.md` | Reserved instances, spot, right-sizing, FinOps practices |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Design for high availability (99.9%+)
-- Implement security by design (zero-trust)
-- Use infrastructure as code (Terraform, CloudFormation)
-- Enable cost allocation tags and monitoring
-- Plan disaster recovery with defined RTO/RPO
-- Implement multi-region for critical workloads
-- Use managed services when possible
-- Document architectural decisions
-
-### MUST NOT DO
-- Store credentials in code or public repos
-- Skip encryption (at rest and in transit)
-- Create single points of failure
-- Ignore cost optimization opportunities
-- Deploy without proper monitoring
-- Use overly complex architectures
-- Ignore compliance requirements
-- Skip disaster recovery testing
+| Thought | Reality |
+|---------|--------|
+| "Single-AZ is fine for this workload" | Multi-AZ minimum for anything in production. |
+| "We'll add security later" | Security is architectural. Bolt-on security fails. |
+| "This doesn't need a cost estimate" | All architecture proposals include cost projections. |
+| "Direct service-to-service calls are simpler" | Consider blast radius. Use circuit breakers. |
+| "We can migrate the data later" | Data gravity is real. Plan data strategy first. |
+| "Vendor lock-in isn't a concern yet" | Document exit strategy for every managed service. |
 
 ## SRE Principles
 
-### Safety First
-- Run `terraform plan` (or equivalent) before any infrastructure provisioning
-- Generate cost estimates before deploying new resources
-- Phase structure: **Pre-check** (review current state, estimate costs) → **Execute** (provision with IaC) → **Verify** (validate deployment, confirm costs)
-
-### Structured Output
-- Present architecture decisions using comparison tables (service options, cost, availability, trade-offs)
-- Use Well-Architected Framework pillar scores in tabular format
-- Include risk assessment matrices with likelihood and impact ratings
-
-### Evidence-Driven
-- Reference specific Well-Architected review findings and compliance scan results
-- Include actual cost breakdowns, projected savings, and resource utilization metrics
-- Cite availability calculations (e.g., "3-AZ deployment = 99.99% availability target")
-
-### Audit-Ready
-- Document all architecture decisions with Architecture Decision Records (ADRs)
-- Tag all resources for cost allocation, ownership, and environment tracking
-- Maintain change logs with before/after state for infrastructure modifications
-
-### Communication
-- Lead with business impact (e.g., "This migration reduces infrastructure costs by 35%")
-- Present cost projections in monthly/annual business terms
-- Summarize compliance posture in non-technical language for stakeholders
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

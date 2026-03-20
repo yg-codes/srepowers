@@ -5,12 +5,6 @@ description: Use when orchestrating Terraform/OpenTofu modules with Terragrunt -
 
 # Terragrunt Expert
 
-Senior Terragrunt specialist with deep expertise in orchestrating Terraform/OpenTofu infrastructure at scale, focusing on stack architecture, DRY configurations, dependency management, and enterprise deployment strategies.
-
-## Role Definition
-
-You are a senior DevOps engineer with 10+ years of infrastructure automation experience. You specialize in Terragrunt for orchestrating OpenTofu/Terraform, with expertise in stack architecture, unit composition, dependency graphs, DRY configuration patterns, and scalable multi-environment deployments. You build maintainable, reusable infrastructure code.
-
 ## When to Use This Skill
 
 - Orchestrating multiple Terraform/OpenTofu modules with Terragrunt
@@ -41,57 +35,20 @@ Load detailed guidance based on context:
 | Dependency Management | `references/dependency-management.md` | DAG optimization, mock outputs, cross-stack dependencies |
 | DRY Patterns | `references/dry-patterns.md` | Include blocks, read_terragrunt_config, configuration inheritance |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Use Terragrunt to eliminate duplication across environments
-- Pin Terragrunt and Terraform/OpenTofu versions
-- Configure remote state with locking and encryption
-- Use include blocks for shared configuration
-- Implement mock outputs for dependencies during plan
-- Version infrastructure module sources
-- Document stack architecture and unit relationships
-- Run terragrunt hcl fmt and validate
-
-### MUST NOT DO
-- Duplicate configuration across environments
-- Create circular dependencies between units
-- Skip mock outputs for dependent units
-- Use hardcoded environment-specific values in modules
-- Mix Terragrunt versions across environments
-- Store secrets in terragrunt.hcl files
-- Skip dependency ordering validation
-- Commit .terragrunt-cache directories
+| Thought | Reality |
+|---------|--------|
+| "Just copy the module, it's faster" | DRY configuration. Copy-paste creates drift. |
+| "One terragrunt.hcl for everything" | Separate environments. Blast radius matters. |
+| "Skip the dependency graph" | Define dependencies explicitly. Implicit ordering causes failures. |
+| "Hardcode the backend config" | Generate backend config. Consistency across environments. |
+| "Remote state reference is fine" | Use dependency blocks for cross-module references. Safer than remote_state. |
+| "Plan is enough, skip the review" | Review plan output in CI. Automated gates prevent mistakes. |
 
 ## SRE Principles
 
-### Safety First
-- Always run `terragrunt plan` and review output before `terragrunt apply`
-- Use `--terragrunt-non-interactive` flag only in CI/CD with proper safeguards
-- Phase structure: **Pre-check** (validate, plan, dependency graph) -> **Execute** (apply with approval) -> **Verify** (output values, resource status, stack status)
-
-### Structured Output
-- Present dependency graphs using ASCII or Mermaid diagrams
-- Use tables for unit comparisons (unit, source, dependencies, inputs)
-- Include stack execution order for multi-unit deployments
-- Show DRY percentage and configuration inheritance chains
-
-### Evidence-Driven
-- Reference actual `terragrunt plan` output showing infrastructure changes
-- Include `terragrunt dag graph` output to verify dependency ordering
-- Cite `terragrunt find` output to show affected units
-- Show before/after DRY metrics for refactoring efforts
-
-### Audit-Ready
-- Version all Terragrunt configurations with meaningful commit messages
-- Maintain stack execution logs with timestamps
-- Document dependency rationale for cross-unit references
-- Track module source versions in terragrunt.hcl
-
-### Communication
-- Lead with infrastructure impact (e.g., "This stack orchestrates 12 units with automated dependency ordering, reducing deployment time from 45min to 8min")
-- Present DRY improvements in maintainability terms
-- Summarize dependency complexity and parallelization opportunities
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

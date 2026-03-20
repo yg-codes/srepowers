@@ -5,12 +5,6 @@ description: Use when building, optimizing, or securing container images and orc
 
 # Container Engineer
 
-Senior Docker specialist with deep expertise in production-grade container builds, image optimization, security hardening, and supply chain security.
-
-## Role Definition
-
-You are a senior DevOps engineer with 10+ years of containerization experience. You specialize in Docker multi-stage builds, image size optimization, container security hardening, supply chain security (SBOM, signing, provenance), and production deployment patterns. You build lean, secure, and maintainable container images.
-
 ## When to Use This Skill
 
 - Building optimized multi-stage Dockerfiles
@@ -40,58 +34,20 @@ Load detailed guidance based on context:
 | Security Hardening | `references/security-hardening.md` | Image scanning, vulnerability remediation, secret management, DHI |
 | Supply Chain | `references/supply-chain.md` | SBOM generation, cosign signing, SLSA provenance |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Use multi-stage builds for production images
-- Pin base image versions with digests (not `latest` tag)
-- Run containers as non-root user
-- Set read-only root filesystem when possible
-- Include HEALTHCHECK instruction for long-running services
-- Use .dockerignore to exclude unnecessary files
-- Scan images for vulnerabilities before deployment
-- Sign images and generate SBOM for supply chain security
-- Set resource limits in docker-compose and orchestration
-
-### MUST NOT DO
-- Run containers as root in production
-- Store secrets in environment variables or image layers
-- Use `latest` tag for production deployments
-- Install unnecessary packages in final image
-- Leave sensitive files in image layers
-- Skip vulnerability scanning
-- Use unverified base images from unknown sources
-- Mount Docker socket into containers
+| Thought | Reality |
+|---------|--------|
+| "Use latest tag, it's simpler" | Pin image versions. `latest` causes non-reproducible builds. |
+| "Root user is fine in the container" | Run non-root. Principle of least privilege. |
+| "One big Dockerfile is easier" | Multi-stage builds. Smaller images = faster deploys + smaller attack surface. |
+| "Base image doesn't matter" | Use minimal bases (distroless/alpine). Every package is attack surface. |
+| "Skip the vulnerability scan" | Scan every image. Known CVEs in containers cause breaches. |
+| "Build context includes everything" | .dockerignore rigorously. Large contexts slow builds and leak secrets. |
 
 ## SRE Principles
 
-### Safety First
-- Use `docker build --no-cache` sparingly and intentionally; rely on layer caching
-- Test image builds in isolation before pushing to registries
-- Phase structure: **Pre-check** (lint Dockerfile, scan base image) -> **Build** (multi-stage with caching) -> **Verify** (vulnerability scan, SBOM, sign)
-
-### Structured Output
-- Present Dockerfiles with clear stage separation and comments
-- Use tables for image layer analysis (layer, size, command, cacheable)
-- Include image size comparisons before/after optimization
-- Show vulnerability scan summaries (severity, CVE count, fixable)
-
-### Evidence-Driven
-- Reference actual `docker images` output showing image sizes
-- Include `docker history` output for layer analysis
-- Cite vulnerability scan results with CVE IDs and remediation paths
-- Show build times with and without layer caching
-
-### Audit-Ready
-- Document base image versions and update schedules
-- Maintain SBOM artifacts for every production image
-- Keep vulnerability scan history and remediation records
-- Track image signing keys and provenance metadata
-
-### Communication
-- Lead with operational impact (e.g., "Reduced image size by 60%, cutting deployment time from 3min to 45sec")
-- Present security posture improvements in business terms (risk reduction, compliance)
-- Summarize vulnerability trends and remediation progress
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

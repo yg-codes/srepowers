@@ -5,12 +5,6 @@ description: Use when designing distributed systems, decomposing monoliths, or i
 
 # Microservices Architect
 
-Senior distributed systems architect specializing in cloud-native microservices architectures, resilience patterns, and operational excellence.
-
-## Role Definition
-
-You are a senior microservices architect with 15+ years of experience designing distributed systems. You specialize in service decomposition, domain-driven design, resilience patterns, service mesh technologies, and cloud-native architectures. You design systems that scale, self-heal, and enable autonomous teams.
-
 ## When to Use This Skill
 
 - Decomposing monoliths into microservices
@@ -43,54 +37,20 @@ Load detailed guidance based on context:
 | Data Management | `references/data.md` | Database per service, event sourcing, CQRS |
 | Observability | `references/observability.md` | Distributed tracing, correlation IDs, metrics |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Apply domain-driven design for service boundaries
-- Use database per service pattern
-- Implement circuit breakers for external calls
-- Add correlation IDs to all requests
-- Use async communication for cross-aggregate operations
-- Design for failure and graceful degradation
-- Implement health checks and readiness probes
-- Use API versioning strategies
-
-### MUST NOT DO
-- Create distributed monoliths
-- Share databases between services
-- Use synchronous calls for long-running operations
-- Skip distributed tracing implementation
-- Ignore network latency and partial failures
-- Create chatty service interfaces
-- Store shared state without proper patterns
-- Deploy without observability
+| Thought | Reality |
+|---------|--------|
+| "This service can call that one directly" | Define contracts first. Direct coupling creates distributed monoliths. |
+| "Distributed transactions are fine" | Prefer sagas. Distributed transactions don't scale. |
+| "One database per service is overkill" | Database per service. Shared databases create hidden coupling. |
+| "Service mesh is too complex" | Evaluate complexity vs. observability and security gains. |
+| "Synchronous calls are simpler" | Async where possible. Synchronous chains amplify failures. |
+| "This doesn't need circuit breaking" | Circuit breakers on all external calls. Cascading failures kill. |
 
 ## SRE Principles
 
-### Safety First
-- Validate service contracts with consumer-driven contract tests before deployment
-- Configure circuit breakers and bulkheads before enabling cross-service communication
-- Phase structure: **Pre-check** (contract tests, dependency health) → **Execute** (deploy with canary) → **Verify** (distributed traces, SLO dashboards, error rates)
-
-### Structured Output
-- Present service boundaries using domain context maps with clear ownership
-- Use comparison tables for communication patterns (sync vs async, trade-offs, latency)
-- Include service dependency matrices showing coupling levels (low/medium/high)
-
-### Evidence-Driven
-- Reference distributed trace data (Jaeger/Zipkin) for latency analysis across service boundaries
-- Include service mesh metrics (request rates, error rates, latency per service pair)
-- Cite SLO dashboard values for each service boundary
-
-### Audit-Ready
-- Document all service contracts with versioned API specifications (OpenAPI, protobuf)
-- Maintain service dependency maps updated with every architecture change
-- Track change impact analysis for cross-service modifications
-
-### Communication
-- Lead with business impact (e.g., "Decomposing checkout service reduces deploy frequency from weekly to hourly")
-- Explain eventual consistency in business terms (e.g., "Order status updates within 2 seconds")
-- Summarize service health in a single-page dashboard format
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

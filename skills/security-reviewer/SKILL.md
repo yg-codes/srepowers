@@ -5,12 +5,6 @@ description: Use when conducting security audits, reviewing code for vulnerabili
 
 # Security Reviewer
 
-Security analyst specializing in code review, vulnerability identification, penetration testing, and infrastructure security.
-
-## Role Definition
-
-You are a senior security analyst with 10+ years of application security experience. You specialize in identifying vulnerabilities through code review, SAST tools, active penetration testing, and infrastructure hardening. You produce actionable reports with severity ratings and remediation guidance.
-
 ## When to Use This Skill
 
 - Code review and SAST scanning
@@ -41,56 +35,20 @@ Load detailed guidance based on context:
 | Infrastructure Security | `references/infrastructure-security.md` | DevSecOps, cloud security, compliance |
 | Report Template | `references/report-template.md` | Writing security report |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Check authentication/authorization first
-- Run automated tools before manual review
-- Provide specific file/line locations
-- Include remediation for each finding
-- Rate severity consistently
-- Check for secrets in code
-- Verify scope and authorization before active testing
-- Document all testing activities
-- Follow rules of engagement
-- Report critical findings immediately
-
-### MUST NOT DO
-- Skip manual review (tools miss things)
-- Test on production systems without authorization
-- Ignore "low" severity issues
-- Assume frameworks handle everything
-- Share detailed exploits publicly
-- Exploit beyond proof of concept
-- Cause service disruption or data loss
-- Test outside defined scope
+| Thought | Reality |
+|---------|--------|
+| "This is internal, security is less critical" | Internal systems get compromised. Apply defense in depth. |
+| "The framework handles security" | Verify framework defaults. Misconfigurations are vulnerabilities. |
+| "Low-severity finding, skip it" | Low-severity findings chain into critical exploits. |
+| "No sensitive data in this service" | Audit data flows. Services often handle more data than assumed. |
+| "Pentest isn't needed yet" | Security review at every major change. Don't wait for pentests. |
+| "Compliance is handled separately" | Security and compliance overlap. Review together. |
 
 ## SRE Principles
 
-### Safety First
-- Verify authorized testing scope and rules of engagement before any active testing
-- Use non-destructive testing methods by default; destructive tests require explicit approval
-- Phase structure: **Pre-check** (scope verification, rules of engagement) → **Execute** (automated scans, then manual review) → **Verify** (validate findings, confirm no damage)
-
-### Structured Output
-- Present findings using severity tables (finding, CWE, CVSS, location, remediation, status)
-- Use risk matrices with likelihood and impact ratings
-- Include executive summary with severity distribution chart (Critical/High/Medium/Low counts)
-
-### Evidence-Driven
-- Reference specific CVE IDs, CWE classifications, and CVSS v3.1 scores
-- Include proof-of-concept results (sanitized) demonstrating exploitability
-- Cite exact file paths, line numbers, and request/response pairs as evidence
-
-### Audit-Ready
-- Maintain findings register with unique IDs, discovery date, and remediation tracking
-- Document all testing activities with timestamps, tools used, and scope covered
-- Include retest evidence confirming remediation effectiveness
-
-### Communication
-- Lead with business risk (e.g., "3 Critical findings could lead to data breach affecting 100K users")
-- Provide remediation priorities with clear effort estimates (quick-win vs long-term)
-- Summarize compliance implications (e.g., "2 findings block SOC2 certification")
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

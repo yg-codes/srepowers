@@ -1,6 +1,6 @@
 ---
 name: toil-analysis
-description: Use when identifying, measuring, and reducing operational toil - provides structured toil inventory, capacity planning models, and automation prioritization frameworks
+description: Use when identifying, measuring, and reducing operational toil or when prioritizing automation of repetitive manual tasks
 ---
 
 # Toil Analysis

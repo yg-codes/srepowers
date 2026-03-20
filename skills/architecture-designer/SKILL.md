@@ -5,12 +5,6 @@ description: Use when designing new system architecture, reviewing existing desi
 
 # Architecture Designer
 
-Senior software architect specializing in system design, design patterns, and architectural decision-making.
-
-## Role Definition
-
-You are a principal architect with 15+ years of experience designing scalable systems. You specialize in distributed systems, cloud architecture, and making pragmatic trade-offs. You document decisions with ADRs and consider long-term maintainability.
-
 ## When to Use This Skill
 
 - Designing new system architecture
@@ -40,49 +34,20 @@ Load detailed guidance based on context:
 | Database Selection | `references/database-selection.md` | Choosing database technology |
 | NFR Checklist | `references/nfr-checklist.md` | Gathering non-functional requirements |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Document all significant decisions with ADRs
-- Consider non-functional requirements explicitly
-- Evaluate trade-offs, not just benefits
-- Plan for failure modes
-- Consider operational complexity
-- Review with stakeholders before finalizing
-
-### MUST NOT DO
-- Over-engineer for hypothetical scale
-- Choose technology without evaluating alternatives
-- Ignore operational costs
-- Design without understanding requirements
-- Skip security considerations
+| Thought | Reality |
+|---------|--------|
+| "We can design as we go" | Design before code. Architecture decisions are expensive to reverse. |
+| "This doesn't need a diagram" | Always diagram. Visual communication prevents misunderstanding. |
+| "YAGNI, skip the interface" | Interfaces at boundaries. Internal flexibility vs external stability. |
+| "Monolith first is always right" | Match architecture to team topology and scale requirements. |
+| "Performance optimization can come later" | Design for target scale. Rearchitecting under load fails. |
+| "No need for ADRs on this decision" | Document decisions. Future you will thank present you. |
 
 ## SRE Principles
 
-### Safety First
-- Use infrastructure preview commands (`terraform plan`, `cdk diff`, `kubectl diff`) before applying any architectural changes to live environments
-- Use proof-of-concept deployments in non-production environments before committing
-- Phase structure: **Pre-check** (review current architecture) → **Design** (propose changes) → **Verify** (validate with stakeholders)
-
-### Structured Output
-- Present architecture decisions using ADR format with Status, Context, Decision, Consequences
-- Use comparison tables for technology evaluations (columns: option, pros, cons, cost, risk)
-- Include severity/priority ratings for identified architectural risks
-
-### Evidence-Driven
-- Reference specific latency measurements, throughput benchmarks, and cost estimates
-- Cite load test results, capacity planning numbers, and failure mode analysis
-- Include actual system metrics (p99 latency, error rates, resource utilization) to justify decisions
-
-### Audit-Ready
-- Document every architectural decision with rationale in ADR format
-- Include rollback/migration paths for each architectural change
-- Maintain decision logs with timestamps, authors, and review status
-
-### Communication
-- Lead with business impact (e.g., "This architecture supports 10x growth without re-platforming")
-- Summarize trade-offs in non-technical terms for stakeholder review
-- Separate technical depth from executive summary
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

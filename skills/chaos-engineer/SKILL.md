@@ -5,12 +5,6 @@ description: Use when designing chaos experiments, implementing failure injectio
 
 # Chaos Engineer
 
-Senior chaos engineer with deep expertise in controlled failure injection, resilience testing, and building systems that get stronger under stress.
-
-## Role Definition
-
-You are a senior chaos engineer with 10+ years of experience in reliability engineering and resilience testing. You specialize in designing and executing controlled chaos experiments, managing blast radius, and building organizational resilience through scientific experimentation and continuous learning from controlled failures.
-
 ## When to Use This Skill
 
 - Designing and executing chaos experiments
@@ -40,54 +34,20 @@ Load detailed guidance based on context:
 | Tools & Automation | `references/chaos-tools.md` | Chaos Monkey, Gremlin, Pumba, CI/CD integration |
 | Game Days | `references/game-days.md` | Planning, executing, learning from game days |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Define steady state metrics before experiments
-- Document hypothesis clearly
-- Control blast radius (start small, isolate impact)
-- Enable automated rollback under 30 seconds
-- Monitor continuously during experiments
-- Ensure zero customer impact initially
-- Capture all learnings and share
-- Implement improvements from findings
-
-### MUST NOT DO
-- Run experiments without hypothesis
-- Skip blast radius controls
-- Test in production without safety nets
-- Ignore monitoring during experiments
-- Run multiple variables simultaneously (initially)
-- Forget to document learnings
-- Skip team communication
-- Leave systems in degraded state
+| Thought | Reality |
+|---------|--------|
+| "Production is too risky for chaos" | Chaos in prod finds real issues. Start small, expand. |
+| "We don't need a hypothesis" | Always hypothesize first. Chaos without hypothesis is just breaking things. |
+| "Skip the blast radius limit" | Constrain blast radius. Uncontrolled chaos causes outages. |
+| "Steady state is obvious" | Define and measure steady state explicitly. Assumptions mislead. |
+| "One big experiment covers everything" | Small, targeted experiments. Isolate variables. |
+| "We can skip the abort conditions" | Always define abort criteria before starting. |
 
 ## SRE Principles
 
-### Safety First
-- All chaos experiments MUST include blast radius controls and automated rollback (< 30 seconds)
-- Run experiments in staging/non-production first; production experiments require explicit approval
-- Phase structure: **Pre-check** (verify steady state metrics) → **Execute** (inject failure) → **Verify** (confirm rollback and recovery)
-
-### Structured Output
-- Present experiment results using tables: hypothesis, steady-state metric, actual result, verdict
-- Use Pre-check → Execute → Verify phases for every experiment
-- Include severity ratings for discovered weaknesses (Critical/High/Medium/Low)
-
-### Evidence-Driven
-- Reference specific steady-state metrics (error rate, latency p99, throughput) before and during experiments
-- Include actual monitoring dashboard screenshots or metric values as evidence
-- Cite mean time to detect (MTTD) and mean time to recover (MTTR) from experiment results
-
-### Audit-Ready
-- Log every experiment with hypothesis, start/end time, blast radius, and outcome
-- Document all remediation actions taken as a result of findings
-- Maintain experiment history for compliance and incident review
-
-### Communication
-- Lead with business impact (e.g., "This experiment revealed a single point of failure affecting 10K users")
-- Summarize findings in non-technical terms for leadership review
-- Clearly distinguish between expected behavior and discovered weaknesses
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

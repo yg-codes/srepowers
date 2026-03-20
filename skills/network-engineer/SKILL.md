@@ -5,12 +5,6 @@ description: Use when designing, optimizing, or troubleshooting cloud and hybrid
 
 # Network Engineer
 
-Senior network engineer specializing in cloud and hybrid network infrastructure with deep expertise in VPC architecture, load balancing, DNS management, and zero-trust networking.
-
-## Role Definition
-
-You are a senior network engineer with 15+ years of experience in enterprise networking, cloud networking (AWS, Azure, GCP), and hybrid architectures. You specialize in VPC design, load balancing strategies, DNS infrastructure, VPN/interconnect solutions, and implementing zero-trust security models. You design networks that are scalable, secure, and highly available.
-
 ## When to Use This Skill
 
 - Designing VPC architecture across single or multi-region deployments
@@ -40,57 +34,20 @@ Load detailed guidance based on context:
 | Load Balancing | `references/load-balancing.md` | Layer 4/7 balancing, algorithms, health checks, SSL termination |
 | DNS Management | `references/dns-management.md` | Zone design, record management, DNSSEC, failover routing |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Document network topology with diagrams before implementation
-- Use separate subnets for public/private/tiered workloads
-- Implement least-privilege network access with security groups
-- Enable flow logs for network troubleshooting and security analysis
-- Plan for high availability across availability zones
-- Use Infrastructure as Code for all network configurations
-- Test failover scenarios before production deployment
-- Monitor network latency, throughput, and error rates
-
-### MUST NOT DO
-- Use overly permissive security group rules (0.0.0.0/0 for sensitive ports)
-- Skip documentation of network topology and routing
-- Ignore cross-region latency in multi-region architectures
-- Hardcode IP addresses in configurations
-- Mix production and development traffic in shared subnets
-- Disable flow logs in production environments
-- Skip health check configuration for load balancers
-- Use self-signed certificates for production TLS
+| Thought | Reality |
+|---------|--------|
+| "Default security group rules are fine" | Explicit allow rules only. Default-deny everything. |
+| "This doesn't need encryption in transit" | Encrypt everything in transit. TLS/mTLS mandatory. |
+| "One big subnet is simpler" | Segment networks by function. Blast radius containment. |
+| "DNS will propagate quickly" | TTLs matter. Lower TTLs before changes, verify propagation. |
+| "NAT isn't needed for this VPC" | Private subnets + NAT for egress. Minimize public exposure. |
+| "Firewall rules can wait" | Security rules deploy with infrastructure, not after. |
 
 ## SRE Principles
 
-### Safety First
-- Always validate network changes in non-production first
-- Use gradual rollout for routing changes (weighted routing, canary)
-- Phase structure: **Pre-check** (review topology, validate security groups, dry-run) -> **Execute** (apply changes incrementally) -> **Verify** (connectivity tests, latency checks, failover validation)
-
-### Structured Output
-- Present network diagrams using ASCII or Mermaid notation
-- Use tables for subnet planning (name, CIDR, AZ, purpose, route table)
-- Include routing tables in documentation (destination, target, purpose)
-- Show security group rules in tabular format (direction, port, source, description)
-
-### Evidence-Driven
-- Reference actual connectivity test results (ping, traceroute, curl)
-- Include flow log samples showing traffic patterns
-- Cite latency measurements before/after optimization
-- Document DNS resolution times and propagation status
-
-### Audit-Ready
-- Version all network configurations in git with change tickets
-- Maintain network topology documentation with change history
-- Keep security group rule change logs with justification
-- Document all VPN tunnel configurations and encryption standards
-
-### Communication
-- Lead with network impact (e.g., "This design provides 99.99% availability with automatic failover in <30 seconds")
-- Present latency improvements in business terms (user experience, conversion impact)
-- Summarize security posture changes (attack surface reduction, compliance alignment)
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

@@ -5,12 +5,6 @@ description: Use when building Python 3.11+ applications requiring type safety, 
 
 # Python Pro
 
-Senior Python developer with 10+ years experience specializing in type-safe, async-first, production-ready Python 3.11+ code.
-
-## Role Definition
-
-You are a senior Python engineer mastering modern Python 3.11+ and its ecosystem. You write idiomatic, type-safe, performant code across web development, data science, automation, and system programming with focus on production best practices.
-
 ## When to Use This Skill
 
 - Writing type-safe Python with complete type coverage
@@ -40,53 +34,20 @@ Load detailed guidance based on context:
 | Testing | `references/testing.md` | pytest, fixtures, mocking, parametrize |
 | Packaging | `references/packaging.md` | poetry, pip, pyproject.toml, distribution |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Type hints for all function signatures and class attributes
-- PEP 8 compliance with black formatting
-- Comprehensive docstrings (Google style)
-- Test coverage exceeding 90% with pytest
-- Use `X | None` instead of `Optional[X]` (Python 3.10+)
-- Async/await for I/O-bound operations
-- Dataclasses over manual __init__ methods
-- Context managers for resource handling
-
-### MUST NOT DO
-- Skip type annotations on public APIs
-- Use mutable default arguments
-- Mix sync and async code improperly
-- Ignore mypy errors in strict mode
-- Use bare except clauses
-- Hardcode secrets or configuration
-- Use deprecated stdlib modules (use pathlib not os.path)
+| Thought | Reality |
+|---------|--------|
+| "Type hints aren't needed here" | Type hints on all public functions. Catches bugs early. |
+| "Just catch Exception" | Catch specific exceptions. Broad catches hide bugs. |
+| "requirements.txt is fine" | Use pyproject.toml with pinned deps. Reproducibility matters. |
+| "This doesn't need async" | Profile first. Async for I/O-bound, multiprocessing for CPU. |
+| "I'll add tests later" | Write tests alongside code. Untested code is broken code. |
+| "Global state is fine for this" | Dependency injection. Global state makes testing impossible. |
 
 ## SRE Principles
 
-### Safety First
-- Validate all operational commands with dry-run flags (e.g., `--check` for formatters, `--dry-run` for deployments, migration preview before applying database changes)
-- Use virtual environment isolation to prevent dependency conflicts
-- Phase structure: **Pre-check** (lint, type-check, test) → **Execute** (implement changes) → **Verify** (full test suite, coverage report, type-check clean)
-
-### Structured Output
-- Present code quality using coverage tables (module, statements, coverage %, missing lines)
-- Use type-check summary tables (files checked, errors, warnings)
-- Include test results in structured format (total, passed, failed, skipped, duration)
-
-### Evidence-Driven
-- Reference pytest coverage reports with actual percentages and uncovered lines
-- Include mypy output showing zero errors in strict mode
-- Cite profiling results (cProfile/py-spy) for performance optimization claims
-
-### Audit-Ready
-- Track dependency changes with `pip-audit` vulnerability scans
-- Document breaking API changes with deprecation warnings and migration guides
-- Every change must include a documented rollback path (migration down scripts, previous package version pins, or feature flag disable)
-
-### Communication
-- Lead with quality impact (e.g., "Type coverage increased from 60% to 95%, eliminating a class of runtime errors")
-- Express performance improvements with concrete metrics (e.g., "Async refactor reduces API response time by 3x")
-- Summarize dependency security posture for stakeholders
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

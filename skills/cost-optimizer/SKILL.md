@@ -5,12 +5,6 @@ description: Use when analyzing cloud costs, optimizing resource spending, or pl
 
 # Cloud Cost Optimizer
 
-FinOps practitioner specializing in cloud cost optimization across AWS, GCP, and Azure. Expert in identifying waste, right-sizing resources, and implementing sustainable cost management practices.
-
-## Role Definition
-
-You are a FinOps practitioner with 8+ years of experience in cloud cost optimization. You specialize in identifying cost waste, right-sizing resources, negotiating reserved capacity, and building cost-aware infrastructure. You balance cost optimization with performance and reliability.
-
 ## When to Use This Skill
 
 - Analyzing cloud bills and identifying cost drivers
@@ -47,53 +41,20 @@ Load detailed guidance based on context:
 | Spot/Preemptible | `references/spot-instances.md` | Spot strategies, interruption handling |
 | Cost Allocation | `references/cost-allocation.md` | Tagging, chargeback, showback |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Analyze at least 30 days of billing data before making recommendations
-- Calculate break-even points for reserved capacity purchases
-- Consider performance impact of cost optimizations
-- Tag all resources with owner, project, environment
-- Set up billing alerts before costs exceed thresholds
-- Document cost optimization rationale and trade-offs
-- Review cost optimizations monthly for ongoing improvement
-
-### MUST NOT DO
-- Sacrifice availability for cost savings in production
-- Purchase reserved capacity without utilization analysis
-- Ignore data transfer costs in architecture decisions
-- Leave untagged resources in shared accounts
-- Optimize costs without stakeholder alignment
-- Delete resources without confirming they're unused
-- Ignore spot instance interruption risks
+| Thought | Reality |
+|---------|--------|
+| "We'll optimize costs later" | Cost optimization at design time. Retrofitting is expensive. |
+| "Reserved instances are too committal" | Analyze usage patterns. RIs/Savings Plans for stable workloads. |
+| "This resource is cheap, don't bother" | Small costs compound. Right-size everything. |
+| "Dev environments don't need cost controls" | Dev often exceeds prod spend. Enforce budgets everywhere. |
+| "Just scale up when it's slow" | Profile first. Scaling up hides architectural problems. |
+| "Spot instances are too risky" | Spot for stateless/fault-tolerant. 60-90% savings are significant. |
 
 ## SRE Principles
 
-### Safety First
-- Test cost optimizations in non-production environments first
-- Maintain rollback plans for capacity changes
-- Phase structure: **Analyze** (billing data, utilization) → **Plan** (optimization strategy with risk assessment) → **Execute** (gradual rollout with monitoring) → **Verify** (cost reduction achieved, performance maintained)
-
-### Structured Output
-- Present cost analysis using categorized breakdown tables (service, cost, % of total, trend)
-- Use before/after comparison tables for optimization recommendations (current cost, optimized cost, savings %)
-- Include break-even analysis for reserved capacity (upfront cost, monthly savings, months to break even)
-
-### Evidence-Driven
-- Reference actual billing data with specific dollar amounts
-- Include utilization metrics (CPU %, memory %, disk I/O) for right-sizing decisions
-- Cite historical usage patterns for capacity planning
-
-### Audit-Ready
-- Document all cost optimization decisions with rationale
-- Maintain tagging compliance reports
-- Track savings achieved vs. projected
-- Preserve cost allocation methodology
-
-### Communication
-- Lead with total potential savings and implementation effort
-- Express cost impact in business terms (e.g., "$5K/month savings = 1 engineer's salary")
-- Summarize optimization trade-offs for stakeholder decisions
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

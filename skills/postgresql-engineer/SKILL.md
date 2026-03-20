@@ -5,12 +5,6 @@ description: Use when optimizing PostgreSQL queries, configuring replication, or
 
 # PostgreSQL Engineer
 
-Senior PostgreSQL expert with deep expertise in database administration, performance optimization, and advanced PostgreSQL features.
-
-## Role Definition
-
-You are a senior PostgreSQL DBA with 10+ years of production experience. You specialize in query optimization, replication strategies, JSONB operations, extension usage, and database maintenance. You build reliable, high-performance PostgreSQL systems that scale.
-
 ## When to Use This Skill
 
 - Analyzing and optimizing slow queries with EXPLAIN
@@ -49,54 +43,20 @@ Load detailed guidance based on context:
 | Database Design | `references/database-design.md` | Normalization, keys, constraints, schemas |
 | SQL Dialects | `references/dialect-differences.md` | PostgreSQL vs MySQL vs SQL Server specifics |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Use EXPLAIN ANALYZE for query optimization
-- Create appropriate indexes (B-tree, GIN, GiST, BRIN)
-- Update statistics with ANALYZE after bulk changes
-- Monitor autovacuum and tune if needed
-- Use connection pooling (pgBouncer, pgPool)
-- Setup replication for high availability
-- Monitor with pg_stat_statements, pg_stat_user_tables
-- Use prepared statements to prevent SQL injection
-
-### MUST NOT DO
-- Disable autovacuum globally
-- Create indexes without analyzing query patterns
-- Use SELECT * in production queries
-- Ignore replication lag monitoring
-- Skip VACUUM on high-churn tables
-- Use text for UUID storage (use uuid type)
-- Store large BLOBs in database (use object storage)
-- Ignore pg_stat_statements warnings
+| Thought | Reality |
+|---------|--------|
+| "This query is fast enough" | EXPLAIN ANALYZE everything. Fast today breaks at scale. |
+| "Skip the index, table is small" | Plan for growth. Add indexes based on query patterns. |
+| "Direct production queries are fine" | Read replicas for analytics. Never load prod primary unnecessarily. |
+| "Schema migration without backup" | Backup before ANY schema change. Point-in-time recovery ready. |
+| "No need for connection pooling" | Always pool. Connection overhead compounds under load. |
+| "Locks are fine, it's a quick update" | Minimize lock duration. Use `CONCURRENTLY` for indexes. |
 
 ## SRE Principles
 
-### Safety First
-- Run `EXPLAIN ANALYZE` on read replicas before executing on primary
-- Wrap all schema changes in transactions with explicit `ROLLBACK` on failure
-- Phase structure: **Pre-check** (backup, EXPLAIN plan review) → **Execute** (apply migration in transaction) → **Verify** (row counts, checksums, application queries)
-
-### Structured Output
-- Present query optimization using before/after comparison tables (plan cost, actual time, rows, buffers)
-- Use tables for index recommendations (table, columns, type, size estimate, query benefit)
-- Include maintenance status summaries (table, dead tuples, last vacuum, last analyze)
-
-### Evidence-Driven
-- Reference actual `EXPLAIN ANALYZE` output with specific cost numbers and row estimates
-- Include `pg_stat_statements` query stats (calls, mean_time, rows)
-- Cite `pg_stat_user_tables` metrics (seq_scan count, idx_scan count, dead tuples)
-
-### Audit-Ready
-- Version all migration scripts with rollback counterparts
-- Document schema changes with before/after DDL comparisons
-- Maintain query performance baselines for critical queries (stored in version control)
-
-### Communication
-- Lead with performance impact (e.g., "This index reduces checkout query from 2.3s to 15ms")
-- Express storage and maintenance implications in business terms
-- Summarize replication health in a clear status format for operations teams
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

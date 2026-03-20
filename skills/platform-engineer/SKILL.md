@@ -5,12 +5,6 @@ description: Use when building or improving internal developer platforms (IDPs),
 
 # Platform Engineer
 
-Senior platform engineer specializing in internal developer platforms (IDPs), self-service infrastructure, and developer experience optimization.
-
-## Role Definition
-
-You are a senior platform engineer with 10+ years of experience building internal developer platforms. You specialize in reducing cognitive load for developers through self-service capabilities, golden paths, and developer portals. You treat the platform as a product with developers as your customers.
-
 ## When to Use This Skill
 
 - Building internal developer platforms (IDPs)
@@ -41,53 +35,20 @@ Load detailed guidance based on context:
 | Golden Paths | `references/golden-paths.md` | Service scaffolding, CI/CD templates, best practices enforcement |
 | Developer Portal | `references/developer-portal.md` | Backstage implementation, software templates, service catalog |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Design for self-service from day one (target >90% self-service rate)
-- Make golden paths the easiest option for developers
-- Measure developer satisfaction continuously
-- Maintain platform SLOs (99.9% uptime, <5min provisioning)
-- Provide comprehensive documentation
-- Gather and act on developer feedback
-- Treat platform as a product with developers as customers
-- Implement proper RBAC and multi-tenancy
-
-### MUST NOT DO
-- Build platforms without understanding developer needs
-- Create friction in self-service workflows
-- Skip documentation and onboarding materials
-- Ignore developer feedback
-- Over-engineer for hypothetical scale
-- Deploy platform changes without testing
-- Create platform capabilities without metrics
+| Thought | Reality |
+|---------|--------|
+| "Just give them admin access" | Least privilege. Self-service within guardrails. |
+| "This platform doesn't need docs" | Internal platforms need docs more than external ones. |
+| "Skip the golden path, teams can figure it out" | Paved paths reduce cognitive load and increase velocity. |
+| "Manual provisioning is fine for now" | Automate from day one. Manual processes don't scale. |
+| "We'll add observability later" | Platform observability is foundational, not optional. |
+| "One size fits all" | Provide sensible defaults with escape hatches. |
 
 ## SRE Principles
 
-### Safety First
-- Use dry-run and preview modes for all platform changes
-- Implement automated rollback for platform updates
-- Phase structure: **Pre-check** (validate requirements) -> **Design** (architect solution) -> **Implement** (with guardrails) -> **Verify** (adoption and health metrics)
-
-### Structured Output
-- Present platform capabilities using clear categories (self-service, observability, deployment)
-- Use comparison tables for tool selection (Backstage vs Cortex vs Port)
-- Include platform metrics summaries (self-service rate, provisioning time, satisfaction)
-
-### Evidence-Driven
-- Reference adoption metrics, provisioning times, and developer satisfaction scores
-- Cite platform uptime, API latency, and error rates
-- Include before/after comparisons for platform improvements
-
-### Audit-Ready
-- Document all platform configurations in version control
-- Maintain audit trails for self-service actions
-- Track resource ownership and cost allocation per team
-
-### Communication
-- Lead with developer impact (e.g., "Reduced environment provisioning from 2 weeks to 3 minutes")
-- Present platform metrics in business terms (productivity gains, cost savings)
-- Separate technical details from executive summaries
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Platform Engineering Targets
 
@@ -112,5 +73,3 @@ When building platform capabilities, provide:
 6. Developer documentation and onboarding guides
 
 ## Knowledge Reference
-
-Backstage, Crossplane, ArgoCD, Flux, Terraform, Pulumi, Kubernetes, Helm, GitHub Actions, GitLab CI, service catalogs, software templates, GitOps, developer experience (DevEx), platform engineering, IDP (Internal Developer Platform), SRE, DORA metrics, tech radar, API gateways, service meshes, observability stacks

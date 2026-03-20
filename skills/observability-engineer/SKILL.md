@@ -5,12 +5,6 @@ description: Use when setting up observability systems including monitoring, log
 
 # Observability Engineer
 
-Observability and performance specialist implementing comprehensive monitoring, alerting, tracing, and performance testing systems.
-
-## Role Definition
-
-You are a senior SRE with 10+ years of experience in production systems. You specialize in the three pillars of observability: logs, metrics, and traces. You build monitoring systems that enable quick incident response, proactive issue detection, and performance optimization.
-
 ## When to Use This Skill
 
 - Setting up application monitoring
@@ -46,48 +40,20 @@ Load detailed guidance based on context:
 | Profiling | `references/application-profiling.md` | CPU/memory profiling, bottlenecks |
 | Capacity Planning | `references/capacity-planning.md` | Scaling, forecasting, budgets |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Use structured logging (JSON)
-- Include request IDs for correlation
-- Set up alerts for critical paths
-- Monitor business metrics, not just technical
-- Use appropriate metric types (counter/gauge/histogram)
-- Implement health check endpoints
-
-### MUST NOT DO
-- Log sensitive data (passwords, tokens, PII)
-- Alert on every error (alert fatigue)
-- Use string interpolation in logs (use structured fields)
-- Skip correlation IDs in distributed systems
+| Thought | Reality |
+|---------|--------|
+| "Logging is enough" | Logs + metrics + traces. All three are needed for diagnosis. |
+| "We'll add monitoring later" | Observability is foundational. Deploy monitoring with the service. |
+| "Alert on everything" | Alert on symptoms, not causes. Too many alerts cause fatigue. |
+| "Custom metrics aren't needed" | RED metrics (Rate, Errors, Duration) minimum for every service. |
+| "Traces are too complex to set up" | Distributed tracing finds issues logs and metrics can't. |
+| "Dashboards can wait" | Create dashboards at deploy time. You'll need them at 3am. |
 
 ## SRE Principles
 
-### Safety First
-- Validate alert rules with `promtool check rules` and recording rules with `promtool test rules` before deploying; use `--dry-run` flags for monitoring config deployments
-- Validate dashboard queries against actual data before publishing
-- Phase structure: **Pre-check** (review current monitoring gaps) → **Execute** (deploy instrumentation) → **Verify** (confirm metrics flowing, alerts firing correctly)
-
-### Structured Output
-- Present monitoring coverage using RED/USE method tables per service
-- Use dashboards with clear sections: Overview → SLOs → Golden Signals → Resources → Alerts
-- Include alert severity matrices (Critical/Warning/Info with escalation paths)
-
-### Evidence-Driven
-- Reference specific PromQL/LogQL queries and their actual output values
-- Include metric samples showing baseline vs anomaly (e.g., "p99 latency: 50ms baseline, 500ms during incident")
-- Cite alert firing history and false positive rates
-
-### Audit-Ready
-- Version control all alert rules, dashboard JSON, and recording rules
-- Document alert rule changes with rationale and expected firing conditions
-- Maintain SLO burn rate records and error budget consumption history
-
-### Communication
-- Lead with business impact (e.g., "This monitoring gap means 15-minute blind spot during checkout failures")
-- Present alert escalation paths in clear, non-technical language
-- Summarize SLO status in executive-friendly format (budget remaining, trend)
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Knowledge Reference
 

@@ -1,6 +1,6 @@
 ---
 name: progressive-delivery
-description: Use when deploying services with canary releases, blue-green deployments, or shadow traffic - provides verification workflows for progressive traffic shifting with SLO-based rollback triggers
+description: Use when deploying services with canary releases, blue-green deployments, or shadow traffic requiring progressive traffic shifting with rollback triggers
 ---
 
 # Progressive Delivery

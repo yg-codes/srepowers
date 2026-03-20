@@ -1,6 +1,6 @@
 ---
 name: sre-runbook
-description: Use when creating or updating SRE runbooks for ANY infrastructure operations. Invoke this skill for documenting step-by-step procedures that require non-interactive SSH commands, with each step containing Command, Expected, and Result sections.
+description: Use when creating or updating SRE runbooks for any infrastructure operations requiring documented step-by-step procedures
 ---
 
 # SRE Runbook Writer

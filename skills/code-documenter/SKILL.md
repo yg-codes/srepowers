@@ -5,12 +5,6 @@ description: Use when adding docstrings, creating API documentation, or building
 
 # Code Documenter
 
-Documentation specialist for inline documentation, API specs, documentation sites, and developer guides.
-
-## Role Definition
-
-You are a senior technical writer with 8+ years of experience documenting software. You specialize in language-specific docstring formats, OpenAPI/Swagger specifications, interactive documentation portals, static site generation, and creating comprehensive guides that developers actually use.
-
 ## When to Use This Skill
 
 - Adding docstrings to functions and classes
@@ -45,51 +39,20 @@ Load detailed guidance based on context:
 | Interactive API Docs | `references/interactive-api-docs.md` | OpenAPI 3.1, portals, GraphQL, WebSocket, gRPC, SDKs |
 | User Guides & Tutorials | `references/user-guides-tutorials.md` | Getting started, tutorials, troubleshooting, FAQs |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Ask for format preference before starting
-- Detect framework for correct API doc strategy
-- Document all public functions/classes
-- Include parameter types and descriptions
-- Document exceptions/errors
-- Test code examples in documentation
-- Generate coverage report
-
-### MUST NOT DO
-- Assume docstring format without asking
-- Apply wrong API doc strategy for framework
-- Write inaccurate or untested documentation
-- Skip error documentation
-- Document obvious getters/setters verbosely
-- Create documentation that's hard to maintain
+| Thought | Reality |
+|---------|--------|
+| "The code is self-documenting" | Document WHY, not WHAT. Intent isn't in the code. |
+| "I'll add docs after release" | Document alongside code. Post-release docs never happen. |
+| "Internal APIs don't need docs" | Internal consumers need docs too. Reduce knowledge silos. |
+| "README is enough" | API docs, architecture docs, and READMEs serve different purposes. |
+| "Examples aren't needed" | Examples are the most-read documentation. Always include them. |
+| "Keep it brief" | Completeness over brevity for reference docs. Conciseness for guides. |
 
 ## SRE Principles
 
-### Safety First
-- Validate documentation builds before publishing (broken links, missing references)
-- Test all code examples in documentation to ensure they compile/run correctly
-- Phase structure: **Pre-check** (audit current doc coverage) → **Execute** (write/update docs) → **Verify** (build, link-check, test examples)
-
-### Structured Output
-- Present documentation coverage using tables (module, coverage %, missing items)
-- Use clear section hierarchy: Overview → Quick Start → API Reference → Examples → Troubleshooting
-- Include documentation coverage reports with gap analysis
-
-### Evidence-Driven
-- Reference actual API response examples and endpoint URLs, not hypothetical ones
-- Include version-specific behavior notes with exact version numbers
-- Reference documentation build logs, coverage metrics, and link-check results as evidence of completeness
-
-### Audit-Ready
-- Version documentation alongside code (same commit, same PR)
-- Include changelog entries for API documentation updates
-- Ensure documentation deployments are reversible (e.g., rollback published site to previous version, revert doc PRs)
-
-### Communication
-- Write for the reader's level (quick start for beginners, API reference for experts)
-- Lead with the most common use case, not the most complex
-- Connect documentation quality to business impact (e.g., "Missing API docs cause 40% of support tickets for this endpoint")
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Formats
 

@@ -5,12 +5,6 @@ description: Use when deploying or managing Kubernetes workloads requiring clust
 
 # Kubernetes Specialist
 
-Senior Kubernetes specialist with deep expertise in production cluster management, security hardening, and cloud-native architectures.
-
-## Role Definition
-
-You are a senior Kubernetes engineer with 10+ years of container orchestration experience. You specialize in production-grade K8s deployments, security hardening (RBAC, NetworkPolicies, Pod Security Standards), and performance optimization. You build scalable, reliable, and secure Kubernetes platforms.
-
 ## When to Use This Skill
 
 - Deploying workloads (Deployments, StatefulSets, DaemonSets, Jobs)
@@ -47,55 +41,20 @@ Load detailed guidance based on context:
 | Cost Optimization | `references/cost-optimization.md` | VPA, HPA tuning, spot instances, quotas, right-sizing |
 | Multi-Cluster | `references/multi-cluster.md` | Cluster API, federation, cross-cluster networking, DR |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Use declarative YAML manifests (avoid imperative kubectl commands)
-- Set resource requests and limits on all containers
-- Include liveness and readiness probes
-- Use secrets for sensitive data (never hardcode credentials)
-- Apply least privilege RBAC permissions
-- Implement NetworkPolicies for network segmentation
-- Use namespaces for logical isolation
-- Label resources consistently for organization
-- Document configuration decisions in annotations
-
-### MUST NOT DO
-- Deploy to production without resource limits
-- Store secrets in ConfigMaps or as plain environment variables
-- Use default ServiceAccount for application pods
-- Allow unrestricted network access (default allow-all)
-- Run containers as root without justification
-- Skip health checks (liveness/readiness probes)
-- Use latest tag for production images
-- Expose unnecessary ports or services
+| Thought | Reality |
+|---------|--------|
+| "Just apply this manifest quickly" | Always `kubectl diff` first. No exceptions. |
+| "Default ServiceAccount is fine" | Create dedicated SA with least-privilege RBAC. |
+| "No need for resource limits in dev" | Limits on ALL containers. Dev leaks to prod. |
+| "NetworkPolicies are overkill here" | Default-deny + explicit allow. Always. |
+| "Root is fine for this container" | Run non-root. Justify exceptions explicitly. |
+| "Skip health checks, it's a simple service" | Probes on everything. K8s can't manage what it can't check. |
 
 ## SRE Principles
 
-### Safety First
-- Use `kubectl apply --dry-run=client -o yaml` to validate manifests before applying
-- Use `kubectl diff` to preview changes against live cluster state
-- Phase structure: **Pre-check** (validate manifests, check cluster state) → **Execute** (apply with rolling strategy) → **Verify** (pod status, health checks, events)
-
-### Structured Output
-- Present resource configurations using complete YAML manifests (no partial snippets)
-- Use tables for resource inventory (name, namespace, replicas, status, image)
-- Include rollout status summaries in tabular format (deployment, desired, current, ready, age)
-
-### Evidence-Driven
-- Reference `kubectl get events`, pod logs, and resource utilization metrics
-- Include actual `kubectl describe` output for troubleshooting
-- Cite specific image digests, resource limits, and probe configurations
-
-### Audit-Ready
-- Document all manifest changes with `kubectl diff` output before applying
-- Maintain rollout history (`kubectl rollout history`) for every deployment
-- Label all resources with app, version, environment, and managed-by metadata
-
-### Communication
-- Lead with operational impact (e.g., "Rolling update with zero downtime for 50K daily users")
-- Summarize cluster health in a clear status table (namespace, pods, services, issues)
-- Communicate resource cost implications for scaling decisions
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

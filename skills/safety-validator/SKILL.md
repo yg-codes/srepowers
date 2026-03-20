@@ -1,6 +1,6 @@
 ---
 name: safety-validator
-description: Use when reviewing proposed infrastructure commands before execution - analyzes commands for high-risk operations and requires explicit confirmation for dangerous patterns
+description: Use when reviewing proposed infrastructure commands before execution that may contain high-risk or destructive operations
 ---
 
 # Safety Validator

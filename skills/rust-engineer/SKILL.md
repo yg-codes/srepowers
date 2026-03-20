@@ -5,12 +5,6 @@ description: Use when building Rust applications requiring memory safety, system
 
 # Rust Engineer
 
-Senior Rust engineer with deep expertise in Rust 2021 edition, systems programming, memory safety, and zero-cost abstractions. Specializes in building reliable, high-performance software leveraging Rust's ownership system.
-
-## Role Definition
-
-You are a senior Rust engineer with 10+ years of systems programming experience. You specialize in Rust's ownership model, async programming with tokio, trait-based design, and performance optimization. You build memory-safe, concurrent systems with zero-cost abstractions.
-
 ## When to Use This Skill
 
 - Building systems-level applications in Rust
@@ -40,54 +34,20 @@ Load detailed guidance based on context:
 | Async | `references/async.md` | async/await, tokio, futures, streams, concurrency |
 | Testing | `references/testing.md` | Unit/integration tests, proptest, benchmarks |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Use ownership and borrowing for memory safety
-- Minimize unsafe code (document all unsafe blocks)
-- Use type system for compile-time guarantees
-- Handle all errors explicitly (Result/Option)
-- Add comprehensive documentation with examples
-- Run clippy and fix all warnings
-- Use cargo fmt for consistent formatting
-- Write tests including doctests
-
-### MUST NOT DO
-- Use unwrap() in production code (prefer expect() with messages)
-- Create memory leaks or dangling pointers
-- Use unsafe without documenting safety invariants
-- Ignore clippy warnings
-- Mix blocking and async code incorrectly
-- Skip error handling
-- Use String when &str suffices
-- Clone unnecessarily (use borrowing)
+| Thought | Reality |
+|---------|--------|
+| "Just use unwrap() here" | Handle errors properly. `unwrap()` panics in production. |
+| "Clone is fine for this" | Avoid unnecessary clones. Borrow first, clone when proven needed. |
+| "unsafe is fine, I know what I'm doing" | Document every `unsafe` block with safety invariants. |
+| "Skip the benchmark, it's obviously fast" | Measure. Intuition about performance is often wrong. |
+| "I'll add docs later" | Document public APIs at write time. Later never comes. |
+| "Mutex is simpler than channels" | Choose the right primitive. Channels for ownership transfer. |
 
 ## SRE Principles
 
-### Safety First
-- Validate all operational commands with dry-run flags (e.g., `cargo build --release` before publishing, `goreleaser check` for releases, staging validation before production deployment)
-- Use MIRI for unsafe code validation in CI
-- Phase structure: **Pre-check** (clippy, test, audit) → **Execute** (implement changes) → **Verify** (full test suite, benchmarks, unsafe audit)
-
-### Structured Output
-- Present code quality using test result tables (module, tests, passed, failed, duration)
-- Use benchmark comparison tables (function, before ns/op, after ns/op, improvement %)
-- Include unsafe code audit summary (block count, safety invariants documented)
-
-### Evidence-Driven
-- Reference `cargo bench` (criterion) results with actual throughput numbers
-- Include `cargo audit` output showing zero known vulnerabilities
-- Cite test coverage and unsafe block counts as quality evidence
-
-### Audit-Ready
-- Track `Cargo.lock` changes with dependency diff in PRs
-- Document all `unsafe` blocks with safety invariant comments
-- Every release must include a documented rollback path (previous binary restore, `Cargo.lock` version pinning, or crate version yanking procedure)
-
-### Communication
-- Lead with performance and safety impact (e.g., "Zero-copy parsing reduces memory usage by 80%")
-- Explain ownership design decisions in terms of resource lifecycle guarantees
-- Summarize safety properties for stakeholders (memory safety, thread safety, no undefined behavior)
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

@@ -1,6 +1,6 @@
 ---
 name: brainstorming-operations
-description: "Use when planning infrastructure operations - explores requirements, risks, verification strategies, and rollback plans before implementation"
+description: "Use when starting any infrastructure operation that needs design before implementation"
 ---
 
 # Brainstorming Infrastructure Operations
@@ -29,6 +29,9 @@ digraph brainstorming {
     "Present design sections" [shape=box];
     "User approves design?" [shape=diamond];
     "Write design doc" [shape=box];
+    "Design review loop" [shape=box];
+    "Review passed?" [shape=diamond];
+    "User reviews design?" [shape=diamond];
     "Invoke writing-operation-plans skill" [shape=doublecircle];
 
     "Explore infrastructure context" -> "Ask clarifying questions";
@@ -37,7 +40,12 @@ digraph brainstorming {
     "Present design sections" -> "User approves design?";
     "User approves design?" -> "Present design sections" [label="no, revise"];
     "User approves design?" -> "Write design doc" [label="yes"];
-    "Write design doc" -> "Invoke writing-operation-plans skill";
+    "Write design doc" -> "Design review loop";
+    "Design review loop" -> "Review passed?";
+    "Review passed?" -> "Design review loop" [label="issues found,\nfix and re-dispatch"];
+    "Review passed?" -> "User reviews design?" [label="approved"];
+    "User reviews design?" -> "Write design doc" [label="changes requested"];
+    "User reviews design?" -> "Invoke writing-operation-plans skill" [label="approved"];
 }
 ```
 
@@ -127,6 +135,18 @@ digraph brainstorming {
 **Documentation:**
 - Write validated design to `docs/plans/YYYY-MM-DD-<operation-name>-design.md`
 - Commit the design document to git
+
+**Design Review Loop:**
+After writing the design document:
+1. Dispatch design-document-reviewer subagent (see `design-document-reviewer-prompt.md`)
+2. If Issues Found: fix, re-dispatch, repeat until Approved
+3. If loop exceeds 3 iterations, surface to human for guidance
+
+**User Review Gate:**
+After the design review loop passes, ask the user to review the written design before proceeding:
+> "Design written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the operation plan."
+
+Wait for the user's response. If they request changes, make them and re-run the design review loop. Only proceed once the user approves.
 
 **Planning:**
 - Invoke **srepowers:writing-operation-plans** to create detailed execution plan

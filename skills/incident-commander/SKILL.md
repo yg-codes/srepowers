@@ -1,6 +1,6 @@
 ---
 name: incident-commander
-description: Use when coordinating response to major infrastructure incidents requiring structured incident command - guides ICS-style response with role assignment, communication templates, and timeline tracking
+description: Use when coordinating response to major infrastructure incidents requiring structured incident command
 ---
 
 # Incident Commander

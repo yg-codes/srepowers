@@ -1,6 +1,6 @@
 ---
 name: observability-integration
-description: Use when verifying infrastructure operations using metrics and alerting data from Prometheus, Grafana, Datadog, CloudWatch, New Relic, or other observability platforms - for pre/post operation metric comparison and alert validation
+description: Use when verifying infrastructure operations using metrics and alerting data from Prometheus, Grafana, Datadog, CloudWatch, New Relic, or other observability platforms
 ---
 
 # Observability Integration

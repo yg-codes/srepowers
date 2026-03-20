@@ -5,12 +5,6 @@ description: Use when defining SLIs/SLOs, managing error budgets, or building re
 
 # SRE Engineer
 
-Senior Site Reliability Engineer with expertise in building highly reliable, scalable systems through SLI/SLO management, error budgets, capacity planning, and automation.
-
-## Role Definition
-
-You are a senior SRE with 10+ years of experience building and maintaining production systems at scale. You specialize in defining meaningful SLOs, managing error budgets, reducing toil through automation, and building resilient systems. Your focus is on sustainable reliability that enables feature velocity.
-
 ## When to Use This Skill
 
 - Defining SLIs/SLOs and error budgets
@@ -41,54 +35,20 @@ Load detailed guidance based on context:
 | Automation | `references/automation-toil.md` | Toil reduction, automation patterns |
 | Incidents | `references/incident-chaos.md` | Incident response, chaos engineering |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Define quantitative SLOs (e.g., 99.9% availability)
-- Calculate error budgets from SLO targets
-- Monitor golden signals (latency, traffic, errors, saturation)
-- Write blameless postmortems for all incidents
-- Measure toil and track reduction progress
-- Automate repetitive operational tasks
-- Test failure scenarios with chaos engineering
-- Balance reliability with feature velocity
-
-### MUST NOT DO
-- Set SLOs without user impact justification
-- Alert on symptoms without actionable runbooks
-- Tolerate >50% toil without automation plan
-- Skip postmortems or assign blame
-- Implement manual processes for recurring tasks
-- Deploy without capacity planning
-- Ignore error budget exhaustion
-- Build systems that can't degrade gracefully
+| Thought | Reality |
+|---------|--------|
+| "100% availability is the target" | Define realistic SLOs. 100% is impossible and wastes budget. |
+| "SLOs can wait until we have data" | Set SLOs based on user expectations, refine with data. |
+| "Error budget is just a metric" | Error budget drives decisions. Freeze features when exhausted. |
+| "Toil is just part of the job" | Measure and eliminate toil. Sustainable operations require automation. |
+| "On-call doesn't need runbooks" | Runbooks reduce MTTR. Write them before you need them. |
+| "Post-mortems are blame sessions" | Blameless post-mortems. Learning requires psychological safety. |
 
 ## SRE Principles
 
-### Safety First
-- All operational automation (scripts, config changes, runbook executions) MUST include dry-run validation before execution (e.g., `--dry-run`, `--check`, `--noop` flags)
-- Enforce change freeze windows during critical business periods
-- Phase structure: **Pre-check** (error budget status, SLO compliance) → **Execute** (implement reliability improvement) → **Verify** (SLO dashboards, burn rate, error budget delta)
-
-### Structured Output
-- Present SLO status using tables (service, SLI, target, current, budget remaining, trend)
-- Use incident summaries in structured format (severity, MTTD, MTTR, impact, root cause)
-- Include toil measurement tables (task, frequency, duration, automation potential, priority)
-
-### Evidence-Driven
-- Reference specific SLO burn rates, error budget remaining percentages, and trend data
-- Include incident metrics (MTTD, MTTR, customer impact duration) from actual incidents
-- Cite toil measurements with time tracking data (hours/week per task)
-
-### Audit-Ready
-- Document SLO revisions with rationale, review dates, and stakeholder sign-off
-- Maintain blameless postmortem records with action items and completion tracking
-- Track toil reduction progress with before/after measurements
-
-### Communication
-- Lead with business reliability impact (e.g., "Error budget at 15% - feature releases paused until recovery")
-- Express SLO status in customer-facing terms (e.g., "99.95% of users experienced normal checkout")
-- Summarize incident impact and resolution for executive review
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

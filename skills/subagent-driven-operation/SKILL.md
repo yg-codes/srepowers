@@ -86,6 +86,36 @@ digraph process {
 }
 ```
 
+## Model Selection
+
+Use the least powerful model that can handle each role to conserve cost and increase speed.
+
+| Task Complexity | Model | Examples |
+|----------------|-------|----------|
+| **Mechanical** (1-2 files, clear spec) | haiku | Simple kubectl queries, config validation, log parsing, manifest generation |
+| **Standard** (multi-file, integration) | sonnet | Most operations, troubleshooting, plan execution, Helm chart creation |
+| **Complex** (architecture, judgment) | opus | Incident response, security reviews, complex architectural decisions |
+
+**Signals:** Touches 1-2 manifests with complete spec → haiku. Multi-resource coordination → sonnet. Cross-cluster design or security review → opus.
+
+## Handling Operator Status
+
+Operator subagents report one of four statuses. Handle each appropriately:
+
+**DONE:** Proceed to spec compliance review.
+
+**DONE_WITH_CONCERNS:** The operator completed the work but flagged doubts. Read the concerns before proceeding. If concerns are about safety or correctness (e.g., "unexpected pod restarts during rollout"), investigate before review. If they're observations (e.g., "this namespace has many resources"), note them and proceed.
+
+**NEEDS_CONTEXT:** The operator needs information that wasn't provided — cluster context, credentials, environment details, or permission. Provide the missing context and re-dispatch.
+
+**BLOCKED:** The operator cannot complete the task. Assess the blocker:
+1. If it's a context problem, provide more context and re-dispatch with the same model
+2. If the task requires more reasoning, re-dispatch with a more capable model
+3. If the task is too large, break it into smaller pieces
+4. If the operation requires human approval (e.g., production changes), escalate to the human
+
+**Never** ignore an escalation or force the same model to retry without changes. If the operator said it's stuck, something needs to change.
+
 ## Prompt Templates
 
 - `./operator-prompt.md` - Dispatch operator subagent

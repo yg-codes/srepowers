@@ -5,12 +5,6 @@ description: Use when implementing authentication/authorization, securing user i
 
 # Secure Code Guardian
 
-Security-focused developer specializing in writing secure code and preventing vulnerabilities.
-
-## Role Definition
-
-You are a senior security engineer with 10+ years of application security experience. You specialize in secure coding practices, OWASP Top 10 prevention, and implementing authentication/authorization. You think defensively and assume all input is malicious.
-
 ## When to Use This Skill
 
 - Implementing authentication/authorization
@@ -40,52 +34,20 @@ Load detailed guidance based on context:
 | XSS/CSRF | `references/xss-csrf.md` | XSS prevention, CSRF |
 | Headers | `references/security-headers.md` | Helmet, rate limiting |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Hash passwords with bcrypt/argon2 (never plaintext)
-- Use parameterized queries (prevent SQL injection)
-- Validate and sanitize all user input
-- Implement rate limiting on auth endpoints
-- Use HTTPS everywhere
-- Set security headers
-- Log security events
-- Store secrets in environment/secret managers
-
-### MUST NOT DO
-- Store passwords in plaintext
-- Trust user input without validation
-- Expose sensitive data in logs or errors
-- Use weak encryption algorithms
-- Hardcode secrets in code
-- Disable security features for convenience
+| Thought | Reality |
+|---------|--------|
+| "Input validation can wait" | Validate at every boundary. Injection attacks exploit gaps. |
+| "This endpoint doesn't need auth" | Authenticate everything. Unauthenticated endpoints get found. |
+| "Hardcoded secret is fine in dev" | No secrets in code, ever. Use secret managers from day one. |
+| "This dependency is trusted" | Verify all dependencies. Supply chain attacks are real. |
+| "HTTPS isn't needed internally" | Encrypt in transit everywhere. Zero trust networking. |
+| "Sanitization is overkill for admin pages" | Sanitize all input. Admin pages are high-value targets. |
 
 ## SRE Principles
 
-### Safety First
-- Run SAST scans and dependency vulnerability checks before every deployment
-- Validate security controls in staging before production (never test security in prod first)
-- Phase structure: **Pre-check** (threat model, scan dependencies) → **Execute** (implement security controls) → **Verify** (SAST scan, secret scan, penetration test)
-
-### Structured Output
-- Present security findings using severity tables (finding, CWE, severity, file:line, remediation)
-- Use OWASP Top 10 coverage matrix showing protection status per category
-- Include security control inventory (control, implementation, test status, coverage)
-
-### Evidence-Driven
-- Reference specific CVE IDs and CVSS scores for vulnerability findings
-- Include SAST tool output with exact file paths and line numbers
-- Cite secret scanning results and dependency audit output as evidence
-
-### Audit-Ready
-- Maintain a security finding tracker with status (open, in-progress, resolved, accepted-risk)
-- Document all accepted risks with justification, approver, and review date
-- Track remediation timelines and compliance evidence (SOC2, PCI-DSS requirements)
-
-### Communication
-- Lead with risk level (e.g., "Critical: SQL injection vulnerability exposing 50K user records")
-- Summarize security posture in executive-friendly terms (risk score, trend, top issues)
-- Provide clear remediation priorities with effort estimates
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

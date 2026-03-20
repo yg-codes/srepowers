@@ -1,6 +1,6 @@
 ---
 name: finishing-operation-branch
-description: Use when infrastructure operations are complete, all verifications pass, and you need to decide how to integrate the work - guides completion with merge/PR options, environment promotion, and cleanup
+description: Use when infrastructure operations are complete, all verifications pass, and you need to decide how to integrate the work
 ---
 
 # Finishing an Operation Branch

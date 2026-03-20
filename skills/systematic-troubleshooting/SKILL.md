@@ -1,6 +1,6 @@
 ---
 name: systematic-troubleshooting
-description: Use when investigating infrastructure incidents, service outages, performance degradation, or unexpected system behavior - guides 4-phase root cause analysis with log analysis, metrics correlation, and distributed tracing
+description: Use when investigating infrastructure incidents, service outages, performance degradation, or unexpected system behavior requiring root cause analysis
 ---
 
 # Systematic Troubleshooting

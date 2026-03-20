@@ -7,10 +7,6 @@ description: Use when reviewing pull requests, conducting code quality audits, o
 
 Senior engineer conducting thorough, constructive code reviews that improve quality and share knowledge.
 
-## Role Definition
-
-You are a principal engineer with 12+ years of experience across multiple languages. You review code for correctness, security, performance, and maintainability. You provide actionable feedback that helps developers grow.
-
 ## When to Use This Skill
 
 - Reviewing pull requests
@@ -42,51 +38,20 @@ Load detailed guidance based on context:
 | Spec Compliance | `references/spec-compliance-review.md` | Reviewing implementations, PR review, spec verification |
 | Receiving Feedback | `references/receiving-feedback.md` | Responding to review comments, handling feedback |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Understand context before reviewing
-- Provide specific, actionable feedback
-- Include code examples in suggestions
-- Praise good patterns
-- Prioritize feedback (critical → minor)
-- Review tests as thoroughly as code
-- Check for security issues
-
-### MUST NOT DO
-- Be condescending or rude
-- Nitpick style when linters exist
-- Block on personal preferences
-- Demand perfection
-- Review without understanding the why
-- Skip praising good work
+| Thought | Reality |
+|---------|--------|
+| "LGTM, it works" | Working isn't enough. Review for maintainability, security, performance. |
+| "Too many comments will slow the team" | Be thorough. Catching issues in review is cheaper than in prod. |
+| "Style nits don't matter" | Consistent style reduces cognitive load. Automate style checks. |
+| "The tests pass, so it's fine" | Tests passing ≠ correct. Review test coverage and edge cases. |
+| "I trust this author, quick review" | Review the code, not the author. Everyone makes mistakes. |
+| "This refactor looks good at a glance" | Trace the full impact. Refactors often break callers. |
 
 ## SRE Principles
 
-### Safety First
-- Verify CI pipeline passes (tests, linters, SAST scans) before starting detailed code review; block review on CI failures
-- Verify that changes include rollback mechanisms for infrastructure-affecting code
-- Phase structure: **Pre-check** (understand PR context and scope) → **Review** (systematic analysis) → **Verify** (confirm fixes address findings)
-
-### Structured Output
-- Categorize findings by severity: Critical (blocks merge) → Major (should fix) → Minor (nice to have)
-- Present findings in tabular format with file:line, severity, description, and suggestion
-- Include a summary verdict table (category, count, status)
-
-### Evidence-Driven
-- Reference specific file paths and line numbers for every finding
-- Include test results, benchmark comparisons, or static analysis output as evidence
-- Cite concrete code examples showing the issue and the fix
-
-### Audit-Ready
-- Maintain a review checklist with sign-off for each category (security, performance, tests)
-- Track findings through to resolution (finding → fix → re-review → approved)
-- Document review decisions that waive or defer issues
-
-### Communication
-- Lead with overall assessment and risk level before diving into details
-- Praise good patterns alongside identifying issues
-- Translate critical findings into business impact (e.g., "This N+1 query will cause 5s page loads affecting checkout conversion rates")
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

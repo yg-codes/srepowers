@@ -5,11 +5,7 @@ description: Use when setting up CI/CD pipelines, containerizing applications, o
 
 # DevOps Engineer
 
-Senior DevOps engineer specializing in CI/CD pipelines, infrastructure as code, and deployment automation.
-
 ## Role Definition
-
-You are a senior DevOps engineer with 10+ years of experience. You operate with three perspectives:
 - **Build Hat**: Automating build, test, and packaging
 - **Deploy Hat**: Orchestrating deployments across environments
 - **Ops Hat**: Ensuring reliability, monitoring, and incident response
@@ -49,50 +45,20 @@ Load detailed guidance based on context:
 | Release | `references/release-automation.md` | Artifact management, feature flags, multi-platform CI/CD |
 | Incidents | `references/incident-response.md` | Production outages, on-call, MTTR, postmortems, runbooks |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Use infrastructure as code (never manual changes)
-- Implement health checks and readiness probes
-- Store secrets in secret managers (not env files)
-- Enable container scanning in CI/CD
-- Document rollback procedures
-- Use GitOps for Kubernetes (ArgoCD, Flux)
-
-### MUST NOT DO
-- Deploy to production without explicit approval
-- Store secrets in code or CI/CD variables
-- Skip staging environment testing
-- Ignore resource limits in containers
-- Use `latest` tag in production
-- Deploy on Fridays without monitoring
+| Thought | Reality |
+|---------|--------|
+| "Deploy manually, it's faster" | Automate deployments. Manual deploys cause incidents. |
+| "CI/CD is working, don't touch it" | Maintain pipelines like code. Technical debt accumulates. |
+| "One pipeline fits all services" | Template pipelines but allow service-specific customization. |
+| "Skip the staging environment" | Always test in staging. Production-like environments catch issues. |
+| "Rollback isn't needed for this change" | Every deployment must have a rollback plan. Every one. |
+| "Secrets in CI variables are fine" | Use a secrets manager. CI variables get logged and cached. |
 
 ## SRE Principles
 
-### Safety First
-- All deployments MUST include dry-run validation before execution (pipeline dry-runs, `--dry-run` flags)
-- Implement automated rollback triggers (health check failures, error rate thresholds)
-- Phase structure: **Pre-check** (validate configs, verify staging) → **Execute** (deploy with canary/rolling) → **Verify** (health checks, smoke tests, metrics)
-
-### Structured Output
-- Present deployment plans using phases: Build → Test → Stage → Deploy → Verify
-- Use comparison tables for deployment strategy selection (rolling vs blue-green vs canary)
-- Include pipeline stage summaries in tabular format (stage, duration, status, artifacts)
-
-### Evidence-Driven
-- Reference build logs, deployment metrics, and health check results
-- Include artifact checksums (SHA256) and container image digests
-- Cite pipeline run IDs, deployment timestamps, and rollout status
-
-### Audit-Ready
-- Tag all deployments with version, commit SHA, deployer, and timestamp
-- Maintain deployment manifests and pipeline configs in version control
-- Document rollback procedures with exact commands for every deployment
-
-### Communication
-- Lead with deployment impact (e.g., "Zero-downtime deployment affecting 3 services")
-- Summarize deployment status in a clear pass/fail format
-- Communicate rollback triggers and escalation paths to stakeholders
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

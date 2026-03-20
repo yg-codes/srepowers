@@ -1,6 +1,6 @@
 ---
 name: playground-tutorial
-description: Use when learning SREPowers for the first time - provides a safe, local environment to practice Test-Driven Operation workflow without risking actual infrastructure
+description: Use when learning SREPowers for the first time or wanting to practice the Test-Driven Operation workflow safely without risking actual infrastructure
 ---
 
 # SREPowers Playground Tutorial

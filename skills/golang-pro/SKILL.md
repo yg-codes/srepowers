@@ -5,12 +5,6 @@ description: Use when building Go applications requiring concurrent programming,
 
 # Golang Pro
 
-Senior Go developer with deep expertise in Go 1.21+, concurrent programming, and cloud-native microservices. Specializes in idiomatic patterns, performance optimization, and production-grade systems.
-
-## Role Definition
-
-You are a senior Go engineer with 8+ years of systems programming experience. You specialize in Go 1.21+ with generics, concurrent patterns, gRPC microservices, and cloud-native applications. You build efficient, type-safe systems following Go proverbs.
-
 ## When to Use This Skill
 
 - Building concurrent Go applications with goroutines and channels
@@ -40,53 +34,20 @@ Load detailed guidance based on context:
 | Testing | `references/testing.md` | Table-driven tests, benchmarks, fuzzing |
 | Project Structure | `references/project-structure.md` | Module layout, internal packages, go.mod |
 
-## Constraints
+## Red Flags — Stop and Verify
 
-### MUST DO
-- Use gofmt and golangci-lint on all code
-- Add context.Context to all blocking operations
-- Handle all errors explicitly (no naked returns)
-- Write table-driven tests with subtests
-- Document all exported functions, types, and packages
-- Use `X | Y` union constraints for generics (Go 1.18+)
-- Propagate errors with fmt.Errorf("%w", err)
-- Run race detector on tests (-race flag)
-
-### MUST NOT DO
-- Ignore errors (avoid _ assignment without justification)
-- Use panic for normal error handling
-- Create goroutines without clear lifecycle management
-- Skip context cancellation handling
-- Use reflection without performance justification
-- Mix sync and async patterns carelessly
-- Hardcode configuration (use functional options or env vars)
+| Thought | Reality |
+|---------|--------|
+| "I'll add error handling later" | Handle errors at write time. `_` assignments hide bugs. |
+| "This goroutine is simple, no lifecycle needed" | Every goroutine needs clear start/stop. Leaks compound. |
+| "Race detector is slow, skip it" | Always `-race`. Data races cause silent corruption. |
+| "Context isn't needed for this function" | All blocking ops get `context.Context`. Always. |
+| "Reflection makes this cleaner" | Prefer generics or interfaces. Reflection has runtime cost. |
+| "Panic is fine for this error" | Panic for programmer bugs only, never for runtime errors. |
 
 ## SRE Principles
 
-### Safety First
-- Validate all operational commands with dry-run flags (e.g., `go build` for compilation, `--dry-run` for deployments, `goreleaser check` for releases) before execution
-- Run `go vet`, `golangci-lint`, and race detector (`-race`) before merge
-- Phase structure: **Pre-check** (lint, vet, test) → **Execute** (implement changes) → **Verify** (full test suite, benchmarks, race detector)
-
-### Structured Output
-- Present code changes using interface-first design (contracts before implementation)
-- Use table-driven tests with clear input/expected/actual columns
-- Include benchmark comparison tables (before/after with ns/op, B/op, allocs/op)
-
-### Evidence-Driven
-- Reference benchmark results from `go test -bench` with actual numbers
-- Include pprof profiling output for performance claims
-- Cite test coverage percentages and race detector results
-
-### Audit-Ready
-- Document all exported API changes with backward compatibility notes
-- Track dependency updates with `go mod tidy` and vulnerability scans (`govulncheck`)
-- Every release must include a documented rollback path (previous binary restore, version pinning, or feature flag disable)
-
-### Communication
-- Lead with performance impact (e.g., "Reduces p99 latency from 50ms to 12ms")
-- Explain concurrency design decisions in terms of resource utilization
-- Summarize breaking changes with migration guidance
+Apply the [SRE Principles](../../references/sre-principles.md) (Safety First, Structured Output, Evidence-Driven, Audit-Ready, Communication) using domain-appropriate tools and commands.
 
 ## Output Templates
 

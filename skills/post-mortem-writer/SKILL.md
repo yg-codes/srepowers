@@ -1,6 +1,6 @@
 ---
 name: post-mortem-writer
-description: Use when creating blameless post-mortems after infrastructure incidents - guides structured documentation of timeline, root cause, impact, and action items for learning and prevention
+description: Use when creating blameless post-mortems after infrastructure incidents or outages that need documented timeline, root cause, and action items
 ---
 
 # Post-Mortem Writer
