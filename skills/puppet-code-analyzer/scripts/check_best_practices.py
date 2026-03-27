@@ -227,9 +227,14 @@ class BestPracticeChecker:
         return issues
 
     def check_directory(self, directory: Path) -> List[PracticeIssue]:
-        """Check all .pp files in directory."""
+        """Check all .pp files in directory, skipping vendored fixtures."""
         all_issues = []
+        excluded_dirs = {"spec/fixtures", ".bundle", "vendor"}
         for pp_file in directory.rglob("*.pp"):
+            rel = pp_file.relative_to(directory)
+            if any(part in excluded_dirs or str(rel).startswith(exc)
+                   for exc in excluded_dirs for part in rel.parts):
+                continue
             all_issues.extend(self.check_file(pp_file))
         return all_issues
 
@@ -325,7 +330,9 @@ def main():
         else:
             print(output)
 
-    return 1 if issues else 0
+    # Exit 1 = WARNING/CRITICAL found; 0 = clean or INFO-only
+    serious = [i for i in issues if i.severity in ("critical", "warning")]
+    return 1 if serious else 0
 
 
 if __name__ == "__main__":

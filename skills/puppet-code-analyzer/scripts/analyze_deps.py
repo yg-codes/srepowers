@@ -100,12 +100,13 @@ class PuppetParser:
     # Pattern to match class definitions
     CLASS_DEF = re.compile(r'class\s+([a-z][a-z0-9_:]*)\s*(?:\(|\s*\{|\s*$)', re.MULTILINE)
 
-    # Patterns for dependency relationships
-    INCLUDES = re.compile(r'include\s+([a-z][a-z0-9_:]*)')
-    REQUIRE = re.compile(r'Require\s*\(\s*[\'"]?([a-z][a-z0-9_:]*)')
-    CONTAIN = re.compile(r'Contain\s*\(\s*[\'"]?([a-z][a-z0-9_:]*)')
-    NOTIFY = re.compile(r'Notify\s*\(\s*[\'"]?([a-z][a-z0-9_:]*)')
-    SUBSCRIBE = re.compile(r'Subscribe\s*\(\s*[\'"]?([a-z][a-z0-9_:]*)')
+    # Patterns for dependency relationships — anchored to non-comment lines
+    # Matches: optional leading whitespace, then the keyword (not preceded by #)
+    INCLUDES = re.compile(r'^(?!#)\s*include\s+([a-z][a-z0-9_:]*)', re.MULTILINE)
+    REQUIRE = re.compile(r'^(?!#)\s*Require\s*\(\s*[\'"]?([a-z][a-z0-9_:]*)', re.MULTILINE)
+    CONTAIN = re.compile(r'^(?!#)\s*Contain\s*\(\s*[\'"]?([a-z][a-z0-9_:]*)', re.MULTILINE)
+    NOTIFY = re.compile(r'^(?!#)\s*Notify\s*\(\s*[\'"]?([a-z][a-z0-9_:]*)', re.MULTILINE)
+    SUBSCRIBE = re.compile(r'^(?!#)\s*Subscribe\s*\(\s*[\'"]?([a-z][a-z0-9_:]*)', re.MULTILINE)
 
     # Chain arrows
     CHAIN_ARROW = re.compile(r'([a-z][a-z0-9_:]*)\s*(->|~>|<-|<~)\s*([a-z][a-z0-9_:]*)')
@@ -176,10 +177,16 @@ class PuppetParser:
         return current_class, dependencies
 
     def parse_directory(self, directory: Path) -> Dict[str, Set[str]]:
-        """Parse all .pp files in a directory."""
+        """Parse all .pp files in a directory, skipping vendored fixtures."""
         all_dependencies = {}
+        excluded_dirs = {"spec/fixtures", ".bundle", "vendor"}
 
         for pp_file in directory.rglob("*.pp"):
+            # Skip vendored/fixture paths
+            rel = pp_file.relative_to(directory)
+            if any(part in excluded_dirs or str(rel).startswith(exc)
+                   for exc in excluded_dirs for part in rel.parts):
+                continue
             class_name, deps = self.parse_file(pp_file)
             if class_name:
                 all_dependencies[class_name] = deps
@@ -262,7 +269,8 @@ def main():
     else:
         print(output)
 
-    return 1 if parser_obj.graph.find_circular_dependencies() else 0
+    # Exit 2 = real circular dependencies found; 0 = clean
+    return 2 if parser_obj.graph.find_circular_dependencies() else 0
 
 
 if __name__ == "__main__":
