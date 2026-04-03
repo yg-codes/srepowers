@@ -1,283 +1,370 @@
-#!/bin/bash
-# Common check script for Proxmox VE nodes
-# Supports: pve-node01.example.com, pve-node02.example.com, pve-node03.example.com
-# Usage: ssh <host> 'bash -s' < check-pve-cluster.sh | tee log-<host>-$(date +%Y%m%d-%H%M%S).log
+#!/usr/bin/env bash
+#
+# Proxmox VE Cluster Health Check Script
+# Description: Comprehensive system health check for PVE nodes and clusters
+# Usage: bash check-pve-cluster.sh
+#        ssh root@pve-host 'bash -s' < check-pve-cluster.sh
 
-echo "========================================"
-echo "System Information"
-echo "========================================"
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Functions
+print_header() {
+	echo ""
+	echo "========================================"
+	echo "$1"
+	echo "========================================"
+	echo ""
+}
+
+print_section() {
+	echo ""
+	echo "--- $1 ---"
+	echo ""
+}
+
+check_status() {
+	if [ $1 -eq 0 ]; then
+		echo -e "${GREEN}✓${NC} $2"
+		return 0
+	else
+		echo -e "${RED}✗${NC} $2"
+		return 1
+	fi
+}
+
+warn_status() {
+	echo -e "${YELLOW}⚠${NC} $1"
+}
+
+# Start of health check
+print_header "Proxmox VE Cluster Health Check"
+echo "Run date: $(date)"
+echo "Run by: $(whoami)@$(hostname)"
+echo ""
+
+# System Information
+print_section "System Information"
+
 echo "Hostname: $(hostname)"
 echo "Kernel: $(uname -r)"
-echo "OS Version: $(cat /etc/os-release | grep PRETTY_NAME)"
 echo "Uptime: $(uptime -p)"
-echo "Current Date: $(date)"
-echo "========================================"
+echo "Load Average: $(uptime | awk -F'load average:' '{print $2}')"
 echo ""
 
-echo "========================================"
-echo "All Running Services"
-echo "========================================"
-systemctl list-units --type=service --state=running
-echo "========================================"
+# PVE Version
+echo "PVE Version:"
+pveversion -v 2>/dev/null | head -5 || echo "  pveversion command not available"
 echo ""
 
-echo "========================================"
-echo "Proxmox Specific Services"
-echo "========================================"
-systemctl status pve-cluster pve-firewall pve-ha-lrm pve-ha-crm pvedaemon pveproxy pvestatd 2>&1
-echo "========================================"
-echo ""
-
-echo "========================================"
-echo "RSyslog Service Status"
-echo "========================================"
-systemctl status rsyslog --no-pager
-echo ""
-
-echo "RSyslog Version:"
-rsyslogd -v
-echo ""
-
-echo "RSyslog Configuration Files:"
-ls -lh /etc/rsyslog* 2>/dev/null
-echo ""
-
-echo "RSyslog Main Configuration (non-comment lines):"
-cat /etc/rsyslog.conf 2>/dev/null | grep -v "^#" | grep -v "^$"
-echo ""
-
-echo "RSyslog Additional Configs:"
-find /etc/rsyslog.d/ -type f -exec echo "=== {} ===" \; -exec cat {} \; 2>/dev/null
-echo ""
-
-echo "RSyslog Network Configuration (remote forwarding):"
-grep -E "(@@|@\(|action\(|module\(load=\"om" /etc/rsyslog.conf /etc/rsyslog.d/*.conf 2>/dev/null | grep -v "^#" || echo "No remote forwarding configured"
-echo ""
-
-echo "RSyslog Log Locations:"
-grep -E "^\$File|^\$WorkDirectory|^\$IncludeConfig" /etc/rsyslog.conf /etc/rsyslog.d/*.conf 2>/dev/null || echo "No special log locations defined"
-echo ""
-
-echo "Active RSyslog Connections:"
-ss -tunlp | grep rsyslog || netstat -tunlp 2>/dev/null | grep rsyslog || echo "No active rsyslog connections found"
-echo "========================================"
-echo ""
-
-echo "========================================"
-echo "Splunk Container Status (Podman)"
-echo "========================================"
-sudo podman ps -a 2>/dev/null || echo "Podman not available or no sudo access"
-echo ""
-
-echo "Splunk Container Logs (last 20 lines):"
-sudo podman logs --tail 20 splunk 2>/dev/null || sudo podman logs --tail 20 $(sudo podman ps -q --filter name=splunk) 2>/dev/null || echo "No splunk container found"
-echo ""
-
-echo "Podman System Info:"
-sudo podman system info 2>/dev/null || echo "Podman info not available"
-echo "========================================"
-echo ""
-
-echo "========================================"
-echo "Proxmox Network Configuration"
-echo "========================================"
-echo "Network Interfaces:"
-ip addr show
-echo ""
-
-echo "Network Configuration File:"
-cat /etc/network/interfaces
-echo ""
-
-echo "Bonding Configuration:"
-cat /proc/net/bonding/* 2>/dev/null || echo "No bonding interfaces found"
-echo ""
-
-echo "Bridge Status:"
-bridge link
-echo ""
-
-echo "Network Routes:"
-ip route show
-echo ""
-
-echo "Default Gateway:"
-ip route | grep default
-echo "========================================"
-echo ""
-
-echo "========================================"
-echo "Proxmox Storage Layout"
-echo "========================================"
-echo "LVM Information:"
-vgs 2>/dev/null || echo "No LVM configured"
-pvs 2>/dev/null || echo "No PVs found"
-lvs 2>/dev/null || echo "No LVs found"
-echo ""
-
-echo "Mount Points:"
-findmnt
-echo ""
-
-echo "Disk Usage:"
-df -h
-echo ""
-
-echo "Block Devices:"
-lsblk
-echo ""
-
-echo "Proxmox Storage Configuration:"
-cat /etc/pve/storage.cfg 2>/dev/null || echo "No storage.cfg found"
-echo ""
-
-echo "ZFS Status (if any):"
-zpool status 2>/dev/null || echo "No ZFS pools found"
-echo ""
-
-echo "ZFS Datasets:"
-zfs list 2>/dev/null || echo "No ZFS datasets found"
-echo "========================================"
-echo ""
-
-echo "========================================"
-echo "Proxmox Cluster Status"
-echo "========================================"
-echo "Cluster Membership:"
-pvecm status 2>/dev/null || echo "Not part of a cluster or pvecm not available"
-echo ""
-
-echo "Cluster Nodes:"
-pvesh get /cluster/status 2>/dev/null --output-format json-pretty 2>/dev/null || pvesh get /cluster/status 2>/dev/null || echo "Cannot get cluster status"
-echo ""
-
-echo "Cluster Resources:"
-pvesh get /cluster/resources 2>/dev/null --output-format json-pretty 2>/dev/null | head -100 || pvesh get /cluster/resources 2>/dev/null | head -100
-echo "========================================"
-echo ""
-
-echo "========================================"
-echo "Proxmox VM/Container List"
-echo "========================================"
-echo "VMs on this node:"
-qm list 2>/dev/null || echo "No VMs or qm not available"
-echo ""
-
-echo "Containers on this node:"
-pct list 2>/dev/null || echo "No containers or pct not available"
-echo ""
-
-echo "VM Configurations:"
-for vmid in $(qm list 2>/dev/null | awk 'NR>1 {print $1}'); do
-    echo "=== VM $vmid ==="
-    qm config $vmid 2>/dev/null
-done
-echo ""
-
-echo "Container Configurations:"
-for ctid in $(pct list 2>/dev/null | awk 'NR>1 {print $1}'); do
-    echo "=== CT $ctid ==="
-    pct config $ctid 2>/dev/null
-done
-echo "========================================"
-echo ""
-
-echo "========================================"
-echo "Cluster VM Allocation (if clustered)"
-echo "========================================"
-pvesh get /cluster/resources --type vm 2>/dev/null || echo "Cannot get cluster VM allocation"
-echo "========================================"
-echo ""
-
-echo "========================================"
-echo "System Resources"
-echo "========================================"
+# CPU Info
 echo "CPU Info:"
-lscpu
+lscpu | grep -E "Architecture|CPU|Core|Thread|Model name" | head -10
 echo ""
 
-echo "Memory Info:"
+# Memory Info
+print_section "Memory Information"
 free -h
 echo ""
 
-echo "CPU Load:"
-uptime
+# Disk Usage
+print_section "Disk Usage"
+df -h | grep -E "Filesystem|/dev/|rpool|tank"
 echo ""
 
-echo "Top Processes (by CPU):"
-ps aux --sort=-%cpu | head -10
+# Service Status
+print_section "PVE Service Status"
+
+services="pve-cluster pvedaemon pveproxy pvestatd rsyslog"
+services_failed=0
+
+for service in $services; do
+	if systemctl is-active --quiet $service; then
+		check_status 0 "$service is running"
+	else
+		check_status 1 "$service is NOT running"
+		services_failed=1
+	fi
+done
+
+# Optional services (only check if installed)
+echo ""
+echo "Optional Services:"
+for service in pve-firewall spiceproxy; do
+	if systemctl list-unit-files "${service}.service" &>/dev/null; then
+		if systemctl is-active --quiet "$service"; then
+			check_status 0 "$service is running"
+		else
+			warn_status "$service is installed but not running"
+		fi
+	fi
+done
+
+# HA services (if cluster)
+if systemctl list-units | grep -q pve-ha-crm; then
+	echo ""
+	echo "HA Services:"
+	for service in pve-ha-crm pve-ha-lrm; do
+		if systemctl is-active --quiet $service; then
+			check_status 0 "$service is running"
+		else
+			check_status 1 "$service is NOT running"
+			services_failed=1
+		fi
+	done
+fi
+
+# Network Configuration
+print_section "Network Configuration"
+
+echo "Network Interfaces:"
+ip -br addr show
 echo ""
 
-echo "Top Processes (by Memory):"
-ps aux --sort=-%mem | head -10
-echo "========================================"
+echo "Routing Table:"
+ip route show
 echo ""
 
-echo "========================================"
-echo "Package Versions"
-echo "========================================"
+# Bond status (if configured)
+for bond in /proc/net/bonding/*; do
+	if [ -f "$bond" ]; then
+		bond_name=$(basename "$bond")
+		echo "Bond: $bond_name"
+		cat "$bond" | grep -E "Bonding Mode|Currently Active Slave|MII Status"
+		# Check for degraded bond (any slave with MII Status: down)
+		slave_down=$(
+			grep -c "MII Status: down" "$bond" 2>/dev/null
+			true
+		)
+		if [ "$slave_down" -gt 0 ]; then
+			warn_status "Bond $bond_name has $slave_down slave(s) DOWN"
+		else
+			check_status 0 "All slaves in $bond_name are UP"
+		fi
+		echo ""
+	fi
+done
+
+# Bridge status
+echo "Bridge Status:"
+bridge link 2>/dev/null || echo "No bridges configured"
+echo ""
+
+# Storage Status
+print_section "Storage Status"
+
+echo "Proxmox Storage:"
+pvesm status 2>/dev/null || warn_status "Could not get storage status"
+echo ""
+
+# ZFS status (if configured)
+if command -v zpool &>/dev/null; then
+	echo "ZFS Pools:"
+	zpool list -o name,size,alloc,free,cap,health 2>/dev/null || warn_status "No ZFS pools configured"
+	echo ""
+
+	echo "ZFS Health:"
+	zpool status -x 2>/dev/null || warn_status "Could not get ZFS health"
+	echo ""
+fi
+
+# LVM status (if configured)
+if command -v vgs &>/dev/null; then
+	echo "LVM Volume Groups:"
+	vgs 2>/dev/null || warn_status "No LVM configured"
+	echo ""
+fi
+
+# Mount points
+echo "Mount Points:"
+df -h | grep -E "Filesystem|/rpool|/mnt/|tank"
+echo ""
+
+# VM/Container Inventory
+print_section "VM and Container Inventory"
+
+echo "Virtual Machines:"
+qm list
+echo ""
+
+echo "Containers:"
+pct list
+echo ""
+
+# Cluster Status (if cluster)
+if command -v pvecm &>/dev/null; then
+	print_section "Cluster Status"
+
+	if pvecm status &>/dev/null; then
+		echo "Cluster Information:"
+		pvecm status
+		echo ""
+
+		echo "Cluster Nodes:"
+		pvecm nodes
+		echo ""
+
+		# Check quorum
+		quorum_info=$(pvecm status 2>/dev/null | grep "Quorate:" || echo "")
+		if echo "$quorum_info" | grep -q "Quorate:.*Yes"; then
+			check_status 0 "Cluster has quorum"
+		else
+			check_status 1 "Cluster does NOT have quorum"
+		fi
+	else
+		echo "This node is not part of a cluster"
+	fi
+	echo ""
+fi
+
+# HA Resources (if configured)
+if command -v ha-manager &>/dev/null; then
+	ha_output=$(ha-manager status 2>/dev/null || echo "")
+	if [ -n "$ha_output" ]; then
+		print_section "HA Resources"
+		ha-manager status
+		echo ""
+	fi
+fi
+
+# Cluster Join Readiness (if not in cluster)
+if ! command -v pvecm &>/dev/null || ! pvecm status &>/dev/null; then
+	print_section "Cluster Join Readiness Check"
+
+	# Check for existing cluster config
+	if [ -f /etc/pve/corosync.conf ]; then
+		warn_status "Existing cluster configuration found at /etc/pve/corosync.conf"
+		echo "Remove with: rm /etc/pve/corosync.conf"
+	else
+		check_status 0 "No existing cluster configuration"
+	fi
+
+	# Check hostname resolution
+	if getent hosts $(hostname) &>/dev/null; then
+		check_status 0 "Hostname resolves: $(hostname)"
+	else
+		check_status 1 "Hostname does not resolve: $(hostname)"
+	fi
+
+	# Check for existing VMs/CTs
+	vm_count=$(qm list 2>/dev/null | tail -n +2 | wc -l)
+	ct_count=$(pct list 2>/dev/null | tail -n +2 | wc -l)
+	if [ $vm_count -eq 0 ] && [ $ct_count -eq 0 ]; then
+		check_status 0 "No VMs or containers (ready for cluster join)"
+	else
+		warn_status "Found $vm_count VM(s) and $ct_count container(s)"
+		echo "VMs and/or containers should not exist before joining a cluster"
+	fi
+	echo ""
+fi
+
+# Package Versions
+print_section "Package Versions"
+
 echo "Proxmox Packages:"
-dpkg -l | grep -E "pve|proxmox" || rpm -qa | grep -E "pve|proxmox"
-echo ""
-
-echo "RSyslog Package:"
-dpkg -l | grep rsyslog || rpm -qa | grep rsyslog
+dpkg -l 2>/dev/null | grep -E "pve-|proxmox-" | awk '{printf "  %-40s %s\n", $2, $3}' || echo "  Could not query packages"
 echo ""
 
 echo "ZFS Packages:"
-dpkg -l | grep zfs || rpm -qa | grep zfs
-echo "========================================"
+dpkg -l 2>/dev/null | grep -E "zfs" | awk '{printf "  %-40s %s\n", $2, $3}' || echo "  No ZFS packages found"
 echo ""
 
-echo "========================================"
-echo "Cluster Join Readiness Check"
-echo "========================================"
-echo "Checking pre-requisites for cluster join:"
+# Replication Status
+print_section "Replication Jobs"
+
+if command -v pvesr &>/dev/null; then
+	repl_output=$(pvesr status 2>/dev/null || echo "")
+	if [ -n "$repl_output" ]; then
+		echo "$repl_output"
+		# Check for failed replication jobs
+		repl_errors=$(echo "$repl_output" | grep -ci "error" || true)
+		if [ "$repl_errors" -gt 0 ]; then
+			warn_status "Replication job errors detected ($repl_errors)"
+		else
+			check_status 0 "All replication jobs OK"
+		fi
+	else
+		echo "No replication jobs configured"
+	fi
+else
+	echo "pvesr command not available"
+fi
 echo ""
 
-echo "1. Corosync Configuration:"
-ls -la /etc/pve/corosync.conf 2>/dev/null && echo "  [WARN] Already has corosync.conf - may already be in cluster" || echo "  [OK] No existing corosync.conf"
+# Recent System Logs
+print_section "Recent System Logs (Errors and Warnings)"
+
+echo "Recent journal errors (last 50):"
+journalctl -p err -n 50 --no-pager
 echo ""
 
-echo "2. SSH Keys:"
-ls -la /etc/pve/priv/ssh 2>/dev/null && echo "  [OK] SSH keys present" || echo "  [WARN] SSH keys not found"
+echo "Recent dmesg errors (last 20):"
+dmesg -T | tail -20
 echo ""
 
-echo "3. Local Storage:"
-pvesm status 2>/dev/null | grep local && echo "  [OK] Local storage configured" || echo "  [WARN] Local storage not found"
+# Recent PVE tasks
+if [ -d /var/log/pve/tasks ]; then
+	print_section "Recent PVE Tasks (Last 10)"
+	ls -lt /var/log/pve/tasks/ | head -11 | tail -10
+	echo ""
+fi
+
+# Summary
+print_header "Health Check Summary"
+
+# Count issues
+total_issues=0
+
+# Check service failures
+if [ $services_failed -eq 1 ]; then
+	warn_status "Some PVE services are not running"
+	total_issues=$((total_issues + 1))
+fi
+
+# Check disk usage
+disk_usage=$(df -h / | awk 'NR==2 {print $5}' | sed 's/%//')
+if [ $disk_usage -gt 80 ]; then
+	warn_status "Root filesystem usage is ${disk_usage}%"
+	total_issues=$((total_issues + 1))
+fi
+
+# Check memory
+mem_avail=$(free | awk 'NR==2{printf "%.0f", $7/$2 * 100.0}')
+if [ $mem_avail -lt 10 ]; then
+	warn_status "Available memory is ${mem_avail}%"
+	total_issues=$((total_issues + 1))
+fi
+
+# Check ZFS health
+if command -v zpool &>/dev/null; then
+	zfs_health=$(zpool status -x 2>/dev/null)
+	if ! echo "$zfs_health" | grep -q "all pools are healthy"; then
+		warn_status "ZFS pool health issues detected"
+		total_issues=$((total_issues + 1))
+	fi
+fi
+
+# Check replication jobs
+if command -v pvesr &>/dev/null; then
+	repl_check=$(pvesr status 2>/dev/null | grep -ci "error" || true)
+	if [ "$repl_check" -gt 0 ]; then
+		warn_status "Replication job errors detected"
+		total_issues=$((total_issues + 1))
+	fi
+fi
+
+echo ""
+if [ $total_issues -eq 0 ]; then
+	echo -e "${GREEN}✓ System health check completed with no critical issues${NC}"
+else
+	echo -e "${YELLOW}⚠ System health check completed with $total_issues issue(s)${NC}"
+fi
 echo ""
 
-echo "4. Network Configuration:"
-cat /etc/network/interfaces | grep -E "vmbr|bond" && echo "  [OK] Network bridges/bonds configured" || echo "  [WARN] No bridges found"
-echo ""
-
-echo "5. Hostname:"
-hostname -f && echo "  [OK] FQDN: $(hostname -f)" || echo "  [WARN] FQDN not set"
-echo ""
-
-echo "6. DNS Resolution:"
-getent hosts $(hostname -f) >/dev/null 2>&1 && echo "  [OK] Hostname resolves" || echo "  [WARN] Hostname does not resolve in DNS"
-echo ""
-
-echo "7. Time Sync:"
-timedatectl status 2>/dev/null || echo "  timedatectl not available"
-echo "========================================"
-echo ""
-
-echo "========================================"
-echo "Recent System Logs"
-echo "========================================"
-echo "Journal logs (last 50 lines):"
-journalctl -n 50 --no-pager
-echo ""
-
-echo "PVE Task logs:"
-tail -50 /var/log/pve/tasks/active 2>/dev/null || echo "No PVE task logs found"
-echo "========================================"
-echo ""
-
-echo "========================================"
-echo "Check Complete"
-echo "========================================"
-echo "End Time: $(date)"
-echo "========================================"
+# End of script
+exit 0

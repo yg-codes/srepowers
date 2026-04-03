@@ -383,27 +383,29 @@ qmrestore pbs-backup:backup/vm/<vmid>/<timestamp> <new-vmid>
 
 ## System Health Check
 
-### Using the Check Script
+### Scripts
 
-This skill includes `scripts/check-pve-cluster.sh` for comprehensive system checks:
+This skill includes `scripts/` with reusable PVE operations scripts for health checks, capacity reporting, and replication management.
+
+| Script | Purpose | Prerequisites |
+|--------|---------|---------------|
+| `check-pve-cluster.sh` | Comprehensive cluster health check (services, network, storage, HA, replication, quorum) | — |
+| `check-pve-capacity.sh` | Capacity reporting: memory, storage, inventory | `jq` |
+| `phase0-replication.sh` | ZFS replication job management (setup/verify/delete) | `jq` |
 
 ```bash
-# Run locally
-bash scripts/check-pve-cluster.sh
+# Health check
+ssh root@<pve-host> 'bash -s' < scripts/check-pve-cluster.sh
 
-# Run remotely via SSH
-ssh root@<pve-host> 'bash -s' < scripts/check-pve-cluster.sh | tee log-<host>-$(date +%Y%m%d-%H%M%S).log
+# Capacity report (memory, storage, inventory)
+ssh root@<pve-host> 'bash -s -- --section all --format text' < scripts/check-pve-capacity.sh
+
+# Memory only, JSON output
+ssh root@<pve-host> 'bash -s -- --section memory --format json' < scripts/check-pve-capacity.sh
+
+# Replication setup
+ssh root@<source-node> 'bash -s -- --target <target-node> setup <vmid> ...' < scripts/phase0-replication.sh
 ```
-
-The script collects:
-- System information (hostname, kernel, uptime)
-- Service status (PVE services, rsyslog)
-- Network configuration (bonds, bridges, routes)
-- Storage layout (ZFS, LVM, mounts)
-- VM/Container inventory
-- Cluster status
-- Cluster join readiness checks
-- Recent system logs
 
 ### Manual Health Checks
 
@@ -547,7 +549,11 @@ grep -i "cluster" references/*.pdf  # Won't work directly on PDF
 
 ### Scripts
 
-- `scripts/check-pve-cluster.sh` - Comprehensive system health check script
+| Script | Purpose |
+|--------|---------|
+| `scripts/check-pve-cluster.sh` | Comprehensive cluster health check |
+| `scripts/check-pve-capacity.sh` | Capacity, allocation, and inventory reporting |
+| `scripts/phase0-replication.sh` | ZFS replication job management |
 
 ### External Resources
 
