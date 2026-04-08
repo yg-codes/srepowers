@@ -533,19 +533,13 @@ Quick invoke skills using `/command` syntax:
 
 **Operations Enhancement:**
 - `/executing-operation-plans` - Execute plans in separate sessions with checkpoints
+- `/dispatching-parallel-agents-sre` - Run 2+ independent infrastructure tasks in parallel
 - `/observability-integration` - Verify operations using metrics and alerting data (Prometheus, Datadog, CloudWatch, New Relic)
 - `/verification-before-completion` - Enforce evidence-before-claims before any completion status
 - `/safety-validator` - Review commands for high-risk operations
 - `/progressive-delivery` - Canary/blue-green release with SLO-based rollback triggers
 - `/toil-analysis` - Measure toil, plan automation investments, model capacity
-
-**Learning & Onboarding:**
-- `/playground-tutorial` - Safe, local tutorial for learning TDO
-- `/environment-health-check` - Verify required tools are installed
-
-**Infrastructure Administration:**
-- `/pve-admin` - Proxmox VE/Backup administration
-- `/puppet-code-analyzer` - Puppet code quality analysis
+- `/receiving-code-review-sre` - Process code review feedback on infrastructure changes
 
 **CI/CD & Pipelines:**
 - `/gitlab-ecr-pipeline` - GitLab CI/CD → AWS ECR pipelines
@@ -571,7 +565,6 @@ Quick invoke skills using `/command` syntax:
 
 **Cost & Optimization:**
 - `/cost-optimizer` - Cloud cost analysis and optimization
-- `/toil-analysis` - Measure toil and plan automation
 
 **Languages & Development:**
 - `/golang-pro` - Go application development
@@ -588,20 +581,35 @@ Quick invoke skills using `/command` syntax:
 - `/code-documenter` - API documentation and docstrings
 - `/test-master` - Testing strategy and automation
 
-## Skills from Superpowers
+**Meta & Utilities:**
+- `/using-srepowers` - Meta-skill: how to find and use SRE skills
+- `/writing-skills-sre` - Create or edit SRE infrastructure skills
+- `/environment-health-check` - Verify required tools are installed
+- `/playground-tutorial` - Safe, local tutorial for learning TDO
 
-SREPowers is designed to work alongside [superpowers](https://github.com/obra/superpowers). The following skills are provided by superpowers and should be used instead of SREPowers equivalents:
+## Companion Plugin: Superpowers
 
-| Skill | Source | Description |
-|-------|--------|-------------|
-| `requesting-code-review` | superpowers | Pre-review checklist for code |
-| `receiving-code-review` | superpowers | Responding to code review feedback |
-| `brainstorming` | superpowers | Socratic design refinement (use `brainstorming-operations` for infrastructure-specific) |
-| `writing-plans` | superpowers | Implementation plans (use `writing-operation-plans` for infrastructure-specific) |
-| `using-git-worktrees` | superpowers | Isolated development branches (use `using-git-worktrees-sre` for control repos) |
-| `finishing-a-development-branch` | superpowers | Merge/PR workflow (use `finishing-operation-branch` for environment promotion) |
+SREPowers is a companion plugin to [superpowers](https://github.com/obra/superpowers). It adapts superpowers' software development workflows for SRE/infrastructure operations. Install both for complete coverage:
 
-**Recommendation:** Install both superpowers and SREPowers for complete coverage.
+| Software Development (superpowers) | SRE Infrastructure (srepowers) |
+|-------------------------------------|-------------------------------|
+| `test-driven-development` | `test-driven-operation` |
+| `subagent-driven-development` | `subagent-driven-operation` |
+| `brainstorming` | `brainstorming-operations` |
+| `writing-plans` | `writing-operation-plans` |
+| `executing-plans` | `executing-operation-plans` |
+| `using-git-worktrees` | `using-git-worktrees-sre` |
+| `finishing-a-development-branch` | `finishing-operation-branch` |
+| `systematic-debugging` | `systematic-troubleshooting` |
+| `verification-before-completion` | `verification-before-completion` (shared) |
+| `dispatching-parallel-agents` | `dispatching-parallel-agents-sre` |
+| `receiving-code-review` | `receiving-code-review-sre` |
+| `writing-skills` | `writing-skills-sre` (extends upstream) |
+
+The following are provided by superpowers only (no SREPowers equivalent):
+- `requesting-code-review` — pre-review checklist for code
+
+SREPowers adds 30+ SRE-native skills with no superpowers equivalent (incident command, runbooks, PVE, Puppet, GitLab ECR, observability, progressive delivery, toil, cost, and domain expertise skills).
 
 ## Developer Tools
 

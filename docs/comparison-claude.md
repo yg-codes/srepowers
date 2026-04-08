@@ -25,9 +25,10 @@
 |---|---|---|
 | **Domain** | Software development | SRE/infrastructure operations |
 | **Audience** | Developers | Site Reliability Engineers |
-| **Skill Count** | 14 (focused) | 45 (comprehensive) |
+| **Skill Count** | 14 (focused) | 49 (comprehensive) |
 | **Core Concept** | Test-Driven Development (TDD) | Test-Driven Operation (TDO) |
-| **Version** | 4.3.0 | 3.3.0 |
+| **Version** | 5.0.7 | 4.0.1 |
+| **Stance** | Standalone | Companion plugin (extends superpowers) |
 
 SREPowers is notably broader in scope, with significant investment in domain-specific skills and a more explicit approach to behavioral enforcement under operational pressure.
 
@@ -55,7 +56,7 @@ SREPowers is notably broader in scope, with significant investment in domain-spe
 
 ---
 
-### SREPowers (45 skills)
+### SREPowers (49 skills)
 
 **Core Infrastructure Operations (6):**
 - `test-driven-operation` — verification-first infrastructure changes
@@ -72,21 +73,28 @@ SREPowers is notably broader in scope, with significant investment in domain-spe
 
 **Operations Execution (4):**
 - `executing-operation-plans` — batch execution across environments
-- `requesting-peer-review` — human review before production changes
+- `receiving-code-review-sre` — processing code review feedback on infra changes
 - `observability-integration` — verify operations using metrics/alerting
 - `using-git-worktrees-sre` — isolated worktrees for control repos
 
 **Infrastructure Administration (4):**
 - `pve-admin` — Proxmox VE/PBS management
+- `pve-vlan-trunk-troubleshooting` — Proxmox VLAN trunk debugging
 - `puppet-code-analyzer` — Puppet code quality analysis
 - `gitlab-ecr-pipeline` — GitLab CI/CD to AWS ECR
-- `clickup-ticket-creator` — CCB-formatted ClickUp tickets
 
-**Domain Expertise (23):**
-Architecture, cloud, microservices, DevOps, Terraform, Kubernetes, Go, Python, Rust, PostgreSQL, SQL, monitoring, SRE engineering, chaos engineering, security (×2), code review, documentation, testing, prompt engineering.
+**SRE Practices (5):**
+- `sre-runbook` — structured runbook generation
+- `progressive-delivery` — canary, blue-green deployments
+- `toil-analysis` — toil identification and reduction
+- `cost-optimizer` — cloud cost analysis and FinOps
+- `environment-health-check` — verify required tools
 
-**Learning & Utilities (5):**
-- `playground-tutorial`, `environment-health-check`, `cache-cleanup`, `using-srepowers`, `finishing-operation-branch`
+**Domain Expertise (22):**
+Architecture, cloud, microservices, DevOps, Terraform, Terragrunt, Kubernetes, containers, networking, Go, Python, Rust, PostgreSQL, observability, SRE engineering, chaos engineering, security (x2), code review, documentation, testing, platform engineering.
+
+**Meta & Utilities (5):**
+- `using-srepowers`, `writing-skills-sre`, `finishing-operation-branch`, `dispatching-parallel-agents-sre`, `playground-tutorial`
 
 ---
 
@@ -174,13 +182,10 @@ Both plugins share identical architectural foundations. The key differences are:
 ### What Superpowers Has That SREPowers Doesn't
 
 1. **Multi-Platform Support**
-   Superpowers works on Claude Code, Codex, and OpenCode. SREPowers targets Claude Code only.
+   Superpowers works on Claude Code, Codex, OpenCode, Cursor, Gemini CLI, and GitHub Copilot CLI. SREPowers targets Claude Code only.
 
-2. **Skill Creation Framework**
-   `writing-skills` skill teaches how to write new skills following the framework's conventions. SREPowers has a skill generator script but no equivalent training skill.
-
-3. **Simplicity**
-   Fewer skills means lower cognitive load. New practitioners can learn the full skill set quickly. SREPowers' 45 skills require more upfront investment.
+2. **Simplicity**
+   Fewer skills means lower cognitive load. New practitioners can learn the full skill set quickly. SREPowers' 49 skills require more upfront investment.
 
 ---
 
@@ -245,14 +250,16 @@ Canary deployments, blue-green traffic splitting, and shadow traffic patterns ar
 
 | SRE Practice | SREPowers Coverage |
 |---|---|
-| Monitoring & Alerting | Good (Prometheus-specific) |
+| Monitoring & Alerting | Good (multi-platform: Prometheus, Datadog, CloudWatch, New Relic) |
 | Incident Response | Excellent |
 | Change Management | Excellent |
 | Runbooks/Playbooks | Good |
-| Error Budgets/SLOs | Partial (sre-engineer mentions it) |
-| **Toil Analysis** | **Missing** |
-| Chaos/Resilience Testing | Moderate (generic) |
-| **Capacity Planning** | **Missing** |
+| Error Budgets/SLOs | Good (sre-engineer) |
+| Toil Analysis | Good (toil-analysis) |
+| Chaos/Resilience Testing | Good (chaos-engineer) |
+| Progressive Delivery | Good (progressive-delivery) |
+| Cost Optimization | Good (cost-optimizer) |
+| Capacity Planning | Partial (sre-engineer mentions it) |
 | Knowledge Sharing | Good |
 
 ---
@@ -261,18 +268,18 @@ Canary deployments, blue-green traffic splitting, and shadow traffic patterns ar
 
 | Dimension | Superpowers | SREPowers |
 |-----------|------------|-----------|
-| Skill count | 14 (focused) | 45 (comprehensive) |
-| Test coverage | 6 tests | 38+ tests |
+| Skill count | 14 (focused) | 49 (comprehensive) |
 | Documentation depth | Concise | Comprehensive |
 | Learning curve | Low | Medium-High |
-| Platform support | 3 platforms | 1 platform (Claude Code) |
+| Platform support | 6 platforms | 1 platform (Claude Code) |
 | Real-world SRE applicability | Code only | Infrastructure + code |
 | Workflow enforcement | Very strict (hard gates) | Strict + context-aware |
-| Risk of over-engineering | Low | Medium (45 skills for a small task) |
+| Risk of over-engineering | Low | Medium (49 skills for a small task) |
 | For small teams | Better | Worse (overhead) |
 | For large operations | Not applicable | Better (specialist depth) |
 | Behavioral psychology | Good | Excellent (explicit) |
 | Incident management | None | Full lifecycle |
+| Dependency | Standalone | Companion plugin (extends superpowers) |
 
 ---
 
@@ -312,13 +319,11 @@ SREPowers is more comprehensive, more opinionated, and more infrastructure-speci
 
 ### What SREPowers Could Improve
 
-1. Add progressive delivery verification workflow (canary, blue-green)
-2. Add toil analysis and reduction workflow
-3. Add capacity planning workflow
-4. Support non-Prometheus observability stacks
-5. Add async incident response patterns for distributed teams
-6. Create a `writing-skills` equivalent for teaching skill creation
+1. Add capacity planning workflow
+2. Support non-Prometheus observability stacks (partially addressed with Datadog/CloudWatch/New Relic)
+3. Add async incident response patterns for distributed teams
+4. Add multi-platform support (Cursor, Codex, OpenCode, Gemini CLI)
 
 ---
 
-*This comparison was generated by Claude Code through analysis of `/home/yg/src/github/srepowers` and `/home/yg/src/github/superpowers` on 2026-02-18.*
+*This comparison was generated by Claude Code through analysis of `/home/yg/src/github/srepowers` and `/home/yg/src/github/superpowers`. Last updated: 2026-04-08.*

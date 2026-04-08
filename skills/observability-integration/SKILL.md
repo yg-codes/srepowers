@@ -25,7 +25,7 @@ Integrate metrics, logs, and alerting data into operational workflows to verify 
 **Pairs with:**
 - `test-driven-operation` - Add metric verification to TDO cycles
 - `systematic-troubleshooting` - Use metrics for root cause analysis
-- `monitoring-expert` - Deep monitoring configuration
+- `observability-engineer` - Deep monitoring configuration
 
 ## The Process
 
@@ -394,7 +394,7 @@ curl -s "http://jaeger:16686/api/traces?service=api&operation=GET%20/users&limit
 **Pairs with:**
 - `test-driven-operation` - Add metric verification to TDO
 - `systematic-troubleshooting` - Use metrics for incident analysis
-- `monitoring-expert` - Configure metrics and alerts
+- `observability-engineer` - Configure metrics and alerts
 - `executing-operation-plans` - Metric checkpoints between batches
 
 **Called by:**

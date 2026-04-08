@@ -1,5 +1,5 @@
 ---
-description: "Use before planning infrastructure operations - explores requirements, risks, verification strategies, and rollback plans"
+description: "Use when starting any infrastructure operation that needs design before implementation"
 ---
 
 Invoke the srepowers:brainstorming-operations skill and follow it exactly as presented to you
