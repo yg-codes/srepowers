@@ -1,5 +1,21 @@
 # Release Notes
 
+## [4.1.0] - 2026-04-08
+
+### Fixed
+
+- **Commands alignment**: Created 43 missing command wrappers — all 49 skills now have matching `/command` access (was 6/49)
+- **Test runner cleanup**: Removed 7 dead test references (cache-cleanup, clickup-ticket-creator, prompt-engineer, etc.), renamed 3 stale test files (monitoring-expert → observability-engineer, postgres-pro → postgresql-engineer, sql-pro → postgresql-engineer-sql), added 4 missing tests to runner
+- **Stale skill names**: Replaced `monitoring-expert` with `observability-engineer` in `observability-integration/SKILL.md`
+- **README.md**: Added 7 missing commands, rewrote companion plugin section with explicit skill mapping table to superpowers
+- **docs/comparison-claude.md**: Updated skill counts (14/49), versions (5.0.7/4.1.0), removed 3 "missing" items that now exist (progressive-delivery, toil-analysis, writing-skills-sre), added companion plugin dependency stance
+
+### Changed
+
+- Companion plugin stance clarified: SREPowers is a companion plugin to superpowers, not standalone. `writing-skills-sre` explicitly extends `superpowers:writing-skills`.
+
+---
+
 ## [3.12.0] - 2026-03-18
 
 ### Removed
