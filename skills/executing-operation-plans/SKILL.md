@@ -38,12 +38,17 @@ kubectl config current-context
 ### Step 1: Load and Review Plan
 
 1. Read operation plan file
-2. Review critically:
+2. Parse YAML frontmatter: extract `risk_level`, `environment`, `tasks_count`, `status`
+3. **Check for resume state:**
+   - If `status: "in_progress"` or `status: "completed"` in frontmatter, read `## Execution Status` section
+   - Identify completed tasks (marked `[x]`) and pending tasks (marked `[ ]`)
+   - Announce: "Resuming operation. Tasks 1-[N-1] completed. Starting from Task [N]."
+4. Review critically:
    - Are verification commands clear?
    - Are rollback steps documented?
    - Are environment boundaries respected?
-3. If concerns: Raise them before starting
-4. If no concerns: Create TodoWrite and proceed
+5. If concerns: Raise them before starting
+6. If no concerns: Create TodoWrite and proceed
 
 ### Step 2: Pre-Execution Safety Check
 
@@ -86,6 +91,10 @@ kubectl logs -n <namespace> -l <label> --tail=20
 kubectl get pods --all-namespaces | grep -v Running
 ```
 
+**Update execution state in plan file:**
+- Mark completed tasks as `[x] completed (commit SHA)`
+- Update frontmatter `status: "in_progress"`
+
 ### Step 5: Report and Checkpoint
 
 ```
@@ -111,7 +120,22 @@ Say "rollback" to revert this batch.
 
 **If more tasks:** Wait for approval, execute next batch
 
-**If all complete:** Final verification, use `finishing-operation-branch`
+**If all complete:** Final verification, update frontmatter `status: "completed"`, update Requirements Traceability status, use `finishing-operation-branch`
+
+## Deviation Handling
+
+When unexpected situations arise during task execution:
+
+| Rule | Type | Action | Max Retries |
+|------|------|--------|-------------|
+| **R1 - Minor bug** | Auto-fix | Fix, re-verify, continue | 3 |
+| **R2 - Missing info** | Auto-resolve | Read adjacent files, infer, continue | 3 |
+| **R3 - Verification drift** | Auto-adapt | Adjust expected output, re-verify | 3 |
+| **R4 - Scope/arch change** | **STOP** | Present to human, await approval | N/A |
+
+**After 3 failed R1-R3 retries:** Escalate to R4. Report what was tried and what's needed.
+
+**Scope boundary:** Do not auto-fix pre-existing issues unrelated to the current task.
 
 ## Environment Promotion
 

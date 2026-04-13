@@ -131,3 +131,24 @@ Skip any step = lying, not verifying
 - **executing-operation-plans** — Each phase completion requires verification before proceeding
 - **finishing-operation-branch** — Branch completion requires all verifications passed
 - **incident-commander** — Incident close requires verified service restoration
+
+## Requirements Traceability Verification
+
+When verifying completion of an operation plan that includes a `## Requirements Traceability` section:
+
+1. Read the requirements traceability table from the plan
+2. For each requirement mapped to a task, verify the task's execution evidence covers it
+3. Update the Status column: `pending` → `done` | `skipped` | `failed`
+4. Present a coverage summary:
+
+```
+Requirements Coverage:
+✅ "Pod has resource limits" → Task 3 → done
+✅ "Health check configured" → Task 3 → done
+❌ "Network policy applied" → Task 4 → failed (verification output mismatch)
+```
+
+5. If any requirement shows `failed` or is still `pending`: the operation is NOT complete
+6. All requirements must be `done` or explicitly `skipped` (with documented reason) before proceeding to `finishing-operation-branch`
+
+**ClickUp integration:** When the plan has a `ticket` in frontmatter, fetch the ticket via ClickUp MCP and cross-reference acceptance criteria against the coverage summary. If all criteria are met, the ticket can be updated to reflect completion.

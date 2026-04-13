@@ -15,19 +15,30 @@ Write comprehensive infrastructure operation plans assuming the operator has zer
 
 **Save plans to:** `docs/plans/YYYY-MM-DD-<operation-name>.md`
 
-## Plan Document Header
+## Plan Document Format
 
-**Every plan MUST start with this header (include ClickUp ticket link if available):**
+**Every plan MUST use this structured format with YAML frontmatter and task sections:**
 
 ```markdown
+---
+# Plan Frontmatter (machine-parseable, used by execution skills)
+ticket: "[TICKET-ID or empty]"  # ClickUp ticket ID (e.g., INFRA-1234)
+ticket_url: "[URL or empty]"    # Full ClickUp URL
+risk_level: "[low|medium|high]"
+risk_rationale: "[Why this risk level]"
+environment: "[sit|uat|prod|mgmt]"
+rollback_plan: "[Brief rollback strategy for the entire operation]"
+stakeholders: "[Who to inform before/during/after]"
+tasks_count: [N]
+status: "pending"               # pending | in_progress | completed | rolled_back
+---
+
 # [Operation Name] Execution Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use srepowers:subagent-driven-operation to implement this plan task-by-task.
 
-**ClickUp Ticket:** [TICKET-ID](https://app.clickup.com/t/9002217639/TICKET-ID) <!-- Optional: include if ticket exists -->
-
 **Goal:** [One sentence describing what this achieves]
-**Risk Level:** [Low/Medium/High with rationale]
+**Risk Level:** [Low/Medium/High] — [rationale]
 **Rollback Plan:** [Brief rollback strategy]
 **Stakeholder Notification:** [Who to inform before/during/after]
 
@@ -39,18 +50,59 @@ Write comprehensive infrastructure operation plans assuming the operator has zer
 - Information to gather first (current pod counts, existing configs)
 - Access requirements (cluster access, API keys, SSH access)
 
+## Requirements Traceability
+
+<!-- Map ClickUp acceptance criteria to plan tasks -->
+| Requirement | Task(s) | Status |
+|-------------|---------|--------|
+| [Acceptance criterion 1] | Task N | pending |
+| [Acceptance criterion 2] | Task N, Task M | pending |
+
 ## Tasks
+
+## Execution Status
+
+<!-- Auto-updated during execution. Used for resume after interruption. -->
+- Task 1: [ ] pending
+- Task 2: [ ] pending
+- Task N: [ ] pending
 ```
+
+### Frontmatter Rules
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `ticket` | No | ClickUp ticket ID when available |
+| `ticket_url` | No | Full URL for subagent access |
+| `risk_level` | **Yes** | Must be `low`, `medium`, or `high` |
+| `risk_rationale` | **Yes** | One sentence justifying the risk level |
+| `environment` | **Yes** | Target environment: `sit`, `uat`, `prod`, or `mgmt` |
+| `rollback_plan` | **Yes** | High-level rollback for the entire operation |
+| `stakeholders` | No | Who to notify |
+| `tasks_count` | **Yes** | Must match actual number of tasks |
+| `status` | **Yes** | Updated during execution |
+
+### Requirements Traceability Rules
+
+- When a ClickUp ticket exists, extract acceptance criteria and map each to one or more plan tasks
+- Every acceptance criterion MUST map to at least one task
+- If a criterion cannot be mapped, add a task for it or explicitly flag it as out-of-scope
+- Status column updated during execution: `pending` → `done` | `skipped` | `failed`
 
 ## Task Structure
 
-**Each step is one action (2-5 minutes). Infrastructure adds dry-run and side-effect verification:**
+**Each step is one action (2-5 minutes). Every task follows TDO discipline with structured fields:**
 
 ```markdown
 ### Task N: [Component/Operation Name]
 
 **Goal:** [One sentence]
 **Files/Resources:** Create/Modify `exact/resource/name.yaml`, Namespace: `namespace-name`
+**Verification:** `[exact verification command]`
+**Expected (RED):** `[exact failure output]`
+**Expected (GREEN):** `[exact success output]`
+**Rollback:** `[exact rollback command]`
+**Side Effects Check:** `[command to verify adjacent systems]`
 
 **Step 1: RED - Write failing verification**
 
@@ -95,14 +147,21 @@ kubectl get pods -n namespace -l app=other-app
 ```bash
 git add [files] && git commit -m "[commit message]"
 ```
+```
 
-**Rollback:**
-```bash
-kubectl delete -f [filename].yaml
-# OR
-git revert HEAD
-```
-```
+### Task Header Fields (Required)
+
+Each task MUST include these fields in its header for machine-parseable extraction:
+
+| Field | Required | Purpose |
+|-------|----------|---------|
+| **Goal** | **Yes** | One-sentence objective |
+| **Files/Resources** | **Yes** | Exact paths and namespaces |
+| **Verification** | **Yes** | Exact command to prove success/failure |
+| **Expected (RED)** | **Yes** | What the verification command outputs before the change |
+| **Expected (GREEN)** | **Yes** | What the verification command outputs after the change |
+| **Rollback** | **Yes** | Exact command to undo this task |
+| **Side Effects Check** | **Yes** | Command to verify adjacent systems unaffected |
 
 ## Key Principles
 
@@ -137,6 +196,23 @@ If any verification fails:
 - Run rollback for affected tasks
 - Re-run failed verification to confirm rollback
 ```
+
+## Plan Quality Gate
+
+After generating the plan and before presenting execution options, dispatch a plan-checker subagent to validate the plan against these 6 dimensions:
+
+1. **Rollback coverage** — Every task has a rollback command (not just "git revert")
+2. **Verification concreteness** — All verification commands are exact (no "check that X works", no placeholders)
+3. **Environment boundary** — No task touches an environment outside the declared `environment` field
+4. **Dry-run presence** — Every kubectl/terraform apply includes a `--dry-run` step
+5. **Side-effect checks** — Every task specifies how to verify no collateral damage
+6. **Risk consistency** — Risk level matches actual blast radius (e.g., cluster-wide changes = high, not medium)
+
+**Checker workflow:**
+1. Dispatch plan-checker subagent using `./plan-checker-prompt.md`
+2. If issues found: fix the plan, re-run checker (max 2 iterations)
+3. If still issues after 2 iterations: surface to human for review
+4. If passes: proceed to execution handoff
 
 ## Execution Handoff
 

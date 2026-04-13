@@ -57,6 +57,26 @@ Task tool (general-purpose):
     - API: `curl -s https://api.example.com/users/123 | jq '.email'`
     - Git: `git log --oneline -1 control-repo/`
 
+    ## Deviation Handling
+
+    When you encounter unexpected situations, classify and respond:
+
+    | Rule | Type | Action | Max Retries |
+    |------|------|--------|-------------|
+    | **R1 - Minor bug** | Auto-fix | Fix, re-verify, continue | 3 |
+    | **R2 - Missing info** | Auto-resolve | Read adjacent files, infer, continue | 3 |
+    | **R3 - Verification drift** | Auto-adapt | Adjust expected output, re-verify | 3 |
+    | **R4 - Scope/arch change** | **STOP** | Report to human, await approval | N/A |
+
+    **R1 examples:** Typo in label, wrong namespace in YAML field, missing annotation
+    **R2 examples:** Missing port number, unclear annotation value, ambiguous config key
+    **R3 examples:** Pod name includes random suffix, output format differs slightly, timing values
+    **R4 examples:** Need different resource type (Deployment vs StatefulSet), API version incompatible, requires additional infrastructure not in plan
+
+    **Scope boundary:** Do NOT auto-fix pre-existing issues unrelated to your assigned task. If an unrelated issue blocks you, report as R4.
+
+    **After 3 failed retries on R1-R3:** Escalate to R4. Report what you tried, what failed, and what you think is needed.
+
     ## Before Reporting Back: Self-Review
 
     Review your work with fresh eyes. Ask yourself:

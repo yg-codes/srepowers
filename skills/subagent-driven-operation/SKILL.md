@@ -39,6 +39,36 @@ digraph when_to_use {
 - Two-stage review after each task: spec compliance first, then artifact quality
 - Faster iteration (no human-in-loop between tasks)
 
+## Plan Parsing
+
+When loading a plan with YAML frontmatter:
+
+1. **Extract frontmatter fields:** `risk_level`, `environment`, `tasks_count`, `status`
+2. **Check resume state:** Read the `## Execution Status` section
+   - If any task shows `[x] completed`, start from the first `[ ] pending` task
+   - Report: "Resuming from Task [N] — Tasks 1-[N-1] already completed"
+3. **Select execution pattern** (see below)
+
+## Execution Pattern Selection
+
+The system selects a pattern based on plan characteristics. Announce the selected pattern at start.
+
+| Pattern | When | How | Token Savings |
+|---------|------|-----|---------------|
+| **Inline** | <= 2 tasks AND risk_level != high | Execute in main context, no subagent spawn | ~14K per task avoided |
+| **Segmented** | 3-6 tasks, no decision checkpoints needed | Batch tasks into segments of 2-3, subagent per segment, verify in main context | ~30-50% vs full |
+| **Full Subagent** | 7+ tasks OR risk_level == high OR any task lacks rollback | Current behavior: fresh subagent per task | Baseline |
+
+**Selection logic:**
+1. If `risk_level: high` → Full Subagent (always)
+2. If `tasks_count <= 2` → Inline
+3. If `tasks_count <= 6` → Segmented
+4. Otherwise → Full Subagent
+
+**Inline pattern:** Execute tasks directly in main context following TDO. No operator subagent dispatch. No spec/artifact review subagents (you self-review). Commit after each task.
+
+**Segmented pattern:** Group consecutive tasks into segments. Dispatch one operator subagent per segment with all tasks in the segment. Run spec review after each segment. Update execution status after each segment.
+
 ## The Process
 
 ```dot
@@ -61,11 +91,15 @@ digraph process {
     }
 
     "Read plan, extract all tasks with full text, note context, create TodoWrite" [shape=box];
+    "Check Execution Status for resume point" [shape=box];
+    "Select execution pattern (inline/segmented/full)" [shape=box];
     "More tasks remain?" [shape=diamond];
     "Dispatch final artifact reviewer for entire operation" [shape=box];
     "Decide: merge to control repo or create MR" [shape=box style=filled fillcolor=lightgreen];
 
-    "Read plan, extract all tasks with full text, note context, create TodoWrite" -> "Dispatch operator subagent (./operator-prompt.md)";
+    "Read plan, extract all tasks with full text, note context, create TodoWrite" -> "Check Execution Status for resume point";
+    "Check Execution Status for resume point" -> "Select execution pattern (inline/segmented/full)";
+    "Select execution pattern (inline/segmented/full)" -> "Dispatch operator subagent (./operator-prompt.md)";
     "Dispatch operator subagent (./operator-prompt.md)" -> "Operator subagent asks questions?";
     "Operator subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
     "Answer questions, provide context" -> "Dispatch operator subagent (./operator-prompt.md)";
@@ -79,7 +113,8 @@ digraph process {
     "Artifact quality reviewer approves?" -> "Operator subagent fixes quality issues" [label="no"];
     "Operator subagent fixes quality issues" -> "Dispatch artifact quality reviewer subagent (./artifact-quality-reviewer-prompt.md)" [label="re-review"];
     "Artifact quality reviewer approves?" -> "Mark task complete in TodoWrite" [label="yes"];
-    "Mark task complete in TodoWrite" -> "More tasks remain?";
+    "Mark task complete in TodoWrite" -> "Update Execution Status in plan file";
+    "Update Execution Status in plan file" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch operator subagent (./operator-prompt.md)" [label="yes"];
     "More tasks remain?" -> "Dispatch final artifact reviewer for entire operation" [label="no"];
     "Dispatch final artifact reviewer for entire operation" -> "Decide: merge to control repo or create MR";
@@ -115,6 +150,47 @@ Operator subagents report one of four statuses. Handle each appropriately:
 4. If the operation requires human approval (e.g., production changes), escalate to the human
 
 **Never** ignore an escalation or force the same model to retry without changes. If the operator said it's stuck, something needs to change.
+
+## Deviation Handling
+
+When an operator encounters unexpected situations during execution, classify the deviation and respond accordingly:
+
+| Rule | Type | Action | Examples |
+|------|------|--------|----------|
+| **R1 - Minor bug** | Auto-fix | Fix, re-verify, continue | Typo in label, wrong namespace in a YAML field, missing annotation |
+| **R2 - Missing info** | Auto-resolve | Read adjacent files or infer from context, continue | Missing port number, unclear annotation value, ambiguous config key |
+| **R3 - Verification drift** | Auto-adapt | Adjust expected output to match reality, re-verify | Pod name includes random suffix, output format slightly different, timing-dependent values |
+| **R4 - Scope/arch change** | **STOP** | Present to human with full context, await approval | Need different resource type (Deployment vs StatefulSet), API version incompatible, requires additional infrastructure |
+
+**Deviation handling flow:**
+1. Operator classifies the deviation as R1-R4
+2. R1-R3: Operator attempts fix (max 3 retries). If still failing after 3 attempts, escalate to R4
+3. R4: Operator stops and reports: what was expected, what was found, what change is needed, rollback status
+4. Human decides: approve the change, modify the approach, or rollback
+
+**Scope boundary:** Operators must NOT auto-fix pre-existing issues unrelated to their assigned task. If an unrelated issue blocks execution, classify as R4.
+
+## Execution State Tracking
+
+After each task completes (including review), update the plan file's `## Execution Status` section:
+
+**Before execution:**
+```markdown
+## Execution Status
+- Task 1: [ ] pending
+- Task 2: [ ] pending
+```
+
+**After Task 1 completes:**
+```markdown
+## Execution Status
+- Task 1: [x] completed (commit abc1234)
+- Task 2: [ ] pending
+```
+
+**Also update frontmatter:** Change `status: "pending"` to `status: "in_progress"` after the first task, and to `status: "completed"` after all tasks.
+
+**On resume:** When loading a plan that has `status: "in_progress"`, read the Execution Status section, skip completed tasks, and announce: "Resuming operation from Task [N]. Tasks 1-[N-1] previously completed."
 
 ## Prompt Templates
 
