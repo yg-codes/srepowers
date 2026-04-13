@@ -468,8 +468,7 @@ def main():
         print(f"3. Customize tests: tests/claude-code/test-{skill_name}.sh")
     print(f"4. Test the skill: /{skill_name}")
     print(f"5. Update README.md with detailed description")
-    print(f"6. Update RELEASE-NOTES.md")
-    print(f"7. Bump version in .claude-plugin/plugin.json")
+    print(f"6. Bump version in .claude-plugin/plugin.json")
 
 
 if __name__ == "__main__":

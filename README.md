@@ -51,6 +51,26 @@ All skills in SREPowers are bound by five core principles:
 | 4 | **Audit-Ready** | Every recommendation must be traceable and reversible |
 | 5 | **Communication** | Technical accuracy with business clarity |
 
+## Security
+
+SREPowers enforces a safety-first security posture across all infrastructure operations:
+
+| Capability | How Enforced | Primary Skills |
+|-----------|-------------|----------------|
+| Dry-run validation | All operational commands require dry-run before execution (Principle #1) | `safety-validator` |
+| Risk classification | 4-tier system (Critical/High/Medium/Low) with typed confirmation for destructive ops | `safety-validator` |
+| Least privilege | Non-root containers, minimal RBAC, scoped service accounts | `kubernetes-specialist`, `container-engineer`, `platform-engineer` |
+| Secret management | No hardcoded secrets, scanning patterns, external secret references | `security-reviewer`, `terraform-engineer` |
+| Secure coding | OWASP Top 10 prevention, input validation, authentication patterns | `secure-code-guardian` |
+| Infrastructure security | DevSecOps pipelines, compliance automation, cloud security audits | `security-reviewer` |
+
+**Key security skills:**
+- **`/safety-validator`** -- Review proposed commands before execution; 4-tier risk classification with typed confirmation for destructive operations
+- **`/security-reviewer`** -- Security audits, SAST/dependency/secret scanning, penetration testing, infrastructure security reviews
+- **`/secure-code-guardian`** -- Application security, OWASP Top 10 prevention, authentication/authorization, encryption
+
+Every operation skill integrates safety checks. The `test-driven-operation` Iron Law ("no infrastructure change without a failing verification first") ensures changes are validated before they reach production.
+
 ## Installation
 
 ### Via Claude Code Marketplace (Recommended)
@@ -111,6 +131,40 @@ cp -r srepowers/skills/* ~/.claude/skills/
 | **Observability** | | |
 | Set up monitoring | `observability-engineer` | - |
 | Verify with metrics | `observability-integration` | - |
+
+## Choosing Your Workflow
+
+Not every operation needs the full brainstorm-plan-execute-verify spine. SREPowers adapts automatically:
+
+### Execution Patterns
+
+The `subagent-driven-operation` skill selects a pattern based on plan characteristics:
+
+| Pattern | When | Behavior |
+|---------|------|----------|
+| **Inline** | <= 2 tasks AND risk is not high | Execute in main context, no subagent spawn, self-review |
+| **Segmented** | 3-6 tasks, no decision checkpoints | Batch into segments of 2-3, subagent per segment |
+| **Full Subagent** | 7+ tasks OR high risk OR any task lacks rollback | Fresh subagent per task with two-stage review (spec + quality) |
+
+### TDO Exceptions
+
+The `test-driven-operation` Iron Law has three defined exceptions (require human partner consent):
+
+| Exception | When It Applies | Example |
+|-----------|----------------|---------|
+| **Emergency response** | Time-critical incident | Production outage, active security incident |
+| **Read-only diagnostics** | Only querying state | `kubectl get`, `terraform plan`, log analysis |
+| **Dry-run exploration** | First pass only, no changes | `terraform plan`, `kubectl diff --dry-run` |
+
+### Workflow Tier Selection
+
+| Situation | Recommended Path |
+|-----------|-----------------|
+| Simple query or read-only check | Use domain skill directly (e.g., `/kubernetes-specialist`) |
+| Single change with clear expected outcome | `/test-driven-operation` (inline) |
+| 2-6 independent tasks, medium risk | `/subagent-driven-operation` (inline or segmented) |
+| 7+ tasks or high risk | `/subagent-driven-operation` (full) or `/executing-operation-plans` |
+| Unsure what to do | `/brainstorming-operations` first, then choose above |
 
 ## Available Skills
 
@@ -776,13 +830,17 @@ curl -s https://api.example.com/users/123 | jq '.email'
 
 ## Contributing
 
-Contributions are welcome! Please:
+Contributions are welcome! Repository: [github.com/yg-codes/srepowers](https://github.com/yg-codes/srepowers)
+
+Please:
 
 1. Fork the repository
 2. Create a feature branch (`cu_your_feature`)
 3. Follow the skill format (SKILL.md with frontmatter)
 4. Test your skills thoroughly
 5. Submit a pull request
+
+For bug reports and feature requests, [open an issue](https://github.com/yg-codes/srepowers/issues).
 
 ## License
 
@@ -792,6 +850,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 Adapted from the excellent [superpowers](https://github.com/obra/superpowers) plugin by Jesse Vital, with adaptations for SRE infrastructure workflows.
 
-## Release Notes
+## Version History
 
-See [RELEASE-NOTES.md](docs/RELEASE-NOTES.md) for version history and changes.
+See `git log` for version history and changes.
