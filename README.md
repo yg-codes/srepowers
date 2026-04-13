@@ -201,7 +201,7 @@ kubectl get pod -n production -l app=api-server
 
 **Output:** Execution plan that operators can follow step-by-step.
 
-**Plan format:** YAML frontmatter with risk level, environment, status tracking, and ClickUp requirements traceability.
+**Plan format:** YAML frontmatter with risk level, environment, status tracking, and requirements traceability (works with ClickUp, Jira, Linear, or any issue tracker).
 
 **Quality gate:** Automated plan-checker subagent validates 6 dimensions (rollback coverage, verification concreteness, environment boundaries, dry-run presence, side-effect checks, risk consistency) before execution handoff.
 

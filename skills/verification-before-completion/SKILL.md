@@ -151,4 +151,4 @@ Requirements Coverage:
 5. If any requirement shows `failed` or is still `pending`: the operation is NOT complete
 6. All requirements must be `done` or explicitly `skipped` (with documented reason) before proceeding to `finishing-operation-branch`
 
-**ClickUp integration:** When the plan has a `ticket` in frontmatter, fetch the ticket via ClickUp MCP and cross-reference acceptance criteria against the coverage summary. If all criteria are met, the ticket can be updated to reflect completion.
+**Issue tracker integration:** When the plan has a `ticket` in frontmatter, cross-reference acceptance criteria against the coverage summary. If a tracker MCP (ClickUp, Jira, etc.) is available, fetch the ticket and verify criteria are met. Update the ticket to reflect completion when all criteria pass.

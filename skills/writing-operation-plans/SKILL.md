@@ -22,8 +22,8 @@ Write comprehensive infrastructure operation plans assuming the operator has zer
 ```markdown
 ---
 # Plan Frontmatter (machine-parseable, used by execution skills)
-ticket: "[TICKET-ID or empty]"  # ClickUp ticket ID (e.g., INFRA-1234)
-ticket_url: "[URL or empty]"    # Full ClickUp URL
+ticket: "[TICKET-ID or empty]"  # Issue tracker ID (e.g., INFRA-1234, PROJ-456)
+ticket_url: "[URL or empty]"    # Full tracker URL
 risk_level: "[low|medium|high]"
 risk_rationale: "[Why this risk level]"
 environment: "[sit|uat|prod|mgmt]"
@@ -52,7 +52,7 @@ status: "pending"               # pending | in_progress | completed | rolled_bac
 
 ## Requirements Traceability
 
-<!-- Map ClickUp acceptance criteria to plan tasks -->
+<!-- Map issue tracker acceptance criteria to plan tasks -->
 | Requirement | Task(s) | Status |
 |-------------|---------|--------|
 | [Acceptance criterion 1] | Task N | pending |
@@ -72,7 +72,7 @@ status: "pending"               # pending | in_progress | completed | rolled_bac
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| `ticket` | No | ClickUp ticket ID when available |
+| `ticket` | No | Issue tracker ticket ID (Jira, ClickUp, Linear, etc.) |
 | `ticket_url` | No | Full URL for subagent access |
 | `risk_level` | **Yes** | Must be `low`, `medium`, or `high` |
 | `risk_rationale` | **Yes** | One sentence justifying the risk level |
@@ -84,7 +84,7 @@ status: "pending"               # pending | in_progress | completed | rolled_bac
 
 ### Requirements Traceability Rules
 
-- When a ClickUp ticket exists, extract acceptance criteria and map each to one or more plan tasks
+- When a ticket exists in the issue tracker, extract acceptance criteria and map each to one or more plan tasks
 - Every acceptance criterion MUST map to at least one task
 - If a criterion cannot be mapped, add a task for it or explicitly flag it as out-of-scope
 - Status column updated during execution: `pending` → `done` | `skipped` | `failed`

@@ -1,5 +1,14 @@
 # Release Notes
 
+## [4.2.1] - 2026-04-13
+
+### Changed
+
+- Generalized issue tracker references in plan frontmatter — `ticket` and `ticket_url` fields now support any tracker (Jira, ClickUp, Linear, etc.) instead of being ClickUp-specific
+- `verification-before-completion` — issue tracker integration now checks for any available tracker MCP, not just ClickUp
+
+---
+
 ## [4.2.0] - 2026-04-13
 
 ### Added
