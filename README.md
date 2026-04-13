@@ -148,16 +148,24 @@ kubectl get pod -n production -l app=api-server
 
 **Core principle:** Fresh subagent per task + two-stage review (spec compliance then artifact quality) = high quality, fast iteration.
 
+**Adaptive execution patterns** (selected based on plan complexity):
+| Pattern | When | Token Savings |
+|---------|------|---------------|
+| **Inline** | <= 2 tasks, low risk | ~14K per task |
+| **Segmented** | 3-6 tasks | 30-50% vs full |
+| **Full Subagent** | 7+ tasks or high risk | Baseline |
+
 **Workflow:**
-1. Read plan, extract all tasks with full text
-2. For each task:
+1. Read plan, parse YAML frontmatter, check for resume state
+2. Select execution pattern (inline/segmented/full)
+3. For each task (or segment):
    - Dispatch operator subagent with full task text
    - Execute operations following Test-Driven Operation
-   - Verify operations succeeded
-   - Commit to control repo (if applicable)
-   - **Spec compliance review** - Verify all requirements met, nothing missing/extra
+   - Handle deviations (R1-R4 taxonomy with retry limits)
+   - **Spec compliance review** - Verify all requirements met
    - **Artifact quality review** - Verify YAML/JSON valid, proper labels/annotations
-3. After all tasks: Final artifact review
+   - Update execution state in plan file
+4. After all tasks: Final artifact review
 
 **Two-Stage Review:**
 - **Spec Compliance:** Did we execute exactly what was requested?
@@ -192,6 +200,10 @@ kubectl get pod -n production -l app=api-server
 5. Save to `docs/plans/YYYY-MM-DD-<operation-name>.md`
 
 **Output:** Execution plan that operators can follow step-by-step.
+
+**Plan format:** YAML frontmatter with risk level, environment, status tracking, and ClickUp requirements traceability.
+
+**Quality gate:** Automated plan-checker subagent validates 6 dimensions (rollback coverage, verification concreteness, environment boundaries, dry-run presence, side-effect checks, risk consistency) before execution handoff.
 
 ### gitlab-ecr-pipeline
 
@@ -256,12 +268,15 @@ kubectl get pod -n production -l app=api-server
 **Core principle:** Batch execution with checkpoints for safety verification and human review.
 
 **Workflow:**
-- Load and review plan
+- Load and review plan, parse YAML frontmatter, check for resume state
 - Pre-execution safety check
-- Execute batch (3 tasks or per-environment)
-- Batch verification
+- Execute batch (3 tasks or per-environment) with TDO discipline
+- Handle deviations (R1-R4 taxonomy)
+- Batch verification, update execution state in plan file
 - Report and checkpoint
 - Continue or complete
+
+**Resume support:** Plans track execution state (pending/in_progress/completed) with per-task status, enabling resume after interruption.
 
 ### verification-before-completion
 
@@ -270,6 +285,8 @@ kubectl get pod -n production -l app=api-server
 **Core principle:** Evidence before claims, always. No completion claims without fresh verification command output.
 
 **Gate function:** Identify verification command → Run it → Read full output → Verify → Only then claim.
+
+**Requirements traceability:** Cross-references plan's acceptance criteria against task execution evidence. All requirements must be `done` or explicitly `skipped` before completion.
 
 **Common SRE failures prevented:**
 - Helm exit 0 ≠ deployment succeeded (run `kubectl rollout status`)
@@ -740,6 +757,9 @@ curl -s https://api.example.com/users/123 | jq '.email'
 - **Artifact quality review** = YAML/JSON validity, Kubernetes best practices
 - **Tests** = Verification commands
 - **Commits** = Git operations on control repo
+- **Adaptive patterns** = Inline (<=2 tasks), Segmented (3-6), Full (7+ or high risk)
+- **Deviation taxonomy** = R1-R4 (auto-fix through STOP) with retry limits
+- **Execution state** = Per-task tracking in plan file for resume after interruption
 
 ### Two-Stage Review
 

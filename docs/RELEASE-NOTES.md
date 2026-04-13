@@ -1,5 +1,27 @@
 # Release Notes
 
+## [4.2.0] - 2026-04-13
+
+### Added
+
+- **Structured plan format** with YAML frontmatter (`risk_level`, `environment`, `status`, `tasks_count`) for machine-parseable plan extraction by execution skills
+- **Automated plan quality gate** — plan-checker subagent validates 6 dimensions (rollback coverage, verification concreteness, environment boundaries, dry-run presence, side-effect checks, risk consistency) before execution handoff
+- **Adaptive execution patterns** for subagent-driven-operation: inline (<=2 tasks, low risk), segmented (3-6 tasks), full subagent (7+ or high risk) — reduces token overhead by up to 50%
+- **Structured deviation taxonomy** (R1-R4: auto-fix through STOP) with retry limits and escalation boundaries for both subagent-driven and executing-operation-plans
+- **Execution state persistence** in plan file — per-task status tracking enables resume after interruption
+- **ClickUp requirements traceability** mapping acceptance criteria to plan tasks with status tracking through to completion verification
+- `skills/writing-operation-plans/plan-checker-prompt.md` — prompt template for plan quality gate subagent
+- `skills/subagent-driven-operation/operator-prompt.md` — updated operator prompt with deviation handling
+
+### Changed
+
+- `writing-operation-plans` — plan format now requires YAML frontmatter, task header fields (Goal, Files/Resources, Verification, Expected RED/GREEN, Rollback, Side Effects Check), requirements traceability section, and execution status section; adds plan quality gate before execution handoff
+- `subagent-driven-operation` — adds plan parsing with frontmatter extraction, execution pattern selection (inline/segmented/full), deviation handling (R1-R4), execution state tracking with resume support, and model selection guidance (haiku/sonnet/opus by complexity)
+- `executing-operation-plans` — adds plan frontmatter parsing, resume state detection, deviation handling (R1-R4 taxonomy), and execution state persistence in plan file
+- `verification-before-completion` — adds requirements traceability verification: cross-references plan acceptance criteria against task evidence, ClickUp integration for ticket completion
+
+---
+
 ## [4.1.0] - 2026-04-08
 
 ### Fixed
