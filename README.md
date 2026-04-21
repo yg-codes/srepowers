@@ -73,25 +73,73 @@ Every operation skill integrates safety checks. The `test-driven-operation` Iron
 
 ## Installation
 
-### Codex Repo-Native Use (Recommended for local development)
+### Codex Repo-Native Use
 
-Codex can use the checked-in repository surfaces directly:
+This is the simplest way to use SREPowers in Codex while working in this repository:
+
+```bash
+git clone https://github.com/yg-codes/srepowers.git
+cd srepowers
+codex .
+```
+
+Codex will pick up the checked-in repo surfaces directly:
 
 - `AGENTS.md` for project instructions
 - `.agents/skills/` for repo-scoped skill discovery
 - `.codex/agents/` for custom agent definitions
 - `.codex/hooks.json` for session-start context injection
 
-Open the repository in Codex and use `/skills` or `$srepowers-skill-name` to invoke skills explicitly. Codex can also choose a skill implicitly from the skill description when the task matches.
+Inside Codex, use `/skills` to browse the loaded skills, or mention a skill explicitly such as `$test-driven-operation` or `$subagent-driven-operation`.
 
 ### Codex Plugin Install
 
-This repository also includes a Codex plugin manifest and repo marketplace entry:
+If you want SREPowers available across repositories, install it as a local Codex plugin. OpenAI's current Codex plugin docs describe local plugins as a plugin directory plus a marketplace file that points at it.
 
-- `.codex-plugin/plugin.json`
-- `.agents/plugins/marketplace.json`
+1. Copy the plugin to your Codex plugins directory:
 
-From Codex, open `/plugins`, add the repo marketplace if needed, and install `srepowers` from the local marketplace entry.
+```bash
+mkdir -p ~/.codex/plugins
+git clone https://github.com/yg-codes/srepowers.git ~/.codex/plugins/srepowers
+```
+
+2. Add a personal marketplace file at `~/.agents/plugins/marketplace.json`:
+
+```bash
+mkdir -p ~/.agents/plugins
+cat > ~/.agents/plugins/marketplace.json <<'EOF'
+{
+  "name": "local-plugins",
+  "interface": {
+    "displayName": "Local Plugins"
+  },
+  "plugins": [
+    {
+      "name": "srepowers",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/srepowers"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Engineering"
+    }
+  ]
+}
+EOF
+```
+
+3. Restart Codex.
+
+4. Open `/plugins` in Codex, find `srepowers` in the `Local Plugins` marketplace, and install or enable it.
+
+After install, Codex will load the plugin from its plugin cache. When you update the plugin source at `~/.codex/plugins/srepowers`, restart Codex so the local install picks up the new files.
+
+### Codex Repo Marketplace
+
+This repository also includes a checked-in repo marketplace at `.agents/plugins/marketplace.json`. That file is meant for developing and testing SREPowers from inside this repository. It is not the recommended way to install SREPowers globally across unrelated repos.
 
 ### Claude Code Marketplace
 
@@ -125,6 +173,8 @@ cp -r srepowers/skills/* ~/.claude/skills/
 
 - `skills/` is the canonical authored source.
 - `.agents/skills/` mirrors the same skills for Codex discovery.
+- `.codex-plugin/plugin.json` is the Codex plugin manifest.
+- `.agents/plugins/marketplace.json` is a repo-local marketplace for development inside this repo.
 - `commands/` remains in place for Claude compatibility and existing slash-command workflows.
 - `hooks/session-start.sh` is shared by both runtimes.
 
