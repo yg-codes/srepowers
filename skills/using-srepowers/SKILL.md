@@ -4,11 +4,11 @@ description: Use when starting any conversation to establish how SRE infrastruct
 ---
 
 <EXTREMELY-IMPORTANT>
-If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.
+Choose the MINIMUM SUFFICIENT workflow for the task.
 
-IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
+Use the smallest set of SREPowers skills that preserves safety, evidence, and rollback discipline.
 
-This is not negotiable. This is not optional. You cannot rationalize your way out of this.
+Do not stack extra workflow skills "just in case." Over-process is a failure mode too.
 </EXTREMELY-IMPORTANT>
 
 ## How to Access Skills
@@ -23,29 +23,39 @@ This is not negotiable. This is not optional. You cannot rationalize your way ou
 
 ## The Rule
 
-**Invoke relevant or requested skills BEFORE any response or action.** Even a 1% chance a skill might apply means you should invoke or mention the skill to check. If an invoked skill turns out to be wrong for the situation, you don't need to use it.
+**Route first, then invoke only the minimum sufficient skills before acting.**
+
+Every infrastructure task should be classified into one of three layers:
+
+1. **Mandatory gates** — safety and evidence rules that apply whenever the situation matches
+2. **Workflow skills** — the smallest process needed for the task shape
+3. **Domain helpers** — platform-specific guidance only after the workflow is chosen
 
 ```dot
 digraph skill_flow {
     "User message received" [shape=doublecircle];
-    "Might any SRE skill apply?" [shape=diamond];
-    "About to plan/operate?" [shape=diamond];
-    "Already brainstormed?" [shape=diamond];
-    "Invoke brainstorming-operations" [shape=box];
-    "Invoke or mention skill" [shape=box];
+    "Classify task shape" [shape=diamond];
+    "Fast path?" [shape=diamond];
+    "Incident / outage?" [shape=diamond];
+    "Planned multi-step change?" [shape=diamond];
+    "Invoke minimum sufficient workflow" [shape=box];
+    "Apply mandatory gates" [shape=box];
     "Announce: Using [skill] to [purpose]" [shape=box];
     "Follow skill exactly" [shape=box];
     "Respond" [shape=doublecircle];
 
-    "User message received" -> "Might any SRE skill apply?";
-    "Might any SRE skill apply?" -> "About to plan/operate?" [label="yes"];
-    "Might any SRE skill apply?" -> "Respond" [label="definitely not"];
-    "About to plan/operate?" -> "Already brainstormed?" [label="yes"];
-    "About to plan/operate?" -> "Invoke or mention skill" [label="no - other skill"];
-    "Already brainstormed?" -> "Invoke brainstorming-operations" [label="no"];
-    "Already brainstormed?" -> "Invoke or mention skill" [label="yes"];
-    "Invoke brainstorming-operations" -> "Invoke or mention skill";
-    "Invoke or mention skill" -> "Announce: Using [skill] to [purpose]";
+    "User message received" -> "Classify task shape";
+    "Classify task shape" -> "Fast path?" [label="low-risk / read-only / local-only"];
+    "Classify task shape" -> "Incident / outage?" [label="incident"];
+    "Classify task shape" -> "Planned multi-step change?" [label="change"];
+    "Fast path?" -> "Invoke minimum sufficient workflow" [label="yes"];
+    "Fast path?" -> "Planned multi-step change?" [label="no"];
+    "Incident / outage?" -> "Invoke minimum sufficient workflow" [label="yes"];
+    "Incident / outage?" -> "Planned multi-step change?" [label="no"];
+    "Planned multi-step change?" -> "Invoke minimum sufficient workflow" [label="yes"];
+    "Planned multi-step change?" -> "Respond" [label="no SRE workflow needed"];
+    "Invoke minimum sufficient workflow" -> "Apply mandatory gates";
+    "Apply mandatory gates" -> "Announce: Using [skill] to [purpose]";
     "Announce: Using [skill] to [purpose]" -> "Follow skill exactly";
 }
 ```
@@ -54,7 +64,53 @@ digraph skill_flow {
 
 For the full skill catalog organized by category, load `references/skill-catalog.md`.
 
-**Core workflow (strict order, do NOT skip steps):** brainstorming-operations → writing-operation-plans → (subagent-driven-operation OR executing-operation-plans) → verification-before-completion → finishing-operation-branch
+## Mandatory Gates
+
+Apply these whenever the trigger matches, regardless of workflow:
+
+| Gate | Trigger | Purpose |
+|------|---------|---------|
+| `verification-before-completion` | Before any success, health, fix, or completion claim | Fresh evidence before claims |
+| `safety-validator` | Risky, destructive, broad-scope, or production commands | Catch dangerous operations before execution |
+| `evidence-first-reporting` | Status updates, handoffs, incident summaries, or ambiguous findings | Separate observations, inference, unknowns, and next checks |
+
+## Workflow Router
+
+Pick the minimum sufficient route:
+
+| Situation | Required workflow | Notes |
+|-----------|-------------------|-------|
+| Active incident or unclear failure | `systematic-troubleshooting` first | Use `incident-commander` only when coordination scope is large |
+| Major incident, multi-team, customer-facing, or long-running outage | `incident-commander` + `systematic-troubleshooting` | Command structure on top, troubleshooting underneath |
+| Planned multi-step infrastructure change | `brainstorming-operations` → `writing-operation-plans` → execution skill | Default route for meaningful changes |
+| Small known-safe change with local validation | `test-driven-operation` directly | Skip brainstorming and full plan only if risk is truly low |
+| Read-only review or diagnosis with no mutation | Relevant domain skill + `evidence-first-reporting` | Do not invent an execution plan for read-only work |
+| High-risk or production change | Add `safety-validator` before execution | High-risk prod changes do not get a fast path |
+
+## Fast Path
+
+Use the fast path only when **all** are true:
+
+- Task is low-risk
+- Scope is read-only or a single-file/local-only change
+- Validation is local and exact
+- Rollback is trivial or not needed because no remote state changes
+- No production or destructive commands
+
+Fast path rules:
+
+- Skip `brainstorming-operations`
+- Skip `writing-operation-plans`
+- Still use `test-driven-operation` or the relevant read-only/domain skill
+- Still apply `verification-before-completion`
+- Still use `evidence-first-reporting` when reporting findings or status
+- Keep output compact
+
+## Standard Workflow
+
+Use this when the task is not eligible for the fast path:
+
+`brainstorming-operations` → `writing-operation-plans` → (`subagent-driven-operation` OR `executing-operation-plans`) → `verification-before-completion` → `finishing-operation-branch`
 
 **Key categories:** Safety & Review, Incident Response, SRE Practices, Platform & Infrastructure, Architecture & Cloud, Languages & Development, Security & Quality
 
@@ -62,22 +118,35 @@ For the full skill catalog organized by category, load `references/skill-catalog
 
 | Thought | Reality |
 |---------|---------|
-| "This is just a quick operation" | Quick ops fail. Check for skills. |
-| "I need more context first" | Skill check comes BEFORE gathering context. |
-| "Let me just run the command" | TDO first. Always. |
+| "This is just a quick operation" | Quick ops can use the fast path, not no process. |
+| "I need all the workflow skills to be safe" | Use the minimum sufficient workflow, not the biggest one. |
+| "Let me just run the command" | Route first. Risky commands require `safety-validator`. |
 | "I remember this skill" | Skills evolve. Invoke the current version. |
-| "This doesn't need brainstorming" | All operations need design. Use brainstorming-operations. |
+| "This doesn't need planning" | Maybe true for fast path only. Prove it from the criteria. |
 | "I'll verify after" | Verification-first is the rule. |
-| "The skill is overkill here" | Simple things become complex. Use it. |
+| "The skill is overkill here" | If it is overkill, choose a smaller workflow, not zero workflow. |
 | "Exit 0 means success" | Exit code ≠ correct result. Use verification-before-completion. |
-| "This doesn't count as a task" | Action = task. Check for skills. |
+| "This doesn't count as a task" | Action = task. Route it. |
 | "Agent reported success" | Verify independently. Trust output, not reports. |
+| "The log line proves the cause" | One signal is not root cause. Use evidence-first reporting. |
 
 ## Skill Priority
 
-1. **Process skills first** (brainstorming-operations, systematic-troubleshooting) — determines HOW to approach
-2. **Workflow skills second** (writing-operation-plans, executing-operation-plans) — structures execution
-3. **Domain skills third** (kubernetes-specialist, terraform-engineer) — guides implementation
+1. **Mandatory gates first** — `safety-validator`, `evidence-first-reporting`, `verification-before-completion`
+2. **Workflow skill second** — choose one route, not several overlapping ones
+3. **Domain skill third** — use platform depth only after the route is clear
+
+## Anti-Patterns
+
+Never:
+
+- Claim success from exit code alone
+- Propose root cause from one signal
+- Edit before restating blast radius and rollback path
+- Generalize from stale output
+- Mix observation and inference in the same sentence without labeling them
+- Force a full planning workflow onto a read-only or trivial local task
+- Skip gates just because the workflow is short
 
 ## Skill Types
 

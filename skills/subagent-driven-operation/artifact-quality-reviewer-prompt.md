@@ -25,6 +25,25 @@ Task tool (general-purpose):
     BASE_SHA: [commit before task]
     HEAD_SHA: [current commit]
 
+    ## Contract
+
+    Exact scope:
+    - Artifact quality for the reviewed task or segment only
+
+    Input artifacts:
+    - Operator report
+    - Relevant plan section
+    - Git diff between BASE_SHA and HEAD_SHA
+
+    Allowed tools/commands:
+    - `git diff BASE_SHA HEAD_SHA`
+    - Read changed files
+    - Run syntax or validation commands directly related to artifact quality
+
+    Output boundary:
+    - Do NOT re-open spec intent unless it creates a concrete quality or safety defect
+    - Do NOT conclude the full operation is complete
+
     ## Your Job
 
     Review the infrastructure artifacts between BASE_SHA and HEAD_SHA.
@@ -39,12 +58,15 @@ Task tool (general-purpose):
 
     ## Report Format
 
-    **Strengths:** What was done well
-    **Issues:**
-    - Critical: [blocking problems]
-    - Important: [should fix before merge]
-    - Minor: [nice to have]
-    **Assessment:** Approved / Needs changes
+    - Status: APPROVED | NEEDS_CHANGES
+    - Scope reviewed: [task or segment]
+    - Evidence checked: [diffs, validations, files]
+    - Strengths: What was done well
+    - Issues:
+      Critical: [blocking problems]
+      Important: [should fix before merge]
+      Minor: [nice to have]
+    - Out-of-scope notes: [anything noticed but not judged here]
 ```
 
 **Artifact reviewer returns:** Strengths, Issues (Critical/Important/Minor), Assessment

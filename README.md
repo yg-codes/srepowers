@@ -12,6 +12,33 @@ Once the plan is approved, the execution skills apply Test-Driven Operation: wri
 
 The result is not “more automation.” The value is disciplined operations under pressure: verification before claims, rollback-aware planning, and explicit review of risky changes.
 
+## Minimum Sufficient Workflow
+
+SREPowers now routes tasks through the minimum sufficient workflow instead of forcing the heaviest process every time.
+
+### Skill Classes
+
+| Class | Skills | Purpose |
+|------|--------|---------|
+| Mandatory gates | `verification-before-completion`, `safety-validator`, `evidence-first-reporting` | Enforce evidence, safety, and precise reporting |
+| Workflow skills | `brainstorming-operations`, `writing-operation-plans`, `test-driven-operation`, `subagent-driven-operation`, `executing-operation-plans` | Shape the operation process |
+| Domain helpers | `kubernetes-specialist`, `terraform-engineer`, `pve-admin`, `puppet-code-analyzer`, and peers | Add platform-specific depth after routing |
+
+### Routing Rules
+
+| Situation | Route |
+|----------|-------|
+| Incident or unclear outage | `systematic-troubleshooting` first |
+| Major incident with multiple teams or broad impact | `incident-commander` + `systematic-troubleshooting` |
+| Planned multi-step change | `brainstorming-operations` → `writing-operation-plans` → execution skill |
+| Small known-safe local change | `test-driven-operation` fast path |
+| Read-only review or diagnosis | Domain skill + `evidence-first-reporting` |
+| Risky or production command set | Add `safety-validator` before execution |
+
+### Fast Path
+
+Use the fast path only for low-risk, read-only, or single-file/local-only work with exact local validation. It skips full planning, but it does not skip validation or evidence.
+
 ## What’s Inside
 
 | Path | Purpose |
@@ -155,29 +182,29 @@ The checked-in `.agents/plugins/marketplace.json` is for developing SREPowers fr
 
 ## Basic Workflow
 
-1. **`brainstorming-operations`**  
-   Refines the operation goal, environment, risk, rollback, and success criteria before implementation.
+1. **Choose the route**
+   Fast path for trivial local work, troubleshooting for incidents, full planning flow for meaningful changes.
 
-2. **`writing-operation-plans`**  
-   Turns the design into bite-sized steps with exact commands, verification checks, and rollback instructions.
+2. **Apply mandatory gates**
+   `safety-validator` for risky commands, `evidence-first-reporting` for precise status, `verification-before-completion` before any success claim.
 
-3. **`subagent-driven-operation`** or **`executing-operation-plans`**  
-   Executes the plan either with reviewed subagent steps or with checkpointed batches for longer operations.
+3. **Use the smallest workflow that fits**
+   `test-driven-operation` for small safe work, or `brainstorming-operations` → `writing-operation-plans` → `subagent-driven-operation`/`executing-operation-plans` for larger changes.
 
-4. **`test-driven-operation`**  
-   Enforces the RED/GREEN loop for infrastructure work: verification first, change second, verification again.
-
-5. **`verification-before-completion`**  
-   Blocks “done” claims until fresh command output shows the expected result.
-
-6. **`finishing-operation-branch`**  
+4. **`finishing-operation-branch`**  
    Wraps up the branch cleanly after the operational work and verification are complete.
-
-Supporting skills such as `safety-validator`, `systematic-troubleshooting`, `observability-integration`, and `incident-commander` plug into this spine when the situation demands them.
 
 ## Reference
 
-### Core Workflow Skills
+### Mandatory Gates
+
+| Skill | Purpose |
+|------|---------|
+| `verification-before-completion` | Evidence before any completion claim |
+| `safety-validator` | Command safety gate for risky work |
+| `evidence-first-reporting` | Separate observation, inference, and unknowns in reports |
+
+### Workflow Skills
 
 | Skill | Purpose |
 |------|---------|
@@ -204,14 +231,14 @@ Supporting skills such as `safety-validator`, `systematic-troubleshooting`, `obs
 | Principle | Meaning |
 |-----------|---------|
 | Safety First | Dry-run and preview before risky changes |
-| Structured Output | Pre-check, execute, verify |
+| Structured Output | Fixed schemas for plans, investigations, and reports |
 | Evidence-Driven | Prefer command output over agent claims |
 | Audit-Ready | Make changes traceable and reversible |
 | Communication | Keep updates technically precise and readable |
 
 ### Security Focus
 
-SREPowers emphasizes least privilege, explicit rollback paths, secure secret handling, and post-change verification. High-risk operations should route through `safety-validator` before execution.
+SREPowers emphasizes least privilege, explicit rollback paths, secure secret handling, and post-change verification. High-risk operations should route through `safety-validator` before execution, and status reporting should keep observations distinct from inference.
 
 ## Explanation
 

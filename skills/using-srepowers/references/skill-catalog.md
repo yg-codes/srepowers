@@ -1,5 +1,12 @@
 # Available Skills
 
+### Mandatory Gates
+| Skill | Use When |
+|-------|----------|
+| `srepowers:verification-before-completion` | Before claiming anything is done, fixed, healthy, or verified |
+| `srepowers:safety-validator` | Before risky, destructive, broad-scope, or production commands |
+| `srepowers:evidence-first-reporting` | When reporting findings, handoffs, status, or incident updates with mixed evidence and inference risk |
+
 ### Core Operation Workflow
 | Skill | Use When |
 |-------|----------|
@@ -15,6 +22,7 @@
 |-------|----------|
 | `srepowers:safety-validator` | Reviewing proposed commands before execution |
 | `srepowers:verification-before-completion` | About to claim work is done, deployed, or healthy |
+| `srepowers:evidence-first-reporting` | Turning observations into audit-ready status updates without overstating certainty |
 | `srepowers:receiving-code-review-sre` | Processing code review feedback on infra changes |
 | `srepowers:environment-health-check` | Verifying SREPowers environment is configured |
 

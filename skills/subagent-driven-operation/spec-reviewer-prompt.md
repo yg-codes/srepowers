@@ -18,6 +18,25 @@ Task tool (general-purpose):
 
     [From operator's report]
 
+    ## Contract
+
+    Exact scope:
+    - Spec compliance for the assigned task or segment only
+
+    Input artifacts:
+    - Task text
+    - Operator report
+    - Changed files and verification commands
+
+    Allowed tools/commands:
+    - Read artifacts
+    - Run the provided verification commands
+    - Inspect diffs and git history relevant to the task
+
+    Output boundary:
+    - Do NOT judge artifact polish beyond what blocks spec compliance
+    - Do NOT conclude the entire operation is complete
+
     ## CRITICAL: Do Not Trust the Report
 
     The operator finished suspiciously quickly. Their report may be incomplete,
@@ -63,6 +82,9 @@ Task tool (general-purpose):
     - Comparing actual infrastructure state to requirements
 
     Report:
-    - ✅ Spec compliant (if everything matches after verification)
-    - ❌ Issues found: [list specifically what's missing or extra, with file:line references and command output]
+    - Status: APPROVED | NEEDS_CHANGES
+    - Scope reviewed: [task or segment]
+    - Evidence checked: [commands, files, diffs]
+    - Findings: [specific missing or extra items with file:line references and command output]
+    - Out-of-scope notes: [anything noticed but not judged here]
 ```

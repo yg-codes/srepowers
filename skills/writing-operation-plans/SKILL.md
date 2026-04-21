@@ -13,6 +13,8 @@ Write comprehensive infrastructure operation plans assuming the operator has zer
 
 **Context:** This should be run after brainstorming-operations has created a design.
 
+**Do not use for fast-path work:** If the task is low-risk, read-only, or a single-file/local-only change with exact local validation, skip this skill and go straight to `test-driven-operation` or the relevant domain skill.
+
 **Save plans to:** `docs/plans/YYYY-MM-DD-<operation-name>.md`
 
 ## Plan Document Format
@@ -67,6 +69,16 @@ status: "pending"               # pending | in_progress | completed | rolled_bac
 - Task 2: [ ] pending
 - Task N: [ ] pending
 ```
+
+## Output Contract
+
+Every plan must make these sections obvious and complete:
+
+- **Pre-checks** — prerequisites, current-state capture, and target confirmation
+- **Execution** — exact step sequence with one action per task
+- **Verification** — exact RED and GREEN commands with expected outputs
+- **Rollback** — exact undo path per task and for the operation overall
+- **Risk** — declared environment, blast radius, and rationale for risk level
 
 ### Frontmatter Rules
 
@@ -174,6 +186,16 @@ Each task MUST include these fields in its header for machine-parseable extracti
 | **Dry-run first** | Validate with `--dry-run=client` before live |
 | **Side-effect check** | Verify adjacent systems weren't affected |
 | **TDO discipline** | RED → Verify RED → Dry-run → GREEN → Verify GREEN → Side effects → Commit |
+
+## Planning Anti-Patterns
+
+Never:
+
+- Write a task without rollback
+- Use placeholders like "check the pods" instead of exact commands
+- Mix multiple risky changes into one task
+- Omit environment or blast-radius context
+- Create a full plan for a trivial fast-path task just to satisfy process
 
 ## Final Verification Section
 

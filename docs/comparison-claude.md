@@ -56,7 +56,7 @@ SREPowers is notably broader in scope, with significant investment in domain-spe
 
 ---
 
-### SREPowers (49 skills)
+### SREPowers (50 skills)
 
 **Core Infrastructure Operations (6):**
 - `test-driven-operation` — verification-first infrastructure changes
@@ -185,7 +185,7 @@ Both plugins share identical architectural foundations. The key differences are:
    Superpowers still spans more surfaces. SREPowers now supports Claude Code and Codex natively, but remains narrower than Superpowers.
 
 2. **Simplicity**
-   Fewer skills means lower cognitive load. New practitioners can learn the full skill set quickly. SREPowers' 49 skills require more upfront investment.
+   Fewer skills means lower cognitive load. New practitioners can learn the full skill set quickly. SREPowers' 50 skills require more upfront investment.
 
 ---
 
@@ -274,7 +274,7 @@ Canary deployments, blue-green traffic splitting, and shadow traffic patterns ar
 | Platform support | 6 platforms | 1 platform (Claude Code) |
 | Real-world SRE applicability | Code only | Infrastructure + code |
 | Workflow enforcement | Very strict (hard gates) | Strict + context-aware |
-| Risk of over-engineering | Low | Medium (49 skills for a small task) |
+| Risk of over-engineering | Low | Medium (50 skills for a small task) |
 | For small teams | Better | Worse (overhead) |
 | For large operations | Not applicable | Better (specialist depth) |
 | Behavioral psychology | Good | Excellent (explicit) |

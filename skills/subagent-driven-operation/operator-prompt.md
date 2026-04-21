@@ -29,6 +29,25 @@ Task tool (general-purpose):
 
     ## Your Job
 
+    ## Contract
+
+    Exact scope:
+    - [One task or one task segment only]
+
+    Input artifacts:
+    - [Task text]
+    - [Relevant files or paths]
+    - [Verification commands]
+    - [Rollback commands]
+
+    Allowed tools/commands:
+    - [List only what this operator should use]
+
+    Output boundary:
+    - Report only on this assigned scope
+    - Do NOT claim the whole operation is complete
+    - Do NOT make architectural decisions outside the assigned task
+
     Once you're clear on requirements:
     1. Follow Test-Driven Operation (TDO): write verification first, watch it fail
     2. Execute minimal infrastructure operation to pass verification
@@ -111,10 +130,12 @@ Task tool (general-purpose):
     ## Report Format
 
     When done, report:
-    - What operations you executed
-    - What you verified and verification results
+    - Status: DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED
+    - Scope completed: [exact task or segment]
+    - Operations executed
+    - Evidence: verification commands run and outputs observed
     - Files changed (manifests, configs, etc.)
     - Commits made (if applicable)
     - Self-review findings (if any)
-    - Any issues or concerns
+    - Open issues or concerns
 ```

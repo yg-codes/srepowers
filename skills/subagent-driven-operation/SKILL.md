@@ -69,6 +69,26 @@ The system selects a pattern based on plan characteristics. Announce the selecte
 
 **Segmented pattern:** Group consecutive tasks into segments. Dispatch one operator subagent per segment with all tasks in the segment. Run spec review after each segment. Update execution status after each segment.
 
+## Subagent Contract
+
+Every subagent invocation must declare five things before work starts:
+
+| Contract Field | Requirement |
+|----------------|-------------|
+| **Exact scope** | One task, one segment, or one review role only |
+| **Input artifacts** | Paste the relevant task text, context, diffs, and verification commands directly |
+| **Allowed tools/commands** | Limit the subagent to the commands needed for its role |
+| **Expected output schema** | Force structured status, evidence, and issues |
+| **Scope boundary** | Subagent must not make final conclusions outside its assigned role |
+
+Role boundaries:
+
+| Role | Exact scope | Must not conclude |
+|------|-------------|-------------------|
+| **Operator** | Execute assigned task or segment, verify, self-review | Overall operation is complete |
+| **Spec reviewer** | Confirm implemented work matches requirements | Artifact quality or production readiness beyond spec fit |
+| **Artifact reviewer** | Assess syntax, maintainability, and safety of artifacts | That the spec was satisfied if spec review has not already passed |
+
 ## The Process
 
 ```dot

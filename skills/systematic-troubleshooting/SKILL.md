@@ -52,6 +52,29 @@ Use for ANY infrastructure issue:
 
 You MUST complete each phase before proceeding to the next.
 
+## Output Contract
+
+Use this structure for investigation summaries and handoffs:
+
+```markdown
+Symptoms:
+- [User-visible or system-visible problem]
+
+Evidence:
+- [Direct observation: command output, logs, metrics, timestamps]
+
+Hypotheses:
+- [Single leading hypothesis plus alternates if needed]
+
+Validation Plan:
+- [Exact next checks to confirm or reject the hypothesis]
+
+Probable Cause:
+- [Only after the evidence supports it]
+```
+
+If `Probable Cause` is not yet supported, write `Probable Cause: not established`.
+
 ### Phase 1: Incident Triage and Data Gathering
 
 **BEFORE attempting ANY remediation:**
@@ -472,6 +495,16 @@ If you catch yourself thinking:
 **ALL of these mean: STOP. Return to Phase 1.**
 
 **If 3+ fixes failed:** Question the architecture.
+
+## Investigation Anti-Patterns
+
+Never:
+
+- Propose a fix before documenting evidence
+- Treat one log line as root cause
+- Mix observed facts and interpretation without labeling them
+- Claim the issue is resolved before re-running the proving check
+- Generalize from stale logs, events, or metrics
 
 ## Common Rationalizations
 
