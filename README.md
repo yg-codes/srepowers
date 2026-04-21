@@ -48,9 +48,46 @@ Or copy the skills directly:
 cp -r srepowers/skills/* ~/.claude/skills/
 ```
 
+### Codex Native Skills Install
+
+This is the recommended Codex setup if you want the simplest update path:
+
+1. Clone the repository into your Codex workspace area.
+
+```bash
+git clone https://github.com/yg-codes/srepowers.git ~/.codex/srepowers
+```
+
+2. Create the skills symlink.
+
+```bash
+mkdir -p ~/.agents/skills
+ln -s ~/.codex/srepowers/skills ~/.agents/skills/srepowers
+```
+
+3. Restart Codex.
+
+Codex will discover the SREPowers skills through `~/.agents/skills/srepowers`. Use `/skills` to inspect them, or mention a skill directly such as `$test-driven-operation`.
+
+Verify:
+
+```bash
+ls -la ~/.agents/skills/srepowers
+```
+
+You should see a symlink pointing at `~/.codex/srepowers/skills`.
+
+Update:
+
+```bash
+cd ~/.codex/srepowers && git pull
+```
+
+This path updates cleanly because the skills are loaded directly from the cloned repository through the symlink.
+
 ### Codex Repo-Native Use
 
-Use this when working inside the repository itself:
+Use this when you are working inside the SREPowers repository itself:
 
 ```bash
 git clone https://github.com/yg-codes/srepowers.git
@@ -65,11 +102,9 @@ Codex will load:
 - `.codex/agents/`
 - `.codex/hooks.json`
 
-Use `/skills` to inspect loaded skills, or mention a skill directly such as `$test-driven-operation`.
+### Codex Local Plugin Install
 
-### Codex Plugin Install
-
-Use this when you want SREPowers available across repositories:
+Use this when you specifically want SREPowers to appear in Codex `/plugins` as a local plugin:
 
 1. Clone the plugin into your Codex plugins directory.
 
@@ -107,6 +142,14 @@ EOF
 ```
 
 3. Restart Codex, open `/plugins`, find `srepowers`, and install or enable it.
+
+This method does not auto-update. You still need to run:
+
+```bash
+cd ~/.codex/plugins/srepowers && git pull
+```
+
+Then restart Codex to pick up the new plugin files.
 
 The checked-in `.agents/plugins/marketplace.json` is for developing SREPowers from inside this repository. It is not the recommended global install path.
 
