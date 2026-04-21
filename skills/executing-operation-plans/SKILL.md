@@ -30,7 +30,7 @@ Before loading the plan:
 
 ```bash
 git branch --show-current
-kubectl config current-context
+kubectl config get-contexts -o name
 ```
 
 **REQUIRED:** Use srepowers:using-git-worktrees-sre to create an isolated worktree for this operation. Do not execute on the main branch without explicit user consent.
@@ -48,7 +48,7 @@ kubectl config current-context
    - Are rollback steps documented?
    - Are environment boundaries respected?
 5. If concerns: Raise them before starting
-6. If no concerns: Create TodoWrite and proceed
+6. If no concerns: Record the execution state and proceed
 
 ### Step 2: Pre-Execution Safety Check
 
@@ -57,10 +57,10 @@ Before executing any operations:
 ```bash
 # Verify current environment
 git branch --show-current
-kubectl config current-context
+kubectl config get-contexts -o name
 
 # Check for active incidents
-kubectl get events --all-namespaces --field-selector type=Warning | head -10
+kubectl --context <context> get events --all-namespaces --field-selector type=Warning | head -10
 ```
 
 **If incidents in progress:** STOP. Report and defer operation.
@@ -82,13 +82,13 @@ After completing batch:
 
 ```bash
 # Verify changes from this batch
-kubectl get <resources> -n <namespace>
+kubectl --context <context> get <resources> -n <namespace>
 
 # Check for errors in affected components
-kubectl logs -n <namespace> -l <label> --tail=20
+kubectl --context <context> logs -n <namespace> -l <label> --tail=20
 
 # Verify dependent services still healthy
-kubectl get pods --all-namespaces | grep -v Running
+kubectl --context <context> get pods --all-namespaces | grep -v Running
 ```
 
 **Update execution state in plan file:**

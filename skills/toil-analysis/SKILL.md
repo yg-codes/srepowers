@@ -185,7 +185,7 @@ Score each toil item on three dimensions (1-5 scale):
 | Alert-triggered manual restart | Kubernetes operator, HPA, or alert auto-remediation |
 | Certificate rotation | cert-manager, external-secrets, or scheduled job |
 | Environment provisioning | Terraform module + CI/CD pipeline trigger |
-| Repetitive kubectl commands | Kubernetes operator or CronJob |
+| Repetitive `kubectl --context <context>` commands | Kubernetes operator or CronJob |
 | Manual approvals for routine changes | GitOps auto-promotion with SLO gates |
 | Dashboard-reading | SLO alerts + automated escalation |
 

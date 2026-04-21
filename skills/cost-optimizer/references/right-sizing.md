@@ -61,8 +61,8 @@ aws cloudwatch get-metric-statistics \
 
 ```bash
 # Get pod resource requests vs usage
-kubectl top pods --all-namespaces
-kubectl describe pods -n <namespace> | grep -A 5 "Limits:\|Requests:"
+kubectl --context <context> top pods --all-namespaces
+kubectl --context <context> describe pods -n <namespace> | grep -A 5 "Limits:\|Requests:"
 ```
 
 ## Instance Family Selection

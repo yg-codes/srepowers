@@ -111,14 +111,14 @@ curl -s "http://prometheus:9090/api/v1/query?query=rate(http_requests_total{vers
 **Kubernetes / Argo Rollouts (canary):**
 
 ```bash
-kubectl argo rollouts set weight canary-deployment 5
-kubectl argo rollouts status canary-deployment --watch --timeout 2m
+kubectl --context <context> argo rollouts set weight canary-deployment 5
+kubectl --context <context> argo rollouts status canary-deployment --watch --timeout 2m
 ```
 
 **Nginx / Ingress weight annotation:**
 
 ```bash
-kubectl annotate ingress api-ingress \
+kubectl --context <context> annotate ingress api-ingress \
   nginx.ingress.kubernetes.io/canary-weight=5 --overwrite
 ```
 
@@ -193,15 +193,15 @@ If `ROLLBACK` output:
 
 ```bash
 # Argo Rollouts
-kubectl argo rollouts abort canary-deployment
-kubectl argo rollouts undo canary-deployment
+kubectl --context <context> argo rollouts abort canary-deployment
+kubectl --context <context> argo rollouts undo canary-deployment
 
 # Ingress weight
-kubectl annotate ingress api-ingress \
+kubectl --context <context> annotate ingress api-ingress \
   nginx.ingress.kubernetes.io/canary-weight=0 --overwrite
 
 # Istio
-kubectl apply -f virtualservice-100pct-v1.yaml
+kubectl --context <context> apply -f virtualservice-100pct-v1.yaml
 ```
 
 ## Blue-Green Workflow
@@ -210,15 +210,15 @@ kubectl apply -f virtualservice-100pct-v1.yaml
 
 ```bash
 # RED: green deployment does not exist / is not ready
-kubectl get deployment api-green -n production -o jsonpath='{.status.readyReplicas}'
+kubectl --context <context> get deployment api-green -n production -o jsonpath='{.status.readyReplicas}'
 # Expected: Error or 0
 
 # GREEN: deploy green stack
-kubectl apply -f deployment-api-green.yaml
+kubectl --context <context> apply -f deployment-api-green.yaml
 
 # Verify GREEN: green is ready, serving 0% traffic
-kubectl rollout status deployment/api-green -n production
-kubectl get deployment api-green -n production -o jsonpath='{.status.readyReplicas}'
+kubectl --context <context> rollout status deployment/api-green -n production
+kubectl --context <context> get deployment api-green -n production -o jsonpath='{.status.readyReplicas}'
 # Expected: N (desired replica count)
 ```
 
@@ -242,15 +242,15 @@ curl -sf "${GREEN_URL}/ready" -o /dev/null && echo "PASS: /ready" || echo "FAIL:
 
 ```bash
 # RED: production service points to blue (v1)
-kubectl get service api -n production -o jsonpath='{.spec.selector.version}'
+kubectl --context <context> get service api -n production -o jsonpath='{.spec.selector.version}'
 # Expected: v1
 
 # GREEN: switch selector to green (v2)
-kubectl patch service api -n production \
+kubectl --context <context> patch service api -n production \
   -p '{"spec":{"selector":{"version":"v2"}}}'
 
 # Verify GREEN: service selector updated, requests flowing to green
-kubectl get service api -n production -o jsonpath='{.spec.selector.version}'
+kubectl --context <context> get service api -n production -o jsonpath='{.spec.selector.version}'
 # Expected: v2
 
 # Validate SLOs using observability-integration skill
@@ -277,17 +277,17 @@ else: print('PASS: SLOs healthy after traffic switch')
 echo "Blue deployment kept for rollback. Decommission after: $(date -d '+30 minutes')"
 
 # Rollback command (if needed within window):
-# kubectl patch service api -n production -p '{"spec":{"selector":{"version":"v1"}}}'
+# kubectl --context <context> patch service api -n production -p '{"spec":{"selector":{"version":"v1"}}}'
 ```
 
 ## Shadow Traffic Workflow
 
 ```bash
 # Deploy shadow service (receives copy of all requests)
-kubectl apply -f deployment-api-shadow.yaml
+kubectl --context <context> apply -f deployment-api-shadow.yaml
 
 # Configure Istio mirroring
-kubectl apply -f - <<EOF
+kubectl --context <context> apply -f - <<EOF
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -306,7 +306,7 @@ EOF
 
 # Compare response bodies (requires shadow logging)
 # Run for 30-60 minutes, then compare:
-kubectl logs -l app=api-v2 -n production | grep "SHADOW_DIFF" | head -20
+kubectl --context <context> logs -l app=api-v2 -n production | grep "SHADOW_DIFF" | head -20
 ```
 
 ## Stage Decision Matrix

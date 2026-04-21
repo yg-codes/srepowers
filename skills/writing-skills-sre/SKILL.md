@@ -5,7 +5,32 @@ description: Use when creating new infrastructure skills, editing existing skill
 
 # Writing SRE Skills
 
-**REQUIRED BACKGROUND:** You MUST invoke `superpowers:writing-skills` first. That skill defines the full methodology — TDD applied to skill documentation, CSO descriptions, pressure testing, rationalization tables, and the complete RED-GREEN-REFACTOR cycle. This skill adds only SRE-specific guidance.
+Use this skill to create or refine SREPowers skills without any dependency on Superpowers.
+
+## Core Methodology
+
+Treat skill authoring as verification-first documentation work:
+
+1. **Decide create vs. edit** — Prefer editing an existing skill when the pattern already exists.
+2. **RED** — Identify what the skill must teach that it does not currently teach, or what bad behavior it fails to prevent.
+3. **GREEN** — Add the minimum instructions, examples, and guardrails needed to close that gap.
+4. **VERIFY** — Pressure-test the wording against risky shortcuts, ambiguity, and platform/runtime differences.
+5. **REFACTOR** — Remove repetition, sharpen triggers, and keep the skill readable under pressure.
+
+## Description Quality
+
+Skill descriptions should:
+
+- start with `Use when...`
+- describe the triggering situation, not the implementation
+- make domain and risk boundaries obvious
+- be specific enough that the correct skill is chosen over a generic one
+
+Bad trigger:
+- "Use for Kubernetes"
+
+Better trigger:
+- "Use when deploying or troubleshooting Kubernetes workloads that require verification-first operational discipline"
 
 ## Infrastructure Skill Types
 
@@ -24,6 +49,7 @@ Apply the same TDD approach with these infrastructure-specific patterns:
 3. **Rollback documentation** — How to undo if something goes wrong
 4. **Dependencies** — Prerequisites before starting (tools, access, state)
 5. **Common mistakes** — What typically goes wrong in production
+6. **Runtime portability** — Avoid references to runtime-specific tools unless absolutely required by the skill
 
 ## SRE-Specific Testing
 
@@ -33,9 +59,15 @@ Pressure scenarios for infrastructure skills should test:
 - Does the agent refuse to skip safety gates under time pressure?
 - Does the agent follow the TDO (RED → GREEN → REFACTOR) cycle?
 
-## SRE Examples for Upstream Patterns
+Add adversarial checks such as:
+- a reviewer suggests skipping verification
+- an operator wants to rely on current Kubernetes context
+- a rollback path is missing
+- the skill examples work in Claude wording but not Codex wording
 
-When `superpowers:writing-skills` references examples, use these SRE equivalents:
+## SRE Examples
+
+When adapting generic skill-writing patterns to SRE work, use these equivalents:
 - Instead of React Router → Kubernetes deployment patterns
 - Instead of `pptx/` → `kubernetes-specialist/`
 - Instead of `condition-based-waiting` → `test-driven-operation`

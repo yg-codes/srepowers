@@ -88,7 +88,7 @@ Pods affected: api-server-7d9c4f5b2x-abc12, api-server-7d9c4f5b2x-def34, api-ser
 All show OOMKilled status.
 
 Your task:
-1. Check current memory limits with kubectl describe pod
+1. Check current memory limits with kubectl --context <context> describe pod
 2. Review application memory usage from metrics
 3. Identify if it's memory leak or insufficient limits
 4. Fix by adjusting limits OR identifying leak source

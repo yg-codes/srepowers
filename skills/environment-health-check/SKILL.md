@@ -100,16 +100,12 @@ Check tool configurations:
 echo ""
 echo "=== Kubernetes Configuration ==="
 if command -v kubectl >/dev/null 2>&1; then
-    echo "Current context:"
-    kubectl config current-context 2>&1 || echo "  ❌ No current context"
-
-    echo ""
     echo "Available contexts:"
     kubectl config get-contexts -o name 2>&1 | head -5 || echo "  ❌ No contexts configured"
 
     echo ""
-    echo "Cluster connectivity:"
-    kubectl cluster-info 2>&1 | head -3 || echo "  ❌ Cannot connect to cluster"
+    echo "Target context connectivity:"
+    kubectl --context <context> cluster-info 2>&1 | head -3 || echo "  ❌ Cannot connect to target context"
 else
     echo "  ❌ kubectl not installed"
 fi
@@ -349,7 +345,7 @@ The connection to the server localhost:8080 was refused
 export KUBECONFIG=~/.kube/config
 
 # Or use specific config
-kubectl --kubeconfig=/path/to/config get nodes
+kubectl --kubeconfig=/path/to/config --context <context> get nodes
 ```
 
 ### Issue: AWS CLI not authenticated
@@ -404,6 +400,6 @@ done
 |-------|---------|
 | Tool installed | `command -v kubectl` |
 | Tool version | `kubectl version --client` |
-| K8s context | `kubectl config current-context` |
+| K8s contexts | `kubectl config get-contexts -o name` |
 | AWS identity | `aws sts get-caller-identity` |
 | All tools | Run this skill! |

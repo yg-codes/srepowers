@@ -35,7 +35,7 @@ Review proposed infrastructure commands before execution to catch dangerous oper
 | Pattern | Example | Why Dangerous |
 |---------|---------|---------------|
 | `rm -rf /` | `rm -rf /data` | Recursive deletion from root |
-| `kubectl delete all` | `kubectl delete all --all-namespaces` | Deletes everything |
+| `kubectl delete all` | `kubectl --context <context> delete all --all-namespaces` | Deletes everything |
 | `DROP DATABASE` | `DROP DATABASE production` | Irreversible data loss |
 | `terraform destroy` | `terraform destroy -auto-approve` | Destroys all infrastructure |
 | `dd if=/dev/zero` | `dd if=/dev/zero of=/dev/sda` | Overwrites disk |
@@ -44,7 +44,7 @@ Review proposed infrastructure commands before execution to catch dangerous oper
 
 | Pattern | Example | Why Dangerous |
 |---------|---------|---------------|
-| `kubectl delete` | `kubectl delete deployment api` | Deletes running workloads |
+| `kubectl delete` | `kubectl --context <context> delete deployment api` | Deletes running workloads |
 | `aws ec2 terminate` | `aws ec2 terminate-instances` | Destroys instances |
 | `docker system prune` | `docker system prune -a` | Removes all containers/images |
 | `git push --force` | `git push --force origin main` | Overwrites history |
@@ -54,7 +54,7 @@ Review proposed infrastructure commands before execution to catch dangerous oper
 
 | Pattern | Example | Why Caution |
 |---------|---------|-------------|
-| `kubectl apply` | `kubectl apply -f production/` | Changes production state |
+| `kubectl apply` | `kubectl --context <context> apply -f production/` | Changes production state |
 | `terraform apply` | `terraform apply` | Modifies infrastructure |
 | Package removal | `apt remove` | Removes dependencies |
 | Service restart | `systemctl restart` | Causes brief outage |
@@ -63,7 +63,7 @@ Review proposed infrastructure commands before execution to catch dangerous oper
 
 | Pattern | Example | Notes |
 |---------|---------|-------|
-| `kubectl get` | `kubectl get pods` | Read-only |
+| `kubectl get` | `kubectl --context <context> get pods` | Read-only |
 | `terraform plan` | `terraform plan` | Non-destructive |
 | `ls`, `cat`, `grep` | `ls -la` | Safe read operations |
 
@@ -75,11 +75,11 @@ Break down compound commands:
 
 ```bash
 # Compound command
-kubectl delete deployment api && kubectl delete service api
+kubectl --context <context> delete deployment api && kubectl --context <context> delete service api
 
 # Parsed as:
-# 1. kubectl delete deployment api
-# 2. kubectl delete service api
+# 1. kubectl --context <context> delete deployment api
+# 2. kubectl --context <context> delete service api
 ```
 
 ### Step 2: Pattern Matching
@@ -116,7 +116,7 @@ RISK_PATTERNS = {
 
 === Safety Validation Report ===
 
-Command: kubectl delete deployment api-server -n production
+Command: kubectl --context <context> delete deployment api-server -n production
 
 Risk Level: 🔴 HIGH
 Category: Workload Deletion
@@ -133,12 +133,12 @@ Verification questions:
 - [ ] Is data backed up/persisted?
 
 Safe alternatives to consider:
-1. Scale to zero: kubectl scale deployment api-server --replicas=0
-2. Drain pods: kubectl drain --ignore-daemonsets
+1. Scale to zero: kubectl --context <context> scale deployment api-server --replicas=0
+2. Drain pods: kubectl --context <context> drain --ignore-daemonsets
 3. Apply maintenance page first
 
 Rollback plan:
-kubectl apply -f api-server-deployment.yaml  # Reapply if needed
+kubectl --context <context> apply -f api-server-deployment.yaml  # Reapply if needed
 
 Type 'delete-api-server-production' to confirm execution:
 ```
@@ -236,7 +236,7 @@ rules:
 
 | Dangerous | Safer Alternative |
 |-----------|-------------------|
-| `kubectl delete deployment` | `kubectl scale deployment --replicas=0` |
+| `kubectl delete deployment` | `kubectl --context <context> scale deployment --replicas=0` |
 | `rm -rf /data` | `mv /data /data.backup.$(date +%s)` |
 | `DROP TABLE` | `RENAME TABLE old_table TO old_table_backup` |
 | `terraform destroy` | `terraform plan -destroy` (review first) |
@@ -246,7 +246,7 @@ rules:
 | Dangerous | Safer Alternative |
 |-----------|-------------------|
 | `git push --force` | `git push --force-with-lease` |
-| `kubectl apply --force` | `kubectl apply` (normal) |
+| `kubectl apply --force` | `kubectl --context <context> apply` (normal) |
 | `rm -f` | `rm -i` (interactive) |
 
 ## SRE Principles
@@ -296,13 +296,13 @@ rules:
 
 ```bash
 # Proposed command
-kubectl delete deployment legacy-api -n production
+kubectl --context <context> delete deployment legacy-api -n production
 
 # Safety validator intervenes:
 # 🔴 HIGH RISK: Deleting production deployment
 #
 # Suggested alternative:
-# kubectl scale deployment legacy-api --replicas=0 -n production
+# kubectl --context <context> scale deployment legacy-api --replicas=0 -n production
 #
 # This keeps the deployment but scales to zero pods.
 # You can scale back up if needed.
@@ -310,10 +310,10 @@ kubectl delete deployment legacy-api -n production
 # Or type 'delete-legacy-api-production' to proceed with deletion.
 
 # User chooses safer alternative:
-kubectl scale deployment legacy-api --replicas=0 -n production
+kubectl --context <context> scale deployment legacy-api --replicas=0 -n production
 
 # Verify:
-kubectl get deployment legacy-api -n production
+kubectl --context <context> get deployment legacy-api -n production
 # Shows 0/0 replicas - safe to delete now if confirmed not needed
 ```
 
@@ -321,7 +321,7 @@ kubectl get deployment legacy-api -n production
 
 ```bash
 # Proposed command
-kubectl delete pods --all -n staging
+kubectl --context <context> delete pods --all -n staging
 
 # Safety validator:
 # 🟠 HIGH RISK: Deleting all pods in namespace
@@ -330,7 +330,7 @@ kubectl delete pods --all -n staging
 # Duration: 30-60 seconds outage per service
 #
 # Are you sure? Consider:
-# - Are you trying to restart pods? Use 'kubectl rollout restart' instead
+# - Are you trying to restart pods? Use 'kubectl --context <context> rollout restart' instead
 # - Are you cleaning up? Use label selectors for specific pods
 #
 # Type 'delete-all-staging-pods' to confirm:

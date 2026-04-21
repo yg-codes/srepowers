@@ -41,15 +41,15 @@ Skip any step = lying, not verifying
 
 | Claim | Requires | Not Sufficient |
 |-------|----------|----------------|
-| Deployment succeeded | `kubectl rollout status` shows all ready | Helm exit 0, "should be up" |
+| Deployment succeeded | `kubectl --context <context> rollout status` shows all ready | Helm exit 0, "should be up" |
 | Service is healthy | Health endpoint returns 200 + correct response | Pod is Running |
-| Config applied | `kubectl get cm/secret -o yaml` shows new value | `kubectl apply` exit 0 |
+| Config applied | `kubectl --context <context> get cm/secret -o yaml` shows new value | `kubectl --context <context> apply` exit 0 |
 | Certificate valid | `openssl s_client` or cert expiry checked | Secret created |
 | Migration complete | Row count / schema verified | Migration job exit 0 |
 | Pipeline passed | CI job logs show green + artifacts | Job queued or "triggered" |
 | Bug fixed | Original symptom reproduced and no longer fails | Code changed |
 | Rollback complete | Service responding correctly at previous version | Old image tag applied |
-| Resource deleted | `kubectl get` returns NotFound | Delete command exit 0 |
+| Resource deleted | `kubectl --context <context> get` returns NotFound | Delete command exit 0 |
 | Agent completed task | VCS diff shows expected changes | Agent reports "success" |
 
 ## Red Flags — STOP
@@ -67,7 +67,7 @@ Skip any step = lying, not verifying
 
 | Excuse | Reality |
 |--------|---------|
-| "Helm exited 0, it's deployed" | Run `kubectl rollout status` |
+| "Helm exited 0, it's deployed" | Run `kubectl --context <context> rollout status` |
 | "I'm confident it's fixed" | Confidence ≠ evidence. Run the check. |
 | "Pod is Running" | Running ≠ healthy. Check health endpoint. |
 | "Agent said success" | Verify independently with kubectl/git diff |
@@ -80,7 +80,7 @@ Skip any step = lying, not verifying
 
 **Deployment:**
 ```
-✅ [kubectl rollout status deploy/api -n prod] [See: successfully rolled out] "Deployment succeeded"
+✅ [kubectl --context <context> rollout status deploy/api -n prod] [See: successfully rolled out] "Deployment succeeded"
 ❌ "Helm exited 0, deployment done"
 ```
 
@@ -92,8 +92,8 @@ Skip any step = lying, not verifying
 
 **Config/Secret applied:**
 ```
-✅ [kubectl get cm app-config -o jsonpath='{.data.KEY}'] [See: expected-value] "Config applied"
-❌ "kubectl apply returned exit 0"
+✅ [kubectl --context <context> get cm app-config -o jsonpath='{.data.KEY}'] [See: expected-value] "Config applied"
+❌ "kubectl --context <context> apply returned exit 0"
 ```
 
 **Infrastructure operation (TDO):**
@@ -104,7 +104,7 @@ Skip any step = lying, not verifying
 
 **Agent delegation:**
 ```
-✅ Agent reports success → [git diff / kubectl get] → Verify changes → Report actual state
+✅ Agent reports success → [git diff / kubectl --context <context> get] → Verify changes → Report actual state
 ❌ Trust agent report at face value
 ```
 

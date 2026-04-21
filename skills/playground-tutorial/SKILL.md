@@ -230,9 +230,9 @@ echo "Created $COUNT files"
 
 | Concept | Tutorial Example | Real Infrastructure |
 |---------|-----------------|---------------------|
-| RED | `cat file.txt` fails | `kubectl get pod` returns "not found" |
-| GREEN | `echo "content" > file.txt` | `kubectl apply -f deployment.yaml` |
-| Verify | `cat file.txt` shows content | `kubectl get pod` shows "Running" |
+| RED | `cat file.txt` fails | `kubectl --context <context> get pod` returns "not found" |
+| GREEN | `echo "content" > file.txt` | `kubectl --context <context> apply -f deployment.yaml` |
+| Verify | `cat file.txt` shows content | `kubectl --context <context> get pod` shows "Running" |
 | REFACTOR | Add comments to file | Document in runbook |
 
 ## SRE Principles in Practice

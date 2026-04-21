@@ -193,7 +193,7 @@ Add metric verification to Test-Driven Operation cycles:
 ### RED Phase (Enhanced)
 ```bash
 # Traditional verification
-kubectl get pod -n production -l app=api-server
+kubectl --context <context> get pod -n production -l app=api-server
 
 # Add metric baseline
 echo "=== Metric Baseline ==="
@@ -203,10 +203,10 @@ curl -s "http://prometheus:9090/api/v1/query?query=up{job='api-server'}" | jq
 ### GREEN Phase (Enhanced)
 ```bash
 # Execute operation
-kubectl apply -f api-server-deployment.yaml
+kubectl --context <context> apply -f api-server-deployment.yaml
 
 # Watch metrics during rollout
-kubectl rollout status deployment/api-server -n production
+kubectl --context <context> rollout status deployment/api-server -n production
 
 # Verify metrics healthy
 curl -s "http://prometheus:9090/api/v1/query?query=up{job='api-server'}" | jq
@@ -215,7 +215,7 @@ curl -s "http://prometheus:9090/api/v1/query?query=up{job='api-server'}" | jq
 ### Verify GREEN Phase (Enhanced)
 ```bash
 # Traditional verification
-kubectl get pod -n production -l app=api-server
+kubectl --context <context> get pod -n production -l app=api-server
 
 # Metric verification
 echo "=== Metric Verification ==="
@@ -380,7 +380,7 @@ Regardless of your observability stack, capture the same four golden signals bef
 ```bash
 # Kiali API — service health
 curl -s "http://kiali:20001/api/namespaces/production/services/api" \
-  -H "Authorization: Bearer $(kubectl create token kiali -n istio-system)" | \
+  -H "Authorization: Bearer $(kubectl --context <context> create token kiali -n istio-system)" | \
   jq '{healthScore: .health.requests.errorRatio, requestRate: .health.requests.requestCount}'
 
 # Jaeger — trace latency percentiles for a service

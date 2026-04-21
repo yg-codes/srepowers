@@ -91,12 +91,12 @@ Incident Channel: #incident-[YYYY-MM-DD]-[description]
 
 ```bash
 # Scope impact quickly
-kubectl get pods --all-namespaces | grep -v Running
-kubectl get events --all-namespaces --sort-by='.lastTimestamp' | tail -20
+kubectl --context <context> get pods --all-namespaces | grep -v Running
+kubectl --context <context> get events --all-namespaces --sort-by='.lastTimestamp' | tail -20
 
 # Check recent changes
 git log --oneline --since="2 hours ago"
-kubectl rollout history deployment/[suspected-deployment] -n [namespace]
+kubectl --context <context> rollout history deployment/[suspected-deployment] -n [namespace]
 ```
 
 Document in incident timeline:

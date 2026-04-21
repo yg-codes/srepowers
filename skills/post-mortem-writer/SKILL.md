@@ -41,10 +41,10 @@ Collect all relevant data:
 
 ```bash
 # Timeline reconstruction
-kubectl get events --all-namespaces --sort-by='.lastTimestamp' --since-time="2026-01-15T10:00:00Z"
+kubectl --context <context> get events --all-namespaces --sort-by='.lastTimestamp' --since-time="2026-01-15T10:00:00Z"
 
 # Logs from affected services
-kubectl logs -n [namespace] -l app=[app-name] --since=2h
+kubectl --context <context> logs -n [namespace] -l app=[app-name] --since=2h
 
 # Metrics during incident window
 # (Export from Prometheus/Grafana)
@@ -53,7 +53,7 @@ kubectl logs -n [namespace] -l app=[app-name] --since=2h
 git log --since="2 hours ago" --oneline
 
 # Deployment history
-kubectl rollout history deployment/[name] -n [namespace]
+kubectl --context <context> rollout history deployment/[name] -n [namespace]
 ```
 
 **Evidence checklist:**
@@ -101,7 +101,7 @@ Use this structure:
 | 10:10 | Identified database connection pool exhaustion | Logs |
 | 10:15 | Attempted fix: Increased connection pool size | Runbook |
 | 10:20 | Fix failed, error rate increased | Metrics |
-| 10:25 | Rolled back to previous version | kubectl rollout undo |
+| 10:25 | Rolled back to previous version | kubectl --context <context> rollout undo |
 | 10:30 | Service recovered, error rate normal | Metrics |
 | 10:45 | All services verified healthy | Manual check |
 
