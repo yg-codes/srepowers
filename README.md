@@ -1,81 +1,56 @@
 # SREPowers
 
-SRE infrastructure skills for Claude Code and Codex: Test-Driven Operations and Subagent-Driven Operations for Kubernetes, Keycloak, GitOps, API workflows, and more.
+SRE infrastructure skills for Claude Code and Codex.
 
-## Overview
+SREPowers adapts software development workflows like brainstorming, planning, subagent execution, and verification-first discipline to infrastructure operations. It is the SRE companion to [superpowers](https://github.com/obra/superpowers): same workflow spine, different domain.
 
-SREPowers adapts proven software development workflows (TDD, subagent-driven development) for infrastructure operations. The skills are shared across runtimes, with Claude compatibility wrappers and first-class Codex-native packaging in the same repository.
+## How It Works
 
-## Skill Workflow Diagram
+SREPowers starts by slowing the agent down before it does infrastructure work. Instead of jumping straight to `kubectl`, Terraform, or API calls, it pushes the agent to clarify the goal, write an execution plan, and define verification before making changes.
 
-```mermaid
-graph TD
-    Start([Need to perform<br/>infrastructure operation]) --> Decision{Have a plan?}
-    Decision -->|No| Brainstorm[brainstorming-operations]
-    Decision -->|Yes, detailed| WritePlan[writing-operation-plans]
-    Decision -->|Yes, ready to execute| ExecMode{Execution mode?}
+Once the plan is approved, the execution skills apply Test-Driven Operation: write a verification command, watch it fail, make the smallest change, and verify again. For larger changes, SREPowers can break the work into reviewed subagent steps so execution stays aligned with the plan.
 
-    Brainstorm --> WritePlan
-    WritePlan --> ExecMode
+The result is not “more automation.” The value is disciplined operations under pressure: verification before claims, rollback-aware planning, and explicit review of risky changes.
 
-    ExecMode -->|Same session,<br/>continuous| Subagent[subagent-driven-operation]
-    ExecMode -->|Separate session,<br/>checkpoints| Execute[executing-operation-plans]
+## What’s Inside
 
-    Subagent --> TDO[test-driven-operation]
-    Execute --> TDO
-
-    TDO --> More{More tasks?}
-    More -->|Yes| TDO
-    More -->|No| Verify[verification-before-completion]
-    Verify --> Finish[finishing-operation-branch]
-
-    Finish --> End([Complete])
-
-    style Start fill:#e1f5e1
-    style End fill:#e1f5e1
-    style TDO fill:#fff4e1
-    style Subagent fill:#e1f0ff
-    style Execute fill:#e1f0ff
-    style Verify fill:#ffe1e1
-```
-
-## SRE Principles
-
-All skills in SREPowers are bound by five core principles:
-
-| # | Principle | Description |
-|---|-----------|-------------|
-| 1 | **Safety First** | All operational commands MUST include dry-run validation before execution |
-| 2 | **Structured Output** | Use tables, bullet points, and explicit phases (Pre-check → Execute → Verify) |
-| 3 | **Evidence-Driven** | Always reference specific log lines, metrics, or config parameters |
-| 4 | **Audit-Ready** | Every recommendation must be traceable and reversible |
-| 5 | **Communication** | Technical accuracy with business clarity |
-
-## Security
-
-SREPowers enforces a safety-first security posture across all infrastructure operations:
-
-| Capability | How Enforced | Primary Skills |
-|-----------|-------------|----------------|
-| Dry-run validation | All operational commands require dry-run before execution (Principle #1) | `safety-validator` |
-| Risk classification | 4-tier system (Critical/High/Medium/Low) with typed confirmation for destructive ops | `safety-validator` |
-| Least privilege | Non-root containers, minimal RBAC, scoped service accounts | `kubernetes-specialist`, `container-engineer`, `platform-engineer` |
-| Secret management | No hardcoded secrets, scanning patterns, external secret references | `security-reviewer`, `terraform-engineer` |
-| Secure coding | OWASP Top 10 prevention, input validation, authentication patterns | `secure-code-guardian` |
-| Infrastructure security | DevSecOps pipelines, compliance automation, cloud security audits | `security-reviewer` |
-
-**Key security skills:**
-- **`/safety-validator`** -- Review proposed commands before execution; 4-tier risk classification with typed confirmation for destructive operations
-- **`/security-reviewer`** -- Security audits, SAST/dependency/secret scanning, penetration testing, infrastructure security reviews
-- **`/secure-code-guardian`** -- Application security, OWASP Top 10 prevention, authentication/authorization, encryption
-
-Every operation skill integrates safety checks. The `test-driven-operation` Iron Law ("no infrastructure change without a failing verification first") ensures changes are validated before they reach production.
+| Path | Purpose |
+|------|---------|
+| `skills/` | Canonical SREPowers skill definitions |
+| `.agents/skills/` | Codex skill mirror for repo-native discovery |
+| `.codex-plugin/` | Codex plugin manifest |
+| `.claude-plugin/` | Claude Code plugin and marketplace metadata |
+| `.codex/agents/` | Codex custom infrastructure agents |
+| `commands/` | Claude compatibility wrappers for `/command` usage |
+| `hooks/` | Shared session-start context injection |
+| `tests/` | Claude and Codex validation scripts |
 
 ## Installation
 
+### Claude Code Marketplace
+
+```bash
+/plugin marketplace add yg-codes/srepowers
+/plugin install srepowers@srepowers-marketplace
+```
+
+Verify with `/help`. You should see commands such as `/test-driven-operation` and `/subagent-driven-operation`.
+
+### Claude Code Manual Installation
+
+```bash
+git clone https://github.com/yg-codes/srepowers.git ~/.claude/plugins/srepowers
+```
+
+Or copy the skills directly:
+
+```bash
+cp -r srepowers/skills/* ~/.claude/skills/
+```
+
 ### Codex Repo-Native Use
 
-This is the simplest way to use SREPowers in Codex while working in this repository:
+Use this when working inside the repository itself:
 
 ```bash
 git clone https://github.com/yg-codes/srepowers.git
@@ -83,27 +58,27 @@ cd srepowers
 codex .
 ```
 
-Codex will pick up the checked-in repo surfaces directly:
+Codex will load:
 
-- `AGENTS.md` for project instructions
-- `.agents/skills/` for repo-scoped skill discovery
-- `.codex/agents/` for custom agent definitions
-- `.codex/hooks.json` for session-start context injection
+- `AGENTS.md`
+- `.agents/skills/`
+- `.codex/agents/`
+- `.codex/hooks.json`
 
-Inside Codex, use `/skills` to browse the loaded skills, or mention a skill explicitly such as `$test-driven-operation` or `$subagent-driven-operation`.
+Use `/skills` to inspect loaded skills, or mention a skill directly such as `$test-driven-operation`.
 
 ### Codex Plugin Install
 
-If you want SREPowers available across repositories, install it as a local Codex plugin. OpenAI's current Codex plugin docs describe local plugins as a plugin directory plus a marketplace file that points at it.
+Use this when you want SREPowers available across repositories:
 
-1. Copy the plugin to your Codex plugins directory:
+1. Clone the plugin into your Codex plugins directory.
 
 ```bash
 mkdir -p ~/.codex/plugins
 git clone https://github.com/yg-codes/srepowers.git ~/.codex/plugins/srepowers
 ```
 
-2. Add a personal marketplace file at `~/.agents/plugins/marketplace.json`:
+2. Add a local plugin marketplace file.
 
 ```bash
 mkdir -p ~/.agents/plugins
@@ -131,802 +106,133 @@ cat > ~/.agents/plugins/marketplace.json <<'EOF'
 EOF
 ```
 
-3. Restart Codex.
+3. Restart Codex, open `/plugins`, find `srepowers`, and install or enable it.
 
-4. Open `/plugins` in Codex, find `srepowers` in the `Local Plugins` marketplace, and install or enable it.
+The checked-in `.agents/plugins/marketplace.json` is for developing SREPowers from inside this repository. It is not the recommended global install path.
 
-After install, Codex will load the plugin from its plugin cache. When you update the plugin source at `~/.codex/plugins/srepowers`, restart Codex so the local install picks up the new files.
+## Basic Workflow
 
-### Codex Repo Marketplace
+1. **`brainstorming-operations`**  
+   Refines the operation goal, environment, risk, rollback, and success criteria before implementation.
 
-This repository also includes a checked-in repo marketplace at `.agents/plugins/marketplace.json`. That file is meant for developing and testing SREPowers from inside this repository. It is not the recommended way to install SREPowers globally across unrelated repos.
+2. **`writing-operation-plans`**  
+   Turns the design into bite-sized steps with exact commands, verification checks, and rollback instructions.
 
-### Claude Code Marketplace
+3. **`subagent-driven-operation`** or **`executing-operation-plans`**  
+   Executes the plan either with reviewed subagent steps or with checkpointed batches for longer operations.
 
-```bash
-# Add the marketplace
-/plugin marketplace add yg-codes/srepowers
+4. **`test-driven-operation`**  
+   Enforces the RED/GREEN loop for infrastructure work: verification first, change second, verification again.
 
-# Install the plugin
-/plugin install srepowers@srepowers-marketplace
+5. **`verification-before-completion`**  
+   Blocks “done” claims until fresh command output shows the expected result.
 
-# Verify installation
-/help
-# You should see:
-# /test-driven-operation - Use when executing infrastructure operations...
-# /subagent-driven-operation - Use when executing infrastructure operation plans...
+6. **`finishing-operation-branch`**  
+   Wraps up the branch cleanly after the operational work and verification are complete.
+
+Supporting skills such as `safety-validator`, `systematic-troubleshooting`, `observability-integration`, and `incident-commander` plug into this spine when the situation demands them.
+
+## Reference
+
+### Core Workflow Skills
+
+| Skill | Purpose |
+|------|---------|
+| `brainstorming-operations` | Design the operation before acting |
+| `writing-operation-plans` | Create step-by-step execution plans |
+| `subagent-driven-operation` | Run plan tasks with reviewed subagent execution |
+| `executing-operation-plans` | Run long plans with checkpoints |
+| `test-driven-operation` | Verification-first infrastructure changes |
+| `verification-before-completion` | Evidence before claims |
+| `finishing-operation-branch` | Clean completion workflow |
+
+### Operational Support
+
+| Category | Representative Skills |
+|----------|-----------------------|
+| Incident response | `systematic-troubleshooting`, `incident-commander`, `post-mortem-writer` |
+| Safety and delivery | `safety-validator`, `progressive-delivery`, `observability-integration` |
+| Infra administration | `pve-admin`, `puppet-code-analyzer`, `gitlab-ecr-pipeline` |
+| SRE practices | `sre-runbook`, `toil-analysis`, `cost-optimizer`, `environment-health-check` |
+| Domain expertise | Kubernetes, Terraform, Terragrunt, containers, networking, security, observability, PostgreSQL, Go, Python, Rust |
+
+### SRE Principles
+
+| Principle | Meaning |
+|-----------|---------|
+| Safety First | Dry-run and preview before risky changes |
+| Structured Output | Pre-check, execute, verify |
+| Evidence-Driven | Prefer command output over agent claims |
+| Audit-Ready | Make changes traceable and reversible |
+| Communication | Keep updates technically precise and readable |
+
+### Security Focus
+
+SREPowers emphasizes least privilege, explicit rollback paths, secure secret handling, and post-change verification. High-risk operations should route through `safety-validator` before execution.
+
+## Explanation
+
+### Why SREPowers Exists
+
+Infrastructure failures usually come from rushed operations, weak verification, or success claims based on exit codes instead of observed state. SREPowers exists to make the agent behave more like a careful operator: define success first, constrain the blast radius, and verify after every meaningful change.
+
+### Workflow Diagram
+
+```text
+Need infrastructure change
+          |
+          v
++---------------------------+
+| brainstorming-operations  |
++---------------------------+
+          |
+          v
++---------------------------+
+| writing-operation-plans   |
++---------------------------+
+          |
+          v
+   +-------------------+
+   | choose execution  |
+   +-------------------+
+      |             |
+      v             v
++----------------+ +-------------------------+
+| subagent-      | | executing-operation-    |
+| driven-        | | plans                   |
+| operation      | +-------------------------+
++----------------+
+      \             /
+       \           /
+        v         v
+     +----------------------+
+     | test-driven-         |
+     | operation            |
+     +----------------------+
+               |
+               v
+     +----------------------+
+     | verification-before- |
+     | completion           |
+     +----------------------+
+               |
+               v
+     +----------------------+
+     | finishing-operation- |
+     | branch               |
+     +----------------------+
 ```
-
-### Claude Code Manual Installation
-
-Clone this repository to your local Claude plugin or skills directory:
-
-```bash
-# Clone the repository
-git clone https://github.com/yg-codes/srepowers.git ~/.claude/plugins/srepowers
-
-# Or copy skills directly
-cp -r srepowers/skills/* ~/.claude/skills/
-```
-
-## Runtime Notes
-
-- `skills/` is the canonical authored source.
-- `.agents/skills/` mirrors the same skills for Codex discovery.
-- `.codex-plugin/plugin.json` is the Codex plugin manifest.
-- `.agents/plugins/marketplace.json` is a repo-local marketplace for development inside this repo.
-- `commands/` remains in place for Claude compatibility and existing slash-command workflows.
-- `hooks/session-start.sh` is shared by both runtimes.
-
-## Skill Selection Guide
-
-| Situation | Recommended Skill | Alternative |
-|-----------|-------------------|-------------|
-| **Planning phase** | | |
-| Need to design an infrastructure operation | `brainstorming-operations` | - |
-| Have a design, need detailed steps | `writing-operation-plans` | - |
-| **Execution phase** | | |
-| Ready to execute, want continuous flow | `subagent-driven-operation` | - |
-| Long operation, need checkpoints | `executing-operation-plans` | - |
-| Single operation with verification | `test-driven-operation` | - |
-| About to claim work is done/deployed/healthy | `verification-before-completion` | - |
-| **Kubernetes** | | |
-| Deploy workloads, configure cluster | `kubernetes-specialist` | - |
-| Build container images | `container-engineer` | - |
-| Progressive deployment | `progressive-delivery` | - |
-| **Infrastructure as Code** | | |
-| Write Terraform modules | `terraform-engineer` | - |
-| Orchestrate with Terragrunt | `terragrunt-expert` | - |
-| **Databases** | | |
-| PostgreSQL operations | `postgresql-engineer` | - |
-| **Incident Response** | | |
-| Production incident | `incident-commander` | `systematic-troubleshooting` |
-| Write post-mortem | `post-mortem-writer` | - |
-| **Cost & Optimization** | | |
-| Analyze cloud costs | `cost-optimizer` | - |
-| Reduce operational toil | `toil-analysis` | - |
-| **Observability** | | |
-| Set up monitoring | `observability-engineer` | - |
-| Verify with metrics | `observability-integration` | - |
-
-## Choosing Your Workflow
-
-Not every operation needs the full brainstorm-plan-execute-verify spine. SREPowers adapts automatically:
-
-### Execution Patterns
-
-The `subagent-driven-operation` skill selects a pattern based on plan characteristics:
-
-| Pattern | When | Behavior |
-|---------|------|----------|
-| **Inline** | <= 2 tasks AND risk is not high | Execute in main context, no subagent spawn, self-review |
-| **Segmented** | 3-6 tasks, no decision checkpoints | Batch into segments of 2-3, subagent per segment |
-| **Full Subagent** | 7+ tasks OR high risk OR any task lacks rollback | Fresh subagent per task with two-stage review (spec + quality) |
-
-### TDO Exceptions
-
-The `test-driven-operation` Iron Law has three defined exceptions (require human partner consent):
-
-| Exception | When It Applies | Example |
-|-----------|----------------|---------|
-| **Emergency response** | Time-critical incident | Production outage, active security incident |
-| **Read-only diagnostics** | Only querying state | `kubectl get`, `terraform plan`, log analysis |
-| **Dry-run exploration** | First pass only, no changes | `terraform plan`, `kubectl diff --dry-run` |
-
-### Workflow Tier Selection
-
-| Situation | Recommended Path |
-|-----------|-----------------|
-| Simple query or read-only check | Use domain skill directly (e.g., `/kubernetes-specialist`) |
-| Single change with clear expected outcome | `/test-driven-operation` (inline) |
-| 2-6 independent tasks, medium risk | `/subagent-driven-operation` (inline or segmented) |
-| 7+ tasks or high risk | `/subagent-driven-operation` (full) or `/executing-operation-plans` |
-| Unsure what to do | `/brainstorming-operations` first, then choose above |
-
-## Available Skills
-
-### test-driven-operation
-
-**Use when:** Executing infrastructure operations with verification commands - API calls, kubectl, Keycloak CRDs, Git MRs, Linux server operations.
-
-**Core principle:** If you didn't watch the verification fail, you don't know if it verifies the right thing.
-
-**Workflow:**
-1. **RED** - Write failing verification command (kubectl, API call, etc.)
-2. **Verify RED** - Run it and watch it fail
-3. **GREEN** - Execute minimal infrastructure operation
-4. **Verify GREEN** - Run verification and confirm it passes
-5. **REFACTOR** - Document and clean up
-
-**Example:**
-```bash
-# RED - Verification fails
-kubectl get pod -n production -l app=api-server
-# Error: No resources found
-
-# GREEN - Apply minimal manifest
-kubectl apply -f api-server-pod.yaml
-
-# Verify GREEN - Passes
-kubectl get pod -n production -l app=api-server
-# NAME          READY   STATUS    RESTARTS   AGE
-# api-server    1/1     Running   0          5s
-```
-
-### subagent-driven-operation
-
-**Use when:** Executing infrastructure operation plans with independent tasks in the current session.
-
-**Core principle:** Fresh subagent per task + two-stage review (spec compliance then artifact quality) = high quality, fast iteration.
-
-**Adaptive execution patterns** (selected based on plan complexity):
-| Pattern | When | Token Savings |
-|---------|------|---------------|
-| **Inline** | <= 2 tasks, low risk | ~14K per task |
-| **Segmented** | 3-6 tasks | 30-50% vs full |
-| **Full Subagent** | 7+ tasks or high risk | Baseline |
-
-**Workflow:**
-1. Read plan, parse YAML frontmatter, check for resume state
-2. Select execution pattern (inline/segmented/full)
-3. For each task (or segment):
-   - Dispatch operator subagent with full task text
-   - Execute operations following Test-Driven Operation
-   - Handle deviations (R1-R4 taxonomy with retry limits)
-   - **Spec compliance review** - Verify all requirements met
-   - **Artifact quality review** - Verify YAML/JSON valid, proper labels/annotations
-   - Update execution state in plan file
-4. After all tasks: Final artifact review
-
-**Two-Stage Review:**
-- **Spec Compliance:** Did we execute exactly what was requested?
-- **Artifact Quality:** Are the infrastructure artifacts well-built?
-
-### brainstorming-operations
-
-**Use when:** Planning infrastructure operations before implementation.
-
-**Core principle:** Design operations with risk assessment, verification strategies, and rollback plans before executing.
-
-**Workflow:**
-1. Understand current infrastructure state
-2. Ask questions to refine operation scope
-3. Present design in sections with validation
-4. Document current state, desired state, approach
-5. Include risk assessment and rollback strategies
-
-**Output:** Design document saved to `docs/plans/YYYY-MM-DD-<operation-name>-design.md`
-
-### writing-operation-plans
-
-**Use when:** You have a design and need to create bite-sized execution steps.
-
-**Core principle:** Create detailed plans with exact commands, verification steps, and rollback instructions.
-
-**Workflow:**
-1. Write plan with TDO discipline for each task
-2. Include exact commands (no placeholders)
-3. Document verification commands with expected outputs
-4. Provide rollback steps for each task
-5. Save to `docs/plans/YYYY-MM-DD-<operation-name>.md`
-
-**Output:** Execution plan that operators can follow step-by-step.
-
-**Plan format:** YAML frontmatter with risk level, environment, status tracking, and requirements traceability (works with ClickUp, Jira, Linear, or any issue tracker).
-
-**Quality gate:** Automated plan-checker subagent validates 6 dimensions (rollback coverage, verification concreteness, environment boundaries, dry-run presence, side-effect checks, risk consistency) before execution handoff.
-
-### gitlab-ecr-pipeline
-
-**Use when:** Creating GitLab CI/CD pipelines that push container images to AWS ECR.
-
-**Core principle:** Generate complete pipelines with proper authentication, building, and pushing.
-
-**Supports:** Building from Containerfile/Dockerfile, mirroring upstream images
-
-**Features:** AWS ECR authentication, Podman/buildah support, multi-stage builds, tagging strategies
-
-### puppet-code-analyzer
-
-**Use when:** Analyzing Puppet code quality in control repos or modules.
-
-**Core principle:** Automated analysis with linting, dependency checking, best practice validation.
-
-**Features:** Syntax validation, dependency analysis, style guide compliance, error troubleshooting
-
-**Workflow:**
-1. Identify Puppet control repo or module
-2. Run syntax validation with puppet-lint
-3. Analyze dependencies and module structure
-4. Check style guide compliance
-5. Generate analysis report with recommendations
-
-### pve-admin
-
-**Use when:** Managing Proxmox VE 8.x/9.x and Proxmox Backup Server 3.x infrastructure.
-
-**Core principle:** Complete Proxmox administration with cluster management and safe operations.
-
-**Features:** Cluster management, VM/CT operations, ZFS storage, networking, HA, backup/restore, health checks
-
-**Operations:**
-- VM/CT lifecycle (create, start, stop, migrate)
-- Storage management (ZFS, LVM, directory, NFS)
-- Network configuration (bridges, bonds, VLANs)
-- Cluster operations (join, leave, quorum)
-- Backup/restore (PBS integration)
-- Health monitoring and diagnostics
-
-### sre-runbook
-
-**Use when:** Creating structured SRE runbooks for infrastructure operations.
-
-**Core principle:** Runbooks with Command/Expected/Result format for verifiable procedures.
-
-**Output:** Structured runbooks with pre-requisites, step-by-step procedures, verification, rollback
-
-**Format:**
-- Pre-requisites (access, tools, state)
-- Procedures with Command/Expected/Result format
-- Verification steps
-- Rollback procedures
-- Troubleshooting section
-
-### executing-operation-plans
-
-**Use when:** You have a written infrastructure operation plan to execute in a separate session with review checkpoints - for long-running operations requiring human review between steps.
-
-**Core principle:** Batch execution with checkpoints for safety verification and human review.
-
-**Workflow:**
-- Load and review plan, parse YAML frontmatter, check for resume state
-- Pre-execution safety check
-- Execute batch (3 tasks or per-environment) with TDO discipline
-- Handle deviations (R1-R4 taxonomy)
-- Batch verification, update execution state in plan file
-- Report and checkpoint
-- Continue or complete
-
-**Resume support:** Plans track execution state (pending/in_progress/completed) with per-task status, enabling resume after interruption.
-
-### verification-before-completion
-
-**Use when:** About to claim infrastructure work is complete, deployed, fixed, or healthy — before any commit, PR, or status update.
-
-**Core principle:** Evidence before claims, always. No completion claims without fresh verification command output.
-
-**Gate function:** Identify verification command → Run it → Read full output → Verify → Only then claim.
-
-**Requirements traceability:** Cross-references plan's acceptance criteria against task execution evidence. All requirements must be `done` or explicitly `skipped` before completion.
-
-**Common SRE failures prevented:**
-- Helm exit 0 ≠ deployment succeeded (run `kubectl rollout status`)
-- Pod Running ≠ service healthy (check health endpoint)
-- `kubectl apply` exit 0 ≠ config applied (read back the value)
-- Agent reports success ≠ verified (check VCS diff)
-
-### observability-integration
-
-**Use when:** Verifying infrastructure operations using metrics and alerting data from Prometheus, Grafana, or other observability platforms.
-
-**Core principle:** Metrics don't lie - use observability data to verify operations and detect issues early.
-
-**Features:**
-- Pre/post operation metric comparison
-- Baseline establishment
-- Alert validation
-- Prometheus query examples
-- Integration with TDO cycles
-
-### incident-commander
-
-**Use when:** Coordinating response to major infrastructure incidents requiring structured incident command.
-
-**Core principle:** Clear command structure + effective communication + systematic troubleshooting = faster incident resolution.
-
-**Features:**
-- ICS-style role assignment (IC, Operations, Communications, Scribe)
-- Severity levels and escalation triggers
-- Communication templates
-- Timeline tracking
-- Multi-phase response process
-
-### post-mortem-writer
-
-**Use when:** Creating blameless post-mortems after infrastructure incidents.
-
-**Core principle:** Blameless post-mortems create a culture of learning and continuous improvement.
-
-**Features:**
-- Structured post-mortem template
-- Timeline reconstruction
-- Root cause analysis framework
-- Action item tracking
-- Blameless writing guidelines
-
-### progressive-delivery
-
-**Use when:** Releasing changes with staged traffic shifting, SLO-based rollback triggers, or blue-green cutover.
-
-**Core principle:** Each traffic stage is a TDO cycle — verify SLOs before promoting to the next stage.
-
-**Features:**
-- Canary release workflow (1% → 5% → 25% → 50% → 100%)
-- Blue-green cutover with immediate rollback capability
-- Shadow traffic validation (zero user impact testing)
-- SLO-based rollback triggers at each stage
-- Per-stage verification commands
-
-### toil-analysis
-
-**Use when:** Quantifying operational toil, planning automation investments, or justifying headcount decisions.
-
-**Core principle:** Toil > 50% of engineering capacity means freeze feature work and automate.
-
-**Features:**
-- Toil inventory with time tracking (task × frequency × duration)
-- Capacity planning projection model (5-quarter growth forecast)
-- Automation prioritization matrix (Impact × Ease × Risk scoring)
-- Reduction progress tracking with before/after measurement
-
-### architecture-designer
-
-**Use when:** Designing new system architecture, reviewing existing designs, or making architectural decisions.
-
-**Focus:** Design patterns, ADRs, scalability planning, system design review.
-
-### chaos-engineer
-
-**Use when:** Designing chaos experiments, implementing failure injection frameworks, or conducting game day exercises.
-
-**Focus:** Blast radius control, game days, antifragile systems, resilience testing.
-
-### cloud-architect
-
-**Use when:** Designing cloud architectures, planning migrations, or optimizing multi-cloud deployments.
-
-**Focus:** Well-Architected Framework, cost optimization, disaster recovery, landing zones, serverless.
-
-### code-documenter
-
-**Use when:** Adding docstrings, creating API documentation, or building documentation sites.
-
-**Focus:** OpenAPI/Swagger specs, JSDoc, doc portals, tutorials, user guides.
-
-### code-reviewer
-
-**Use when:** Reviewing pull requests, conducting code quality audits, or identifying security vulnerabilities.
-
-**Focus:** PR reviews, code quality checks, refactoring suggestions.
-
-### devops-engineer
-
-**Use when:** Setting up CI/CD pipelines, containerizing applications, or managing infrastructure as code.
-
-**Focus:** Pipelines, Docker, Kubernetes, cloud platforms, GitOps.
-
-### golang-pro
-
-**Use when:** Building Go applications requiring concurrent programming, microservices architecture, or high-performance systems.
-
-**Focus:** Goroutines, channels, Go generics, gRPC integration.
-
-### kubernetes-specialist
-
-**Use when:** Deploying or managing Kubernetes workloads requiring cluster configuration, security hardening, or troubleshooting.
-
-**Focus:** Helm charts, RBAC, NetworkPolicies, storage, performance optimization.
-
-### microservices-architect
-
-**Use when:** Designing distributed systems, decomposing monoliths, or implementing microservices patterns.
-
-**Focus:** Service boundaries, DDD, saga patterns, event sourcing, service mesh, distributed tracing.
-
-### observability-engineer
-
-**Use when:** Setting up observability systems including monitoring, logging, metrics, tracing, or alerting.
-
-**Focus:** Dashboards, Prometheus/Grafana, OpenTelemetry, load testing, profiling, capacity planning, SLO-based alerting.
-
-### postgresql-engineer
-
-**Use when:** Optimizing PostgreSQL queries, configuring replication, or implementing advanced database features.
-
-**Focus:** EXPLAIN analysis, JSONB operations, extension usage, VACUUM tuning, performance monitoring, complex SQL patterns, query migration.
-
-### python-pro
-
-**Use when:** Building Python 3.11+ applications requiring type safety, async programming, or production-grade patterns.
-
-**Focus:** Type hints, pytest, async/await, dataclasses, mypy configuration.
-
-### rust-engineer
-
-**Use when:** Building Rust applications requiring memory safety, systems programming, or zero-cost abstractions.
-
-**Focus:** Ownership patterns, lifetimes, traits, async/await with tokio.
-
-### secure-code-guardian
-
-**Use when:** Implementing authentication/authorization, securing user input, or preventing OWASP Top 10 vulnerabilities.
-
-**Focus:** Authentication, authorization, input validation, encryption.
-
-### security-reviewer
-
-**Use when:** Conducting security audits, reviewing code for vulnerabilities, or analyzing infrastructure security.
-
-**Focus:** SAST scans, penetration testing, DevSecOps practices, cloud security reviews.
-
-### cost-optimizer
-
-**Use when:** Analyzing cloud costs, optimizing resource spending, or planning reserved capacity.
-
-**Focus:** AWS/GCP/Azure cost analysis, right-sizing, reserved instances, spot instances, cost allocation, FinOps practices.
-
-### sre-engineer
-
-**Use when:** Defining SLIs/SLOs, managing error budgets, or building reliable systems at scale.
-
-**Focus:** Incident management, chaos engineering, toil reduction, capacity planning.
-
-### terraform-engineer
-
-**Use when:** Implementing infrastructure as code with Terraform across AWS, Azure, or GCP.
-
-**Focus:** Module development, state management, provider configuration, multi-environment workflows.
-
-### terragrunt-expert
-
-**Use when:** Orchestrating Terraform/OpenTofu modules with Terragrunt - DRY configurations, stack architecture, dependency management.
-
-**Core principle:** Eliminate duplication across environments with Terragrunt's include blocks, dependency management, and remote state automation.
-
-**Features:**
-- DRY configurations across environments
-- Stack architecture (implicit/explicit)
-- Dependency graph management with mock outputs
-- Remote state automation with backend configuration
-- Multi-environment deployment workflows
-
-### container-engineer
-
-**Use when:** Building, optimizing, or securing container images and orchestration for production environments.
-
-**Core principle:** Build lean, secure, and maintainable container images with multi-stage builds, security hardening, and supply chain security.
-
-**Features:**
-- Multi-stage Dockerfile patterns
-- Image size optimization and layer caching
-- Security hardening (non-root, read-only filesystem, capabilities)
-- Supply chain security (SBOM, cosign, SLSA)
-- Docker Compose for orchestration
-- Kubernetes runtime (containerd, CRI-O)
-- Vulnerability scanning and remediation
-
-### network-engineer
-
-**Use when:** Designing, optimizing, or troubleshooting cloud and hybrid network infrastructures.
-
-**Core principle:** Design networks that are scalable, secure, and highly available with proper segmentation and zero-trust principles.
-
-**Features:**
-- VPC architecture (single/multi-region)
-- Load balancing strategies (Layer 4/7, global, internal)
-- DNS management and failover routing
-- VPN, Direct Connect, ExpressRoute, Cloud Interconnect
-- Zero-trust network architecture
-- Network segmentation and security groups
-
-### platform-engineer
-
-**Use when:** Building or improving internal developer platforms (IDPs), designing self-service infrastructure, or optimizing developer workflows.
-
-**Core principle:** Treat the platform as a product with developers as customers - reduce cognitive load through self-service and golden paths.
-
-**Features:**
-- Internal Developer Platforms (IDPs)
-- Self-service infrastructure capabilities
-- Golden path templates for services
-- Backstage developer portal implementation
-- Service catalogs and software templates
-- Platform metrics and adoption tracking
-
-### test-master
-
-**Use when:** Writing tests, creating test strategies, or building automation frameworks.
-
-**Focus:** Unit tests, integration tests, E2E, coverage analysis, performance testing, security testing.
-
-## Commands
-
-Quick invoke skills using `/command` syntax:
-
-**SRE Operations:**
-- `/test-driven-operation` - Execute operations with verification commands
-- `/subagent-driven-operation` - Execute operation plans with subagent dispatch
-- `/brainstorming-operations` - Design infrastructure operations
-- `/writing-operation-plans` - Create detailed execution plans
-- `/sre-runbook` - Create structured SRE runbooks
-
-**Workspace & Lifecycle:**
-- `/using-git-worktrees-sre` - Create isolated workspaces for control repos
-- `/finishing-operation-branch` - Complete operations with merge/PR workflow
-
-**Incident Response:**
-- `/systematic-troubleshooting` - 4-phase root cause analysis for incidents
-- `/incident-commander` - Coordinate major incident response with ICS structure
-- `/post-mortem-writer` - Create blameless post-mortems
-
-**Operations Enhancement:**
-- `/executing-operation-plans` - Execute plans in separate sessions with checkpoints
-- `/dispatching-parallel-agents-sre` - Run 2+ independent infrastructure tasks in parallel
-- `/observability-integration` - Verify operations using metrics and alerting data (Prometheus, Datadog, CloudWatch, New Relic)
-- `/verification-before-completion` - Enforce evidence-before-claims before any completion status
-- `/safety-validator` - Review commands for high-risk operations
-- `/progressive-delivery` - Canary/blue-green release with SLO-based rollback triggers
-- `/toil-analysis` - Measure toil, plan automation investments, model capacity
-- `/receiving-code-review-sre` - Process code review feedback on infrastructure changes
-
-**CI/CD & Pipelines:**
-- `/gitlab-ecr-pipeline` - GitLab CI/CD → AWS ECR pipelines
-
-**Architecture & Design:**
-- `/architecture-designer` - System architecture design and review
-- `/cloud-architect` - Cloud architecture and multi-cloud optimization
-- `/microservices-architect` - Distributed systems and microservices patterns
-
-**DevOps & Infrastructure:**
-- `/devops-engineer` - CI/CD pipelines, containers, infrastructure as code
-- `/terraform-engineer` - Infrastructure as code with Terraform
-- `/terragrunt-expert` - Terragrunt orchestration for Terraform/OpenTofu
-- `/container-engineer` - Container builds, optimization, and security
-- `/network-engineer` - Network infrastructure and architecture
-- `/kubernetes-specialist` - Kubernetes operations depth
-- `/chaos-engineer` - Resilience testing and failure injection
-- `/platform-engineer` - Internal Developer Platforms (IDPs)
-
-**Observability & Reliability:**
-- `/observability-engineer` - Observability stack setup and management
-- `/sre-engineer` - SLO/SLI management and reliability at scale
-
-**Cost & Optimization:**
-- `/cost-optimizer` - Cloud cost analysis and optimization
-
-**Languages & Development:**
-- `/golang-pro` - Go application development
-- `/python-pro` - Python application development
-- `/rust-engineer` - Rust systems programming
-- `/postgresql-engineer` - PostgreSQL operations and SQL optimization
-
-**Security:**
-- `/secure-code-guardian` - Application security and OWASP prevention
-- `/security-reviewer` - Security audits and infrastructure security
-
-**Quality & Documentation:**
-- `/code-reviewer` - Code quality audits and PR reviews
-- `/code-documenter` - API documentation and docstrings
-- `/test-master` - Testing strategy and automation
-
-**Meta & Utilities:**
-- `/using-srepowers` - Meta-skill: how to find and use SRE skills
-- `/writing-skills-sre` - Create or edit SRE infrastructure skills
-- `/environment-health-check` - Verify required tools are installed
-- `/playground-tutorial` - Safe, local tutorial for learning TDO
-
-## Companion Plugin: Superpowers
-
-SREPowers is a companion plugin to [superpowers](https://github.com/obra/superpowers). It adapts superpowers' software development workflows for SRE/infrastructure operations. Install both for complete coverage:
-
-| Software Development (superpowers) | SRE Infrastructure (srepowers) |
-|-------------------------------------|-------------------------------|
-| `test-driven-development` | `test-driven-operation` |
-| `subagent-driven-development` | `subagent-driven-operation` |
-| `brainstorming` | `brainstorming-operations` |
-| `writing-plans` | `writing-operation-plans` |
-| `executing-plans` | `executing-operation-plans` |
-| `using-git-worktrees` | `using-git-worktrees-sre` |
-| `finishing-a-development-branch` | `finishing-operation-branch` |
-| `systematic-debugging` | `systematic-troubleshooting` |
-| `verification-before-completion` | `verification-before-completion` (shared) |
-| `dispatching-parallel-agents` | `dispatching-parallel-agents-sre` |
-| `receiving-code-review` | `receiving-code-review-sre` |
-| `writing-skills` | `writing-skills-sre` (extends upstream) |
-
-The following are provided by superpowers only (no SREPowers equivalent):
-- `requesting-code-review` — pre-review checklist for code
-
-SREPowers adds 30+ SRE-native skills with no superpowers equivalent (incident command, runbooks, PVE, Puppet, GitLab ECR, observability, progressive delivery, toil, cost, and domain expertise skills).
-
-## Developer Tools
-
-### Skill Generator
-
-Create new skills with the scaffolding tool:
-
-```bash
-# Interactive mode
-python scripts/create-skill.py
-
-# With arguments
-python scripts/create-skill.py \
-  --name my-skill \
-  --description "Use when doing X" \
-  --category core
-```
-
-This generates:
-- `skills/my-skill/SKILL.md` - Skill definition
-- `commands/my-skill.md` - Command wrapper
-- `skills/my-skill/references/` - Reference directory
-- `tests/claude-code/test-my-skill.sh` - Test template
-
-### Evaluation Framework
-
-Run automated evaluations to verify skill output quality:
-
-```bash
-# Run all evals
-python evals/eval-runner.py
-
-# Run specific skill eval
-python evals/eval-runner.py --skill sre-runbook
-
-# Generate report
-python evals/eval-runner.py --report results.md
-```
-
-Commands are thin wrappers that invoke skills directly for quick access.
-
-## Usage Examples
-
-### Kubernetes Deployment
-
-```bash
-# Write verification first
-kubectl get deployment -n staging api-server -o jsonpath='{.spec.replicas}'
-
-# Apply deployment
-kubectl apply -f deployment.yaml
-
-# Verify
-kubectl get deployment -n staging api-server -o jsonpath='{.spec.replicas}'
-# Output: 3
-```
-
-### Keycloak Realm Provisioning
-
-```bash
-# Write verification first
-kubectl get keycloakrealm/example-realm -o jsonpath='{.status.ready}'
-
-# Apply Keycloak CRD
-kubectl apply -f keycloak-realm.yaml
-
-# Verify
-kubectl get keycloakrealm/example-realm -o jsonpath='{.status.ready}'
-# Output: true
-```
-
-### Git Control Repo Operation
-
-```bash
-# Write verification first
-kubectl get configmap -n production app-config -o jsonpath='{.data.DATABASE_URL}'
-
-# Create config in control repo
-cat > manifests/production/app-config.yaml <<EOF
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: app-config
-  namespace: production
-data:
-  DATABASE_URL: postgresql://prod-db.example.com:5432/app
-EOF
-
-git add manifests/production/app-config.yaml
-git commit -m "Add production database config"
-git push
-
-# Wait for ArgoCD/Flux sync, then verify
-kubectl get configmap -n production app-config -o jsonpath='{.data.DATABASE_URL}'
-# Output: postgresql://prod-db.example.com:5432/app
-```
-
-### API Operation
-
-```bash
-# Write verification first
-curl -s https://api.example.com/users/123 | jq '.email'
-# Output: null
-
-# Execute API call
-curl -X PATCH https://api.example.com/users/123 \
-  -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com"}'
-
-# Verify
-curl -s https://api.example.com/users/123 | jq '.email'
-# Output: "user@example.com"
-```
-
-## Key Principles
-
-### Test-Driven Operation (TDO)
-
-- **Tests** = Verification commands (kubectl, API calls, Git queries)
-- **Commits** = Git operations on control repo
-- Always write verification first, run it, watch it fail
-- Execute minimal operation to pass
-- Verify output matches expected result
-
-### Subagent-Driven Operation
-
-- **Operator** = Infrastructure operations specialist
-- **Artifact quality review** = YAML/JSON validity, Kubernetes best practices
-- **Tests** = Verification commands
-- **Commits** = Git operations on control repo
-- **Adaptive patterns** = Inline (<=2 tasks), Segmented (3-6), Full (7+ or high risk)
-- **Deviation taxonomy** = R1-R4 (auto-fix through STOP) with retry limits
-- **Execution state** = Per-task tracking in plan file for resume after interruption
-
-### Two-Stage Review
-
-1. **Spec Compliance** - Verified all operations executed, nothing missing/extra
-2. **Artifact Quality** - YAML/JSON valid, proper labels/annotations, security best practices
-
-## Documentation
-
-- [Testing Anti-Patterns](docs/testing-anti-patterns.md) - Common infrastructure operation testing pitfalls and how to avoid them
-- [Persuasion Principles](docs/persuasion-principles.md) - Psychology of effective skill design for SRE discipline
-- [Container CI/CD Reference](docs/container-cicd-reference/) - ECR, GitLab Container Registry, IAM auth patterns
-- [Implementation Plan](docs/plans/2026-02-09-implement-all-8-actions-from-user-feedback.md) - Development roadmap and task breakdown
-- [Merge Plan](docs/plans/2026-02-09-merge-yg-claude-skills-into-srepowers.md) - yg-claude merge strategy and execution
 
 ## Contributing
 
-Contributions are welcome! Repository: [github.com/yg-codes/srepowers](https://github.com/yg-codes/srepowers)
-
-Please:
-
-1. Fork the repository
-2. Create a feature branch (`cu_your_feature`)
-3. Follow the skill format (SKILL.md with frontmatter)
-4. Test your skills thoroughly
-5. Submit a pull request
-
-For bug reports and feature requests, [open an issue](https://github.com/yg-codes/srepowers/issues).
+1. Fork the repository.
+2. Create a feature branch.
+3. Follow the existing skill format and repository conventions.
+4. Run the relevant tests in `tests/`.
+5. Submit a pull request.
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License. See [LICENSE](LICENSE).
 
-## Acknowledgments
-
-Adapted from the excellent [superpowers](https://github.com/obra/superpowers) plugin by Jesse Vital, with adaptations for SRE infrastructure workflows.
-
-## Version History
-
-See `git log` for version history and changes.
+Last Updated: 2026-04-21
