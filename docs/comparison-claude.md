@@ -1,7 +1,7 @@
 # SREPowers vs. Superpowers: A Comparative Evaluation
 
 **Date:** 2026-02-18
-**Evaluator:** Claude Code (claude-sonnet-4-6)
+**Evaluator:** Claude Code (claude-sonnet-4-6), updated for Codex-native support on 2026-04-21
 
 ## Table of Contents
 
@@ -19,7 +19,7 @@
 
 ## Executive Summary
 
-**SREPowers** and **Superpowers** are both Claude Code plugin frameworks that adapt software engineering discipline (TDD, subagent-driven development) to autonomous agent workflows. They share a common philosophical ancestor but serve fundamentally different domains:
+**SREPowers** and **Superpowers** both adapt software engineering discipline (TDD, subagent-driven development) to autonomous agent workflows. They share a common philosophical ancestor but serve fundamentally different domains:
 
 | | Superpowers | SREPowers |
 |---|---|---|
@@ -182,7 +182,7 @@ Both plugins share identical architectural foundations. The key differences are:
 ### What Superpowers Has That SREPowers Doesn't
 
 1. **Multi-Platform Support**
-   Superpowers works on Claude Code, Codex, OpenCode, Cursor, Gemini CLI, and GitHub Copilot CLI. SREPowers targets Claude Code only.
+   Superpowers still spans more surfaces. SREPowers now supports Claude Code and Codex natively, but remains narrower than Superpowers.
 
 2. **Simplicity**
    Fewer skills means lower cognitive load. New practitioners can learn the full skill set quickly. SREPowers' 49 skills require more upfront investment.

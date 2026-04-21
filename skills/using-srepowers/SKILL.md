@@ -1,6 +1,6 @@
 ---
 name: using-srepowers
-description: Use when starting any conversation - establishes how to find and use SRE infrastructure skills, requiring Skill tool invocation before ANY response including clarifying questions
+description: Use when starting any conversation to establish how SRE infrastructure skills are discovered and invoked in Claude Code and Codex before any operational response.
 ---
 
 <EXTREMELY-IMPORTANT>
@@ -13,15 +13,17 @@ This is not negotiable. This is not optional. You cannot rationalize your way ou
 
 ## How to Access Skills
 
-**In Claude Code:** Use the `Skill` tool. When you invoke a skill, its content is loaded and presented to you — follow it directly. Never use the Read tool on skill files.
+**In Claude Code:** Use the `Skill` tool. When you invoke a skill, its content is loaded and presented to you — follow it directly.
 
-**Skill namespace:** All SRE infrastructure skills are under `srepowers:` (e.g., `srepowers:test-driven-operation`).
+**In Codex:** Use repo or plugin-discovered skills through `/skills` or by mentioning `$skill-name`. Codex may also activate a skill implicitly when the task matches its description.
+
+**Skill namespace:** When an explicit namespace is required, use `srepowers:` (for example `srepowers:test-driven-operation`).
 
 # Using SRE Skills
 
 ## The Rule
 
-**Invoke relevant or requested skills BEFORE any response or action.** Even a 1% chance a skill might apply means you should invoke the skill to check. If an invoked skill turns out to be wrong for the situation, you don't need to use it.
+**Invoke relevant or requested skills BEFORE any response or action.** Even a 1% chance a skill might apply means you should invoke or mention the skill to check. If an invoked skill turns out to be wrong for the situation, you don't need to use it.
 
 ```dot
 digraph skill_flow {
@@ -30,7 +32,7 @@ digraph skill_flow {
     "About to plan/operate?" [shape=diamond];
     "Already brainstormed?" [shape=diamond];
     "Invoke brainstorming-operations" [shape=box];
-    "Invoke Skill tool" [shape=box];
+    "Invoke or mention skill" [shape=box];
     "Announce: Using [skill] to [purpose]" [shape=box];
     "Follow skill exactly" [shape=box];
     "Respond" [shape=doublecircle];
@@ -39,11 +41,11 @@ digraph skill_flow {
     "Might any SRE skill apply?" -> "About to plan/operate?" [label="yes"];
     "Might any SRE skill apply?" -> "Respond" [label="definitely not"];
     "About to plan/operate?" -> "Already brainstormed?" [label="yes"];
-    "About to plan/operate?" -> "Invoke Skill tool" [label="no - other skill"];
+    "About to plan/operate?" -> "Invoke or mention skill" [label="no - other skill"];
     "Already brainstormed?" -> "Invoke brainstorming-operations" [label="no"];
-    "Already brainstormed?" -> "Invoke Skill tool" [label="yes"];
-    "Invoke brainstorming-operations" -> "Invoke Skill tool";
-    "Invoke Skill tool" -> "Announce: Using [skill] to [purpose]";
+    "Already brainstormed?" -> "Invoke or mention skill" [label="yes"];
+    "Invoke brainstorming-operations" -> "Invoke or mention skill";
+    "Invoke or mention skill" -> "Announce: Using [skill] to [purpose]";
     "Announce: Using [skill] to [purpose]" -> "Follow skill exactly";
 }
 ```

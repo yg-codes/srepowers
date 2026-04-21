@@ -1,10 +1,10 @@
 # SREPowers
 
-SRE infrastructure skills for Claude Code: Test-Driven Operations and Subagent-Driven Operations for Kubernetes, Keycloak, GitOps, API workflows, and more.
+SRE infrastructure skills for Claude Code and Codex: Test-Driven Operations and Subagent-Driven Operations for Kubernetes, Keycloak, GitOps, API workflows, and more.
 
 ## Overview
 
-SREPowers adapts proven software development workflows (TDD, subagent-driven development) for infrastructure operations. These skills help you execute infrastructure changes systematically with verification-first discipline.
+SREPowers adapts proven software development workflows (TDD, subagent-driven development) for infrastructure operations. The skills are shared across runtimes, with Claude compatibility wrappers and first-class Codex-native packaging in the same repository.
 
 ## Skill Workflow Diagram
 
@@ -73,7 +73,27 @@ Every operation skill integrates safety checks. The `test-driven-operation` Iron
 
 ## Installation
 
-### Via Claude Code Marketplace (Recommended)
+### Codex Repo-Native Use (Recommended for local development)
+
+Codex can use the checked-in repository surfaces directly:
+
+- `AGENTS.md` for project instructions
+- `.agents/skills/` for repo-scoped skill discovery
+- `.codex/agents/` for custom agent definitions
+- `.codex/hooks.json` for session-start context injection
+
+Open the repository in Codex and use `/skills` or `$srepowers-skill-name` to invoke skills explicitly. Codex can also choose a skill implicitly from the skill description when the task matches.
+
+### Codex Plugin Install
+
+This repository also includes a Codex plugin manifest and repo marketplace entry:
+
+- `.codex-plugin/plugin.json`
+- `.agents/plugins/marketplace.json`
+
+From Codex, open `/plugins`, add the repo marketplace if needed, and install `srepowers` from the local marketplace entry.
+
+### Claude Code Marketplace
 
 ```bash
 # Add the marketplace
@@ -89,9 +109,9 @@ Every operation skill integrates safety checks. The `test-driven-operation` Iron
 # /subagent-driven-operation - Use when executing infrastructure operation plans...
 ```
 
-### Manual Installation
+### Claude Code Manual Installation
 
-Clone this repository to your local skills directory:
+Clone this repository to your local Claude plugin or skills directory:
 
 ```bash
 # Clone the repository
@@ -100,6 +120,13 @@ git clone https://github.com/yg-codes/srepowers.git ~/.claude/plugins/srepowers
 # Or copy skills directly
 cp -r srepowers/skills/* ~/.claude/skills/
 ```
+
+## Runtime Notes
+
+- `skills/` is the canonical authored source.
+- `.agents/skills/` mirrors the same skills for Codex discovery.
+- `commands/` remains in place for Claude compatibility and existing slash-command workflows.
+- `hooks/session-start.sh` is shared by both runtimes.
 
 ## Skill Selection Guide
 

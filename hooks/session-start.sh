@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SessionStart hook for srepowers plugin
+# SessionStart hook for SREPowers in Claude Code and Codex
 
 set -euo pipefail
 
@@ -25,12 +25,13 @@ escape_for_json() {
 
 using_srepowers_escaped=$(escape_for_json "$using_srepowers_content")
 
-# Output context injection as JSON
+# Output context injection as JSON. Both Claude Code and Codex support
+# SessionStart additional developer context in this shape.
 cat <<EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<EXTREMELY_IMPORTANT>\nYou have SREPowers - SRE infrastructure skills for disciplined operations.\n\n**Below is the full content of your 'srepowers:using-srepowers' skill - your introduction to using SRE infrastructure skills. For all other skills, use the 'Skill' tool:**\n\n${using_srepowers_escaped}\n\n</EXTREMELY_IMPORTANT>"
+    "additionalContext": "<EXTREMELY_IMPORTANT>\nYou have SREPowers - SRE infrastructure skills for disciplined operations.\n\nBelow is the full content of your 'srepowers:using-srepowers' skill. Follow it to select and use the correct SRE workflow in your current runtime.\n\n${using_srepowers_escaped}\n\n</EXTREMELY_IMPORTANT>"
   }
 }
 EOF

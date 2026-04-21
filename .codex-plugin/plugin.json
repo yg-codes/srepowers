@@ -1,0 +1,42 @@
+{
+  "name": "srepowers",
+  "version": "4.3.1",
+  "description": "SRE infrastructure skills for disciplined operations across Claude Code and Codex.",
+  "author": {
+    "name": "yg",
+    "email": "sre@example.com",
+    "url": "https://github.com/yg-codes/srepowers"
+  },
+  "homepage": "https://github.com/yg-codes/srepowers",
+  "repository": "https://github.com/yg-codes/srepowers",
+  "license": "MIT",
+  "keywords": [
+    "sre",
+    "infrastructure",
+    "operations",
+    "kubernetes",
+    "terraform",
+    "observability",
+    "incident-management",
+    "codex",
+    "claude"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SREPowers",
+    "shortDescription": "SRE workflows and infrastructure skills",
+    "longDescription": "Bundle disciplined SRE skills, verification-first workflows, and infrastructure-oriented agent guidance for Codex.",
+    "developerName": "yg",
+    "category": "Engineering",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/yg-codes/srepowers",
+    "defaultPrompt": [
+      "Use SREPowers to plan and verify an infrastructure change.",
+      "Use SREPowers to troubleshoot an SRE incident with evidence-first discipline."
+    ],
+    "brandColor": "#2E7D32"
+  }
+}

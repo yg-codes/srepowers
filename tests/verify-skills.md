@@ -1,5 +1,7 @@
 # SREPowers Skills Verification Guide
 
+This guide covers both Claude Code compatibility and Codex-native use. Use `tests/claude-code/` for Claude wrapper validation and `tests/codex/` for Codex packaging and repo-surface validation.
+
 ## Test Commands for Each Skill
 
 ### 1. Test-Driven Operation (TDO)
