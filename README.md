@@ -220,9 +220,9 @@ The checked-in `.agents/plugins/marketplace.json` is for developing SREPowers fr
 
 | Category | Representative Skills |
 |----------|-----------------------|
-| Incident response | `systematic-troubleshooting`, `incident-commander`, `post-mortem-writer` |
+| Incident response | `systematic-troubleshooting`, `incident-commander`, `post-mortem-writer`, `pcap-analysis` |
 | Safety and delivery | `safety-validator`, `progressive-delivery`, `observability-integration` |
-| Infra administration | `pve-admin`, `puppet-code-analyzer`, `gitlab-ecr-pipeline` |
+| Infra administration | `pve-admin`, `puppet-code-analyzer`, `puppet-merge-request`, `gitlab-ecr-pipeline` |
 | SRE practices | `sre-runbook`, `toil-analysis`, `cost-optimizer`, `environment-health-check` |
 | Domain expertise | Kubernetes, Terraform, Terragrunt, containers, networking, security, observability, PostgreSQL, Go, Python, Rust |
 

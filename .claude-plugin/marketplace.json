@@ -9,7 +9,7 @@
     {
       "name": "srepowers",
       "description": "SRE infrastructure skills: Test-Driven Operations and Subagent-Driven Operations for Kubernetes, Keycloak, GitOps, and API workflows",
-      "version": "4.4.1",
+      "version": "4.5.0",
       "source": "./",
       "author": {
         "name": "yg",
