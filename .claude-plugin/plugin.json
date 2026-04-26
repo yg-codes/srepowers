@@ -1,7 +1,7 @@
 {
   "name": "srepowers",
-  "description": "SRE infrastructure skills with domain expertise: 50 skills including TDO, SDO, verification-before-completion, evidence-first-reporting, incident management, progressive delivery, toil analysis, cost optimization, multi-stack observability, async incident response, runbooks, Proxmox, Puppet, CI/CD, parallel agents, code review, skill writing, plus domain expertise in architecture, cloud, DevOps, Kubernetes, Terraform, Terragrunt, containers, networking, platform engineering, observability, Go, Python, Rust, PostgreSQL, security, testing",
-  "version": "4.5.0",
+  "description": "SRE infrastructure skills with domain expertise: 52 skills including TDO, SDO, verification-before-completion, evidence-first-reporting, incident management, progressive delivery, toil analysis, cost optimization, multi-stack observability, async incident response, runbooks, Proxmox, Puppet, CI/CD, parallel agents, code review, skill writing, plus domain expertise in architecture, cloud, DevOps, Kubernetes, Terraform, Terragrunt, containers, networking, platform engineering, observability, Go, Python, Rust, PostgreSQL, security, testing",
+  "version": "4.5.1",
   "author": {
     "name": "yg",
     "email": "sre@example.com"

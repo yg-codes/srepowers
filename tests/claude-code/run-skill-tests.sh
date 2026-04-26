@@ -150,6 +150,20 @@ tests=(
 	"test-sre-engineer.sh"
 	"test-terraform-engineer.sh"
 	"test-test-master.sh"
+	"test-container-engineer.sh"
+	"test-cost-optimizer.sh"
+	"test-dispatching-parallel-agents-sre.sh"
+	"test-network-engineer.sh"
+	"test-observability-integration.sh"
+	"test-pcap-analysis.sh"
+	"test-platform-engineer.sh"
+	"test-playground-tutorial.sh"
+	"test-post-mortem-writer.sh"
+	"test-puppet-merge-request.sh"
+	"test-pve-vlan-trunk-troubleshooting.sh"
+	"test-receiving-code-review-sre.sh"
+	"test-terragrunt-expert.sh"
+	"test-toil-analysis.sh"
 )
 
 # Integration tests (slow, full execution)

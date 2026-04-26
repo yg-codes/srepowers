@@ -4,38 +4,24 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 
 ## Test Commands for Each Skill
 
-### 1. Test-Driven Operation (TDO)
+### Meta-Skill
+
+#### 1. Using-SREPowers
 
 ```
-# Test: Ask Claude to use TDO for a simple operation
-"I need to create a Kubernetes ConfigMap in the production namespace. Use the test-driven-operation skill."
+# Test: Start a new session
+# The meta-skill should auto-inject via hooks
 
 # Expected behavior:
-# 1. Claude announces: "I'm using the test-driven-operation skill"
-# 2. Writes RED verification command first
-# 3. Runs verification and confirms it fails
-# 4. Applies ConfigMap (GREEN)
-# 5. Runs verification and confirms it passes
+# 1. Session-start hook runs
+# 2. using-srepowers content injected as context
+# 3. Claude knows about all SRE skills
+# 4. Red flags table available for reference
 ```
 
-### 2. Subagent-Driven Operation (SDO)
+### Mandatory Gates
 
-```
-# Test: Ask Claude to execute a plan with SDO
-"I have an operation plan at docs/plans/test-plan.md. Use subagent-driven-operation to execute it."
-
-# Expected behavior:
-# 1. Claude announces: "I'm using the subagent-driven-operation skill"
-# 2. Reads plan once, extracts all tasks
-# 3. For each task:
-#    - Dispatches operator subagent
-#    - Executes operations with TDO
-#    - Runs spec compliance review
-#    - Runs artifact quality review
-#    - Loops until approved
-```
-
-### 3. Verification Before Completion (VBC)
+#### 2. Verification Before Completion
 
 ```
 # Test: Claim completion without verification
@@ -48,7 +34,35 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 # 4. Only then allows claim
 ```
 
-### 4. Brainstorming Operations
+#### 3. Safety Validator
+
+```
+# Test: Propose a risky command
+"I need to run kubectl delete namespace production --context prod"
+
+# Expected behavior:
+# 1. Claude invokes safety-validator skill
+# 2. Classifies risk level
+# 3. Proposes safer alternative or additional flags
+# 4. Requires explicit approval before executing
+```
+
+#### 4. Evidence-First Reporting
+
+```
+# Test: Report findings
+"Summarize what you found about the DNS issue."
+
+# Expected behavior:
+# 1. Claude invokes evidence-first-reporting skill
+# 2. Separates observed evidence from inference
+# 3. Labels unknowns explicitly
+# 4. Structures report with Evidence / Inference / Unknowns / Next Steps
+```
+
+### Core Operation Workflow
+
+#### 5. Brainstorming Operations
 
 ```
 # Test: Plan a new operation
@@ -65,7 +79,7 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 # 4. Saves design to docs/plans/YYYY-MM-DD-*.md
 ```
 
-### 5. Writing Operation Plans
+#### 6. Writing Operation Plans
 
 ```
 # Test: Create an execution plan
@@ -81,20 +95,133 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 # 3. Saves to docs/plans/YYYY-MM-DD-*.md
 ```
 
-### 6. Using-SREPowers (Meta-Skill)
+#### 7. Executing Operation Plans
 
 ```
-# Test: Start a new session
-# The meta-skill should auto-inject via hooks
+# Test: Execute a written plan
+"I have an operation plan at docs/plans/test-plan.md. Execute it with the executing-operation-plans skill."
 
 # Expected behavior:
-# 1. Session-start hook runs
-# 2. using-srepowers content injected as context
-# 3. Claude knows about all SRE skills
-# 4. Red flags table available for reference
+# 1. Claude reads the plan
+# 2. Executes tasks sequentially with checkpoints
+# 3. Runs verification commands after each task
+# 4. Pauses for review at defined checkpoints
 ```
 
-### 7. SRE Runbook
+#### 8. Subagent-Driven Operation (SDO)
+
+```
+# Test: Ask Claude to execute a plan with SDO
+"I have an operation plan at docs/plans/test-plan.md. Use subagent-driven-operation to execute it."
+
+# Expected behavior:
+# 1. Claude announces: "I'm using the subagent-driven-operation skill"
+# 2. Reads plan once, extracts all tasks
+# 3. For each task:
+#    - Dispatches operator subagent
+#    - Executes operations with TDO
+#    - Runs spec compliance review
+#    - Runs artifact quality review
+#    - Loops until approved
+```
+
+#### 9. Test-Driven Operation (TDO)
+
+```
+# Test: Ask Claude to use TDO for a simple operation
+"I need to create a Kubernetes ConfigMap in the production namespace. Use the test-driven-operation skill."
+
+# Expected behavior:
+# 1. Claude announces: "I'm using the test-driven-operation skill"
+# 2. Writes RED verification command first
+# 3. Runs verification and confirms it fails
+# 4. Applies ConfigMap (GREEN)
+# 5. Runs verification and confirms it passes
+```
+
+#### 10. Finishing Operation Branch
+
+```
+# Test: Complete an operation
+"The operation is done and verified. Use finishing-operation-branch to wrap up."
+
+# Expected behavior:
+# 1. Claude invokes finishing-operation-branch skill
+# 2. Reviews verification results
+# 3. Suggests merge or PR approach
+# 4. Cleans up worktree if applicable
+```
+
+### Safety and Review
+
+#### 11. Receiving Code Review SRE
+
+```
+# Test: Process code review feedback
+"A reviewer says my Hiera change should use lookup() instead of hiera_hash(). What should I do?"
+
+# Expected behavior:
+# 1. Claude invokes receiving-code-review-sre skill
+# 2. Evaluates feedback on technical merit
+# 3. Verifies claim before implementing
+# 4. Does not blindly agree or implement without verification
+```
+
+#### 12. Environment Health Check
+
+```
+# Test: Verify environment
+"Check that all SREPowers tools are available before we start."
+
+# Expected behavior:
+# 1. Claude invokes environment-health-check skill
+# 2. Checks for kubectl, terraform, aws CLI, etc.
+# 3. Reports which tools are available
+# 4. Flags missing tools before operations begin
+```
+
+### Incident Response
+
+#### 13. Incident Commander
+
+```
+# Test: Coordinate a major incident
+"We have a production outage affecting the payment service. Use incident-commander to coordinate."
+
+# Expected behavior:
+# 1. Claude invokes incident-commander skill
+# 2. Establishes incident structure (IC, Comms, Tech Lead)
+# 3. Tracks timeline and actions
+# 4. Coordinates communication
+```
+
+#### 14. Systematic Troubleshooting
+
+```
+# Test: Root cause analysis
+"The API is returning 503 errors intermittently. Use systematic-troubleshooting to investigate."
+
+# Expected behavior:
+# 1. Claude invokes systematic-troubleshooting skill
+# 2. Follows 4-phase approach (scope, hypothesize, test, conclude)
+# 3. Rules out causes systematically
+# 4. Documents evidence chain
+```
+
+#### 15. Post-Mortem Writer
+
+```
+# Test: Write a post-mortem
+"Write a blameless post-mortem for the payment service outage that lasted 45 minutes."
+
+# Expected behavior:
+# 1. Claude invokes post-mortem-writer skill
+# 2. Structures with timeline, root cause, impact
+# 3. Includes action items with owners
+# 4. Follows blameless format
+```
+
+#### 16. SRE Runbook
 
 ```
 # Test: Create a runbook
@@ -110,48 +237,208 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 #    - Troubleshooting section
 ```
 
-### 8. PVE Admin
+### Parallel and Workflow Tools
+
+#### 17. Dispatching Parallel Agents SRE
 
 ```
-# Test: Proxmox administration
-"How do I check the health of my Proxmox cluster? Use pve-admin."
+# Test: Parallel agent dispatch
+"I need to check the health of 5 different clusters simultaneously. Use dispatching-parallel-agents-sre."
 
 # Expected behavior:
-# 1. Claude invokes pve-admin skill
-# 2. Shows cluster health check commands
-# 3. References check-pve-cluster.sh helper script
-# 4. Covers: node status, storage, network, services
+# 1. Claude invokes dispatching-parallel-agents-sre skill
+# 2. Identifies independent tasks
+# 3. Dispatches subagents in parallel
+# 4. Aggregates results
 ```
 
-### 9. Puppet Code Analyzer
+#### 18. Using Git Worktrees SRE
 
 ```
-# Test: Analyze Puppet code
-"Analyze the Puppet module at ~/src/fsx/puppet/modules/my_module for code quality."
+# Test: Create a worktree
+"I need to work on this operation in isolation. Use using-git-worktrees-sre."
 
 # Expected behavior:
-# 1. Claude invokes puppet-code-analyzer skill
-# 2. Runs linting with puppet-lint
-# 3. Analyzes dependencies
-# 4. Checks best practices
-# 5. Generates report with recommendations
+# 1. Claude invokes using-git-worktrees-sre skill
+# 2. Creates isolated worktree
+# 3. Verifies environment in worktree
+# 4. Provides instructions for switching back
 ```
 
-### 10. Cache Cleanup
+#### 19. Writing Skills SRE
 
 ```
-# Test: Clean development caches
-"Clean up my Go and npm caches. Use cache-cleanup."
+# Test: Create a new skill
+"I need to create a new skill for managing AWS Lambda functions. Use writing-skills-sre."
 
 # Expected behavior:
-# 1. Claude invokes cache-cleanup skill
-# 2. Pre-check: Verifies Go and npm tools work
-# 3. Shows cache sizes before cleanup
-# 4. Performs cleanup
-# 5. Post-check: Verifies tools still work after cleanup
+# 1. Claude invokes writing-skills-sre skill
+# 2. Creates SKILL.md with proper frontmatter
+# 3. Creates command wrapper
+# 4. Follows project conventions
 ```
 
-### 11. GitLab ECR Pipeline
+#### 20. Playground Tutorial
+
+```
+# Test: Learn SREPowers
+"I'm new to SREPowers. Show me how it works."
+
+# Expected behavior:
+# 1. Claude invokes playground-tutorial skill
+# 2. Walks through TDO workflow safely
+# 3. Uses non-destructive examples
+# 4. Explains each step
+```
+
+### SRE Practices
+
+#### 21. SRE Engineer
+
+```
+# Test: SLO definition
+"Define SLIs and SLOs for our payment processing service. Use sre-engineer."
+
+# Expected behavior:
+# 1. Claude invokes sre-engineer skill
+# 2. Defines meaningful SLIs
+# 3. Sets appropriate SLO targets
+# 4. Establishes error budget policies
+```
+
+#### 22. Toil Analysis
+
+```
+# Test: Identify toil
+"We spend 10 hours a week manually restarting failed pods. Analyze this toil."
+
+# Expected behavior:
+# 1. Claude invokes toil-analysis skill
+# 2. Categorizes toil (type, frequency, duration)
+# 3. Identifies automation candidates
+# 4. Proposes reduction strategies
+```
+
+#### 23. Observability Integration
+
+```
+# Test: Verify metrics
+"Verify that our new service has proper monitoring in Prometheus and Grafana."
+
+# Expected behavior:
+# 1. Claude invokes observability-integration skill
+# 2. Checks metrics are being collected
+# 3. Verifies dashboards exist
+# 4. Validates alerting rules
+```
+
+#### 24. Observability Engineer
+
+```
+# Test: Set up observability
+"Design an observability stack with Prometheus, Grafana, and OpenTelemetry for our Kubernetes cluster."
+
+# Expected behavior:
+# 1. Claude invokes observability-engineer skill
+# 2. Proposes metrics, logging, and tracing architecture
+# 3. Creates dashboard templates
+# 4. Defines SLO-based alerting
+```
+
+#### 25. Progressive Delivery
+
+```
+# Test: Canary deployment
+"Set up a canary deployment for our API service with automatic rollback."
+
+# Expected behavior:
+# 1. Claude invokes progressive-delivery skill
+# 2. Defines canary strategy with traffic shifting
+# 3. Sets up monitoring for canary health
+# 4. Configures rollback triggers
+```
+
+#### 26. Chaos Engineer
+
+```
+# Test: Design chaos experiment
+"Design a chaos experiment to test our Kubernetes cluster's resilience to node failures. Use chaos-engineer."
+
+# Expected behavior:
+# 1. Claude invokes chaos-engineer skill
+# 2. Defines hypothesis, blast radius, steady state
+# 3. Plans failure injection approach
+# 4. Includes rollback and abort criteria
+```
+
+### Platform and Infrastructure
+
+#### 27. Kubernetes Specialist
+
+```
+# Test: K8s security hardening
+"Harden the RBAC configuration for our production Kubernetes cluster. Use kubernetes-specialist."
+
+# Expected behavior:
+# 1. Claude invokes kubernetes-specialist skill
+# 2. Reviews RBAC policies
+# 3. Applies least-privilege principle
+# 4. Configures NetworkPolicies
+```
+
+#### 28. Terraform Engineer
+
+```
+# Test: Terraform module
+"Create a reusable Terraform module for an AWS VPC with subnets. Use terraform-engineer."
+
+# Expected behavior:
+# 1. Claude invokes terraform-engineer skill
+# 2. Creates module with variables and outputs
+# 3. Follows module best practices
+# 4. Includes state management considerations
+```
+
+#### 29. Terragrunt Expert
+
+```
+# Test: Terragrunt orchestration
+"Set up a Terragrunt stack for multi-environment Terraform deployment. Use terragrunt-expert."
+
+# Expected behavior:
+# 1. Claude invokes terragrunt-expert skill
+# 2. Creates DRY Terragrunt configurations
+# 3. Sets up dependency management
+# 4. Configures remote state backends
+```
+
+#### 30. Platform Engineer
+
+```
+# Test: Internal developer platform
+"Design an internal developer platform with self-service infrastructure provisioning."
+
+# Expected behavior:
+# 1. Claude invokes platform-engineer skill
+# 2. Proposes golden paths for common workflows
+# 3. Considers service catalog design
+# 4. Addresses developer experience concerns
+```
+
+#### 31. DevOps Engineer
+
+```
+# Test: CI/CD pipeline setup
+"Set up a CI/CD pipeline for a Node.js application with Docker. Use devops-engineer."
+
+# Expected behavior:
+# 1. Claude invokes devops-engineer skill
+# 2. Creates pipeline configuration
+# 3. Includes build, test, deploy stages
+# 4. Containerization with Docker
+```
+
+#### 32. GitLab ECR Pipeline
 
 ```
 # Test: Create pipeline
@@ -167,20 +454,102 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 #    - Proper tagging
 ```
 
-### 12. ClickUp Ticket Creator
+#### 33. Container Engineer
 
 ```
-# Test: Create a ticket
-"Create a ClickUp ticket for adding a new load balancer to production."
+# Test: Container optimization
+"Optimize this Dockerfile for production use with security hardening."
 
 # Expected behavior:
-# 1. Claude invokes clickup-ticket-creator skill
-# 2. Structures content with CCB template:
-#    - Description, Rationale, Impact, Risk
-#    - UAT, Procedure, Verification, Rollback
+# 1. Claude invokes container-engineer skill
+# 2. Suggests multi-stage build
+# 3. Recommends distroless or minimal base image
+# 4. Adds security scanning (trivy/grype)
 ```
 
-### 13. Architecture Designer
+#### 34. Network Engineer
+
+```
+# Test: Network troubleshooting
+"Investigate why pods in different namespaces cannot communicate. Use network-engineer."
+
+# Expected behavior:
+# 1. Claude invokes network-engineer skill
+# 2. Analyzes NetworkPolicy configuration
+# 3. Checks VPC and subnet routing
+# 4. Proposes DNS and load balancing fixes
+```
+
+#### 35. PVE Admin
+
+```
+# Test: Proxmox administration
+"How do I check the health of my Proxmox cluster? Use pve-admin."
+
+# Expected behavior:
+# 1. Claude invokes pve-admin skill
+# 2. Shows cluster health check commands
+# 3. References check-pve-cluster.sh helper script
+# 4. Covers: node status, storage, network, services
+```
+
+#### 36. PVE VLAN Trunk Troubleshooting
+
+```
+# Test: VLAN trunk debugging
+"A VM on VLAN 227 cannot reach the network on pve-node02. Use pve-vlan-trunk-troubleshooting."
+
+# Expected behavior:
+# 1. Claude invokes pve-vlan-trunk-troubleshooting skill
+# 2. Tests VLAN reachability from the PVE host
+# 3. Checks upstream switch trunk config
+# 4. Compares bridge config between nodes
+```
+
+#### 37. Puppet Code Analyzer
+
+```
+# Test: Analyze Puppet code
+"Analyze the Puppet module at ~/src/fsx/puppet/modules/my_module for code quality."
+
+# Expected behavior:
+# 1. Claude invokes puppet-code-analyzer skill
+# 2. Runs linting with puppet-lint
+# 3. Analyzes dependencies
+# 4. Checks best practices
+# 5. Generates report with recommendations
+```
+
+#### 38. Puppet Merge Request
+
+```
+# Test: Create Puppet MR
+"Create a merge request for the cu_infra_1234_splunk branch in control/infra."
+
+# Expected behavior:
+# 1. Claude invokes puppet-merge-request skill
+# 2. Validates branch name
+# 3. Pre-checks for conflicts
+# 4. Creates MRs using glab CLI
+```
+
+#### 39. PCAP Analysis
+
+```
+# Test: Analyze packet capture
+"Analyze /var/tmp/dns_err.pcap for DNS resolution failures."
+
+# Expected behavior:
+# 1. Claude invokes pcap-analysis skill
+# 2. Starts with summary stats (scope, time range)
+# 3. Extracts DNS fields as TSV
+# 4. Identifies failures using CLI tools
+# 5. Deep-inspects specific frames only
+```
+
+### Architecture and Cloud
+
+#### 40. Architecture Designer
 
 ```
 # Test: Design system architecture
@@ -193,20 +562,7 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 # 4. May suggest creating an ADR
 ```
 
-### 14. Chaos Engineer
-
-```
-# Test: Design chaos experiment
-"Design a chaos experiment to test our Kubernetes cluster's resilience to node failures. Use chaos-engineer."
-
-# Expected behavior:
-# 1. Claude invokes chaos-engineer skill
-# 2. Defines hypothesis, blast radius, steady state
-# 3. Plans failure injection approach
-# 4. Includes rollback and abort criteria
-```
-
-### 15. Cloud Architect
+#### 41. Cloud Architect
 
 ```
 # Test: Cloud architecture design
@@ -219,72 +575,7 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 # 4. Proposes landing zone structure
 ```
 
-### 16. Code Documenter
-
-```
-# Test: Create API documentation
-"Generate OpenAPI documentation for our REST API endpoints. Use code-documenter."
-
-# Expected behavior:
-# 1. Claude invokes code-documenter skill
-# 2. Creates structured API documentation
-# 3. Uses OpenAPI/Swagger format
-# 4. Includes examples and schemas
-```
-
-### 17. Code Reviewer
-
-```
-# Test: Review code quality
-"Review this pull request for code quality and security issues. Use code-reviewer."
-
-# Expected behavior:
-# 1. Claude invokes code-reviewer skill
-# 2. Checks for security vulnerabilities
-# 3. Evaluates code quality and readability
-# 4. Provides actionable feedback
-```
-
-### 18. DevOps Engineer
-
-```
-# Test: CI/CD pipeline setup
-"Set up a CI/CD pipeline for a Node.js application with Docker. Use devops-engineer."
-
-# Expected behavior:
-# 1. Claude invokes devops-engineer skill
-# 2. Creates pipeline configuration
-# 3. Includes build, test, deploy stages
-# 4. Containerization with Docker
-```
-
-### 19. Golang Pro
-
-```
-# Test: Go concurrency
-"Implement a worker pool pattern in Go with error handling. Use golang-pro."
-
-# Expected behavior:
-# 1. Claude invokes golang-pro skill
-# 2. Uses goroutines and channels
-# 3. Implements proper error handling
-# 4. Follows Go best practices
-```
-
-### 20. Kubernetes Specialist
-
-```
-# Test: K8s security hardening
-"Harden the RBAC configuration for our production Kubernetes cluster. Use kubernetes-specialist."
-
-# Expected behavior:
-# 1. Claude invokes kubernetes-specialist skill
-# 2. Reviews RBAC policies
-# 3. Applies least-privilege principle
-# 4. Configures NetworkPolicies
-```
-
-### 21. Microservices Architect
+#### 42. Microservices Architect
 
 ```
 # Test: Service decomposition
@@ -297,46 +588,35 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 # 4. Proposes communication patterns (sync/async)
 ```
 
-### 22. Monitoring Expert
+#### 43. Cost Optimizer
 
 ```
-# Test: Observability setup
-"Set up a monitoring stack with Prometheus and Grafana for our Kubernetes cluster. Use monitoring-expert."
+# Test: Cloud cost analysis
+"Analyze our AWS bill and identify cost reduction opportunities."
 
 # Expected behavior:
-# 1. Claude invokes monitoring-expert skill
-# 2. Configures metrics collection
-# 3. Creates dashboards
-# 4. Sets up alerting rules
+# 1. Claude invokes cost-optimizer skill
+# 2. Identifies top cost drivers
+# 3. Suggests right-sizing for over-provisioned resources
+# 4. Proposes reserved instance or savings plan strategy
 ```
 
-### 23. Postgres Pro
+### Languages and Development
+
+#### 44. Golang Pro
 
 ```
-# Test: Query optimization
-"Optimize this slow PostgreSQL query using EXPLAIN ANALYZE. Use postgres-pro."
+# Test: Go concurrency
+"Implement a worker pool pattern in Go with error handling. Use golang-pro."
 
 # Expected behavior:
-# 1. Claude invokes postgres-pro skill
-# 2. Analyzes query plan
-# 3. Suggests index improvements
-# 4. Recommends VACUUM/ANALYZE if needed
+# 1. Claude invokes golang-pro skill
+# 2. Uses goroutines and channels
+# 3. Implements proper error handling
+# 4. Follows Go best practices
 ```
 
-### 24. Prompt Engineer
-
-```
-# Test: Prompt design
-"Design a chain-of-thought prompt for code review automation. Use prompt-engineer."
-
-# Expected behavior:
-# 1. Claude invokes prompt-engineer skill
-# 2. Structures prompt with CoT
-# 3. Includes few-shot examples
-# 4. Suggests evaluation metrics
-```
-
-### 25. Python Pro
+#### 45. Python Pro
 
 ```
 # Test: Python async programming
@@ -349,7 +629,7 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 # 4. Follows Python best practices
 ```
 
-### 26. Rust Engineer
+#### 46. Rust Engineer
 
 ```
 # Test: Rust ownership patterns
@@ -362,20 +642,22 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 # 4. Uses Arc/Mutex for thread safety
 ```
 
-### 27. Secure Code Guardian
+#### 47. PostgreSQL Engineer
 
 ```
-# Test: Security hardening
-"Review this login form for OWASP Top 10 vulnerabilities. Use secure-code-guardian."
+# Test: Query optimization
+"Optimize this slow PostgreSQL query using EXPLAIN ANALYZE."
 
 # Expected behavior:
-# 1. Claude invokes secure-code-guardian skill
-# 2. Checks for injection, XSS, CSRF
-# 3. Validates authentication flow
-# 4. Recommends security improvements
+# 1. Claude invokes postgresql-engineer skill
+# 2. Analyzes query plan
+# 3. Suggests index improvements
+# 4. Recommends VACUUM/ANALYZE if needed
 ```
 
-### 28. Security Reviewer
+### Security and Quality
+
+#### 48. Security Reviewer
 
 ```
 # Test: Security audit
@@ -388,46 +670,46 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 # 4. Generates findings report
 ```
 
-### 29. SQL Pro
+#### 49. Secure Code Guardian
 
 ```
-# Test: Complex query optimization
-"Optimize this query using window functions and CTEs. Use sql-pro."
+# Test: Security hardening
+"Review this login form for OWASP Top 10 vulnerabilities. Use secure-code-guardian."
 
 # Expected behavior:
-# 1. Claude invokes sql-pro skill
-# 2. Rewrites with window functions
-# 3. Uses CTEs for readability
-# 4. Analyzes indexing strategy
+# 1. Claude invokes secure-code-guardian skill
+# 2. Checks for injection, XSS, CSRF
+# 3. Validates authentication flow
+# 4. Recommends security improvements
 ```
 
-### 30. SRE Engineer
+#### 50. Code Reviewer
 
 ```
-# Test: SLO definition
-"Define SLIs and SLOs for our payment processing service. Use sre-engineer."
+# Test: Review code quality
+"Review this pull request for code quality and security issues. Use code-reviewer."
 
 # Expected behavior:
-# 1. Claude invokes sre-engineer skill
-# 2. Defines meaningful SLIs
-# 3. Sets appropriate SLO targets
-# 4. Establishes error budget policies
+# 1. Claude invokes code-reviewer skill
+# 2. Checks for security vulnerabilities
+# 3. Evaluates code quality and readability
+# 4. Provides actionable feedback
 ```
 
-### 31. Terraform Engineer
+#### 51. Code Documenter
 
 ```
-# Test: Terraform module
-"Create a reusable Terraform module for an AWS VPC with subnets. Use terraform-engineer."
+# Test: Create API documentation
+"Generate OpenAPI documentation for our REST API endpoints. Use code-documenter."
 
 # Expected behavior:
-# 1. Claude invokes terraform-engineer skill
-# 2. Creates module with variables and outputs
-# 3. Follows module best practices
-# 4. Includes state management considerations
+# 1. Claude invokes code-documenter skill
+# 2. Creates structured API documentation
+# 3. Uses OpenAPI/Swagger format
+# 4. Includes examples and schemas
 ```
 
-### 32. Test Master
+#### 52. Test Master
 
 ```
 # Test: Test strategy
@@ -443,42 +725,77 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 ## Command Wrappers Test
 
 ```bash
-# Test each /command - SRE workflow skills
-claude -p "/test-driven-operation"
-claude -p "/subagent-driven-operation"
+# Test each /command — Core workflow
+claude -p "/using-srepowers"
 claude -p "/brainstorming-operations"
 claude -p "/writing-operation-plans"
-claude -p "/verification-before-completion"
-claude -p "/sre-runbook"
-claude -p "/pve-admin"
-claude -p "/puppet-code-analyzer"
-claude -p "/cache-cleanup"
-claude -p "/gitlab-ecr-pipeline"
-claude -p "/clickup-ticket-creator"
+claude -p "/executing-operation-plans"
+claude -p "/subagent-driven-operation"
+claude -p "/test-driven-operation"
+claude -p "/finishing-operation-branch"
 
-# Test each /command - Domain expertise skills
-claude -p "/architecture-designer"
+# Test each /command — Mandatory gates
+claude -p "/verification-before-completion"
+claude -p "/safety-validator"
+claude -p "/evidence-first-reporting"
+
+# Test each /command — Safety and review
+claude -p "/receiving-code-review-sre"
+claude -p "/environment-health-check"
+
+# Test each /command — Incident and troubleshooting
+claude -p "/incident-commander"
+claude -p "/systematic-troubleshooting"
+claude -p "/post-mortem-writer"
+claude -p "/sre-runbook"
+
+# Test each /command — Parallel and workflow tools
+claude -p "/dispatching-parallel-agents-sre"
+claude -p "/using-git-worktrees-sre"
+claude -p "/writing-skills-sre"
+claude -p "/playground-tutorial"
+
+# Test each /command — SRE practices
+claude -p "/sre-engineer"
+claude -p "/toil-analysis"
+claude -p "/observability-integration"
+claude -p "/observability-engineer"
+claude -p "/progressive-delivery"
 claude -p "/chaos-engineer"
-claude -p "/cloud-architect"
-claude -p "/code-documenter"
-claude -p "/code-reviewer"
-claude -p "/devops-engineer"
-claude -p "/golang-pro"
+
+# Test each /command — Infrastructure administration
 claude -p "/kubernetes-specialist"
+claude -p "/terraform-engineer"
+claude -p "/terragrunt-expert"
+claude -p "/platform-engineer"
+claude -p "/devops-engineer"
+claude -p "/gitlab-ecr-pipeline"
+claude -p "/container-engineer"
+claude -p "/network-engineer"
+claude -p "/pve-admin"
+claude -p "/pve-vlan-trunk-troubleshooting"
+claude -p "/puppet-code-analyzer"
+claude -p "/puppet-merge-request"
+claude -p "/pcap-analysis"
+
+# Test each /command — Architecture and cloud
+claude -p "/architecture-designer"
+claude -p "/cloud-architect"
 claude -p "/microservices-architect"
-claude -p "/monitoring-expert"
-claude -p "/postgres-pro"
-claude -p "/prompt-engineer"
+claude -p "/cost-optimizer"
+
+# Test each /command — Languages and development
+claude -p "/golang-pro"
 claude -p "/python-pro"
 claude -p "/rust-engineer"
-claude -p "/secure-code-guardian"
-claude -p "/security-reviewer"
-claude -p "/sql-pro"
-claude -p "/sre-engineer"
-claude -p "/terraform-engineer"
-claude -p "/test-master"
+claude -p "/postgresql-engineer"
 
-# Each should invoke the corresponding skill
+# Test each /command — Security and quality
+claude -p "/security-reviewer"
+claude -p "/secure-code-guardian"
+claude -p "/code-reviewer"
+claude -p "/code-documenter"
+claude -p "/test-master"
 ```
 
 ## Infrastructure-Specific Verification Tests
@@ -535,7 +852,9 @@ claude
 # - "Use brainstorming-operations to plan a deployment"
 # - "/sre-runbook for restarting nginx"
 # - "/pve-admin check cluster health"
-# - "/cache-cleanup for Go and npm"
+# - "/container-engineer optimize Dockerfile"
+# - "/pcap-analysis investigate dns_err.pcap"
+# - "/puppet-merge-request create MR for cu_infra branch"
 # - etc.
 
 # 5. Check hooks fired
@@ -545,7 +864,7 @@ claude
 ## Success Criteria
 
 - All tests pass: `./tests/claude-code/run-skill-tests.sh`
-- All 32 skills load when prompted
-- All 31 commands invoke correct skills
+- All 52 skills load when prompted
+- All 52 commands invoke correct skills
 - Hooks inject meta-skill on session start
 - Each skill demonstrates its workflow correctly

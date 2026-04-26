@@ -1,5 +1,10 @@
 # Available Skills
 
+### Meta-Skill (Always Active)
+| Skill | Use When |
+|-------|----------|
+| `srepowers:using-srepowers` | Auto-injected at session start; routes work through minimum sufficient workflow |
+
 ### Mandatory Gates
 | Skill | Use When |
 |-------|----------|
@@ -20,11 +25,10 @@
 ### Safety and Review
 | Skill | Use When |
 |-------|----------|
-| `srepowers:safety-validator` | Reviewing proposed commands before execution |
-| `srepowers:verification-before-completion` | About to claim work is done, deployed, or healthy |
-| `srepowers:evidence-first-reporting` | Turning observations into audit-ready status updates without overstating certainty |
 | `srepowers:receiving-code-review-sre` | Processing code review feedback on infra changes |
 | `srepowers:environment-health-check` | Verifying SREPowers environment is configured |
+
+> Note: `verification-before-completion`, `safety-validator`, and `evidence-first-reporting` are listed in Mandatory Gates above.
 
 ### Incident Response
 | Skill | Use When |
@@ -64,7 +68,10 @@
 | `srepowers:container-engineer` | Container builds and security |
 | `srepowers:network-engineer` | Cloud and hybrid networking |
 | `srepowers:pve-admin` | Proxmox VE/PBS administration |
+| `srepowers:pve-vlan-trunk-troubleshooting` | Debugging PVE VLAN trunk connectivity |
 | `srepowers:puppet-code-analyzer` | Puppet code quality analysis |
+| `srepowers:puppet-merge-request` | Creating Puppet control repo merge requests |
+| `srepowers:pcap-analysis` | Network packet capture investigation with tshark |
 
 ### Architecture and Cloud
 | Skill | Use When |
