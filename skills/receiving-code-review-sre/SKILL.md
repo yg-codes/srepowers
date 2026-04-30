@@ -1,6 +1,6 @@
 ---
 name: receiving-code-review-sre
-description: Use when receiving code review feedback on infrastructure changes, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation
+description: Use when you receive code review feedback on infrastructure changes — evaluates each suggestion for technical correctness before implementing. Also use for "got review feedback", "reviewer says to change", "how should I handle this review comment", "reviewer wants me to", or when review feedback seems unclear, questionable, or potentially incorrect for the infrastructure context.
 ---
 
 # Code Review Reception (SRE/Infrastructure)

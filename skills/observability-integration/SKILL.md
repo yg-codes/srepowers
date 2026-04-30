@@ -1,6 +1,6 @@
 ---
 name: observability-integration
-description: Use when verifying infrastructure operations using metrics and alerting data from Prometheus, Grafana, Datadog, CloudWatch, New Relic, or other observability platforms
+description: Use when verifying infrastructure changes or operations against live metrics and alerts from Prometheus, Grafana, Datadog, CloudWatch, or New Relic. Also use for "check metrics after deploy", "verify with dashboards", "are alerts firing", "check Grafana", "look at Prometheus", "validate with observability data". Triggers on post-change verification using monitoring platforms, not on building monitoring systems (use observability-engineer for that).
 ---
 
 # Observability Integration

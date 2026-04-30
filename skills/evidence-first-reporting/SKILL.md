@@ -1,6 +1,6 @@
 ---
 name: evidence-first-reporting
-description: Use when reporting infrastructure findings, status updates, handoffs, or investigation summaries that must separate observed evidence from inference
+description: Use when reporting infrastructure findings, status updates, investigation results, or handoffs — separates what was observed from what is inferred. Also use for "write a status report", "summarize findings", "what did we find", "report on this investigation", "handoff notes", or when presenting conclusions that need clear evidence trails.
 ---
 
 # Evidence-First Reporting

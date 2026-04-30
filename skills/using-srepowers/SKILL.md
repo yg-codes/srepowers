@@ -1,6 +1,6 @@
 ---
 name: using-srepowers
-description: Use when starting any conversation to establish how SRE infrastructure skills are discovered and invoked in Claude Code and Codex before any operational response.
+description: Use when starting any conversation — auto-injected at session start to establish how SRE infrastructure skills are discovered and invoked in Claude Code and Codex. Also use for "how do I use srepowers", "which skill should I use", "show me available skills", "help with srepowers commands".
 ---
 
 <EXTREMELY-IMPORTANT>

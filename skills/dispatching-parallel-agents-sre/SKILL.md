@@ -1,6 +1,6 @@
 ---
 name: dispatching-parallel-agents-sre
-description: Use when facing 2+ independent infrastructure tasks that can be worked on without shared state or sequential dependencies
+description: Use when you have multiple independent infrastructure tasks to run in parallel — deploying to several hosts, patching multiple clusters, running checks across environments. Also use for "run these in parallel", "do these at the same time", "dispatch agents for each task", or when facing 2+ tasks with no dependencies between them.
 ---
 
 # Dispatching Parallel Agents (SRE)

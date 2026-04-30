@@ -1,6 +1,6 @@
 ---
 name: using-git-worktrees-sre
-description: Use when starting infrastructure operations that need isolation from current workspace - creates isolated git worktrees for control repos with environment-aware directory selection and safety verification
+description: Use when you need an isolated workspace for infrastructure changes — creates git worktrees so you can work without affecting the current branch. Also use for "work in a worktree", "isolate this change", "create a separate working directory", "worktree for this operation", or when starting Puppet, Kubernetes, or Terraform operations that need a clean branch.
 ---
 
 # Using Git Worktrees for Infrastructure

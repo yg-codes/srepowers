@@ -1,6 +1,6 @@
 ---
 name: writing-skills-sre
-description: Use when creating new infrastructure skills, editing existing skills, or verifying skills work before deployment
+description: Use when creating new SREPowers skills, editing existing infrastructure skills, or verifying skills work before deployment. Also use for "write a new skill", "add a skill", "update a skill", "test this skill", "create skill for", or when building reusable operational procedures as SREPowers skill files.
 ---
 
 # Writing SRE Skills
