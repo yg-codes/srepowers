@@ -1,20 +1,40 @@
 {
-  "name": "srepowers-local",
-  "interface": {
-    "displayName": "SREPowers Local Plugins"
+  "name": "srepowers-marketplace",
+  "description": "SRE infrastructure skills marketplace for Codex compatibility",
+  "owner": {
+    "name": "yg",
+    "email": "sre@example.com"
   },
   "plugins": [
     {
-      "name": "srepowers",
-      "source": {
-        "source": "local",
-        "path": "./"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Engineering"
+      "name": "srepowers-core",
+      "description": "SRE workflow spine, mandatory gates, and incident response",
+      "version": "5.0.0",
+      "source": "./plugins/srepowers-core",
+      "author": {
+        "name": "yg",
+        "email": "sre@example.com"
+      }
+    },
+    {
+      "name": "srepowers-domain",
+      "description": "Software engineering domain expertise for infrastructure engineers",
+      "version": "5.0.0",
+      "source": "./plugins/srepowers-domain",
+      "author": {
+        "name": "yg",
+        "email": "sre@example.com"
+      }
+    },
+    {
+      "name": "srepowers-infra",
+      "description": "Proxmox, Puppet, and GitLab CI/CD administration",
+      "version": "5.0.0",
+      "source": "./plugins/srepowers-infra",
+      "author": {
+        "name": "yg",
+        "email": "sre@example.com"
+      }
     }
   ]
 }

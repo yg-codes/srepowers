@@ -1,0 +1,28 @@
+{
+  "name": "srepowers-infra",
+  "version": "5.0.0",
+  "description": "Infrastructure-specific administration — Proxmox VE, Puppet, and GitLab CI/CD pipelines",
+  "author": {
+    "name": "yg",
+    "email": "sre@example.com",
+    "url": "https://github.com/yg-codes/srepowers"
+  },
+  "homepage": "https://github.com/yg-codes/srepowers",
+  "repository": "https://github.com/yg-codes/srepowers",
+  "license": "MIT",
+  "keywords": [
+    "proxmox", "pve", "puppet", "gitlab", "ci-cd", "ecr",
+    "infrastructure", "vlan", "merge-request"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SREPowers Infra",
+    "shortDescription": "Proxmox, Puppet, and GitLab CI/CD skills",
+    "longDescription": "Infrastructure administration skills for Proxmox VE/PBS management, Puppet code analysis and merge requests, and GitLab CI/CD pipelines pushing to AWS ECR.",
+    "developerName": "yg",
+    "category": "Engineering",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/yg-codes/srepowers",
+    "brandColor": "#E65100"
+  }
+}

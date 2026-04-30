@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/session-start.sh"
+            "command": "./plugins/srepowers-core/hooks/session-start.sh"
           }
         ]
       }

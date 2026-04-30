@@ -1,5 +1,9 @@
 # Available Skills
 
+## Plugin: srepowers-core (28 skills)
+
+SRE workflow spine, mandatory gates, and incident response.
+
 ### Meta-Skill (Always Active)
 | Skill | Use When |
 |-------|----------|
@@ -26,9 +30,8 @@
 | Skill | Use When |
 |-------|----------|
 | `srepowers:receiving-code-review-sre` | Processing code review feedback on infra changes |
+| `srepowers:code-reviewer` | PR reviews, code quality audits |
 | `srepowers:environment-health-check` | Verifying SREPowers environment is configured |
-
-> Note: `verification-before-completion`, `safety-validator`, and `evidence-first-reporting` are listed in Mandatory Gates above.
 
 ### Incident Response
 | Skill | Use When |
@@ -36,7 +39,7 @@
 | `srepowers:incident-commander` | Coordinating major infrastructure incidents |
 | `srepowers:systematic-troubleshooting` | Root cause analysis for incidents or failures |
 | `srepowers:post-mortem-writer` | Writing blameless post-mortems |
-| `srepowers:sre-runbook` | Creating structured runbooks |
+| `srepowers:pcap-analysis` | Network packet capture investigation with tshark |
 
 ### Parallel and Workflow Tools
 | Skill | Use When |
@@ -50,28 +53,18 @@
 | Skill | Use When |
 |-------|----------|
 | `srepowers:sre-engineer` | SLI/SLO, error budgets, reliability |
+| `srepowers:sre-runbook` | Creating structured runbooks |
 | `srepowers:toil-analysis` | Identifying and reducing operational toil |
 | `srepowers:observability-integration` | Metrics/traces/logs verification |
 | `srepowers:observability-engineer` | Setting up observability stacks |
 | `srepowers:progressive-delivery` | Canary, blue-green deployments |
-| `srepowers:chaos-engineer` | Chaos experiments, resilience testing |
-
-### Platform and Infrastructure
-| Skill | Use When |
-|-------|----------|
-| `srepowers:kubernetes-specialist` | K8s deployments, cluster management |
-| `srepowers:terraform-engineer` | IaC with Terraform |
-| `srepowers:terragrunt-expert` | Terragrunt module orchestration |
-| `srepowers:platform-engineer` | Internal developer platforms |
 | `srepowers:devops-engineer` | CI/CD, containers, IaC |
-| `srepowers:gitlab-ecr-pipeline` | GitLab CI/CD → AWS ECR |
-| `srepowers:container-engineer` | Container builds and security |
-| `srepowers:network-engineer` | Cloud and hybrid networking |
-| `srepowers:pve-admin` | Proxmox VE/PBS administration |
-| `srepowers:pve-vlan-trunk-troubleshooting` | Debugging PVE VLAN trunk connectivity |
-| `srepowers:puppet-code-analyzer` | Puppet code quality analysis |
-| `srepowers:puppet-merge-request` | Creating Puppet control repo merge requests |
-| `srepowers:pcap-analysis` | Network packet capture investigation with tshark |
+
+---
+
+## Plugin: srepowers-domain (19 skills)
+
+Software engineering domain expertise.
 
 ### Architecture and Cloud
 | Skill | Use When |
@@ -79,9 +72,19 @@
 | `srepowers:architecture-designer` | System architecture design |
 | `srepowers:cloud-architect` | Cloud architecture and migrations |
 | `srepowers:microservices-architect` | Distributed systems design |
+| `srepowers:platform-engineer` | Internal developer platforms |
 | `srepowers:cost-optimizer` | Cloud cost optimization |
 
-### Languages and Development
+### Infrastructure Platforms
+| Skill | Use When |
+|-------|----------|
+| `srepowers:kubernetes-specialist` | K8s deployments, cluster management |
+| `srepowers:terraform-engineer` | IaC with Terraform |
+| `srepowers:terragrunt-expert` | Terragrunt module orchestration |
+| `srepowers:container-engineer` | Container builds and security |
+| `srepowers:network-engineer` | Cloud and hybrid networking |
+
+### Languages
 | Skill | Use When |
 |-------|----------|
 | `srepowers:golang-pro` | Go application development |
@@ -94,6 +97,20 @@
 |-------|----------|
 | `srepowers:security-reviewer` | Security audits |
 | `srepowers:secure-code-guardian` | Application security |
-| `srepowers:code-reviewer` | PR reviews, code quality |
-| `srepowers:code-documenter` | API documentation |
+| `srepowers:chaos-engineer` | Chaos experiments, resilience testing |
 | `srepowers:test-master` | Testing strategy |
+| `srepowers:code-documenter` | API documentation |
+
+---
+
+## Plugin: srepowers-infra (5 skills)
+
+Infrastructure-specific administration.
+
+| Skill | Use When |
+|-------|----------|
+| `srepowers:pve-admin` | Proxmox VE/PBS administration |
+| `srepowers:pve-vlan-trunk-troubleshooting` | Debugging PVE VLAN trunk connectivity |
+| `srepowers:puppet-code-analyzer` | Puppet code quality analysis |
+| `srepowers:puppet-merge-request` | Creating Puppet control repo merge requests |
+| `srepowers:gitlab-ecr-pipeline` | GitLab CI/CD → AWS ECR |

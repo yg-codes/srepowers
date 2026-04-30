@@ -10,7 +10,7 @@ SREPowers starts by slowing the agent down before it does infrastructure work. I
 
 Once the plan is approved, the execution skills apply Test-Driven Operation: write a verification command, watch it fail, make the smallest change, and verify again. For larger changes, SREPowers can break the work into reviewed subagent steps so execution stays aligned with the plan.
 
-The result is not “more automation.” The value is disciplined operations under pressure: verification before claims, rollback-aware planning, and explicit review of risky changes.
+The result is not "more automation." The value is disciplined operations under pressure: verification before claims, rollback-aware planning, and explicit review of risky changes.
 
 ## Minimum Sufficient Workflow
 
@@ -30,7 +30,7 @@ SREPowers now routes tasks through the minimum sufficient workflow instead of fo
 |----------|-------|
 | Incident or unclear outage | `systematic-troubleshooting` first |
 | Major incident with multiple teams or broad impact | `incident-commander` + `systematic-troubleshooting` |
-| Planned multi-step change | `brainstorming-operations` → `writing-operation-plans` → execution skill |
+| Planned multi-step change | `brainstorming-operations` -> `writing-operation-plans` -> execution skill |
 | Small known-safe local change | `test-driven-operation` fast path |
 | Read-only review or diagnosis | Domain skill + `evidence-first-reporting` |
 | Risky or production command set | Add `safety-validator` before execution |
@@ -39,17 +39,53 @@ SREPowers now routes tasks through the minimum sufficient workflow instead of fo
 
 Use the fast path only for low-risk, read-only, or single-file/local-only work with exact local validation. It skips full planning, but it does not skip validation or evidence.
 
-## What’s Inside
+## Plugin Structure
+
+SREPowers is distributed as a marketplace containing three plugins, each with its own skills and commands.
+
+```
+srepowers/
+├── .claude-plugin/marketplace.json     ← lists all 3 plugins
+├── plugins/
+│   ├── srepowers-core/                 ← 28 skills
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── skills/
+│   │   ├── commands/
+│   │   └── hooks/
+│   ├── srepowers-domain/               ← 19 skills
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── skills/
+│   │   └── commands/
+│   └── srepowers-infra/                ← 5 skills
+│       ├── .claude-plugin/plugin.json
+│       ├── skills/
+│       └── commands/
+├── .agents/skills/                     ← Codex skill mirror (52 symlinks)
+├── .codex/skills/                      ← Codex repo-native symlinks
+├── .codex/agents/                      ← Codex custom agents
+├── .codex-plugin/                      ← Codex plugin manifest
+├── docs/, tests/, evals/, scripts/     ← shared resources
+└── README.md, LICENSE, AGENTS.md
+```
+
+| Plugin | Skills | Focus |
+|--------|--------|-------|
+| `srepowers-core` | 28 | Workflow spine, mandatory gates, incident response, SRE practices |
+| `srepowers-domain` | 19 | Software engineering depth: Go, Python, Rust, K8s, Terraform, containers, networking, security, testing, databases |
+| `srepowers-infra` | 5 | Infrastructure administration: Proxmox VE, Puppet, GitLab CI/CD |
+
+Marketplace install pulls all three at once. Each plugin can also be installed individually if you only need a subset.
+
+## What's Inside
 
 | Path | Purpose |
 |------|---------|
-| `skills/` | Canonical SREPowers skill definitions |
+| `plugins/*/skills/` | Skill definitions, grouped by plugin |
+| `plugins/*/commands/` | Claude compatibility wrappers for `/command` usage |
+| `.claude-plugin/marketplace.json` | Marketplace manifest listing all plugins |
 | `.agents/skills/` | Codex skill mirror for repo-native discovery |
 | `.codex-plugin/` | Codex plugin manifest |
-| `.claude-plugin/` | Claude Code plugin and marketplace metadata |
 | `.codex/agents/` | Codex custom infrastructure agents |
-| `commands/` | Claude compatibility wrappers for `/command` usage |
-| `hooks/` | Shared session-start context injection |
 | `tests/` | Claude and Codex validation scripts |
 
 ## Installation
@@ -58,7 +94,15 @@ Use the fast path only for low-risk, read-only, or single-file/local-only work w
 
 ```bash
 /plugin marketplace add yg-codes/srepowers
-/plugin install srepowers@srepowers-marketplace
+/plugin install srepowers-core@srepowers-marketplace
+/plugin install srepowers-domain@srepowers-marketplace
+/plugin install srepowers-infra@srepowers-marketplace
+```
+
+Or install all three at once:
+
+```bash
+/plugin install srepowers-core@srepowers-marketplace srepowers-domain@srepowers-marketplace srepowers-infra@srepowers-marketplace
 ```
 
 Verify with `/help`. You should see commands such as `/test-driven-operation` and `/subagent-driven-operation`.
@@ -67,12 +111,6 @@ Verify with `/help`. You should see commands such as `/test-driven-operation` an
 
 ```bash
 git clone https://github.com/yg-codes/srepowers.git ~/.claude/plugins/srepowers
-```
-
-Or copy the skills directly:
-
-```bash
-cp -r srepowers/skills/* ~/.claude/skills/
 ```
 
 ### Codex Native Skills Install
@@ -89,28 +127,18 @@ git clone https://github.com/yg-codes/srepowers.git ~/.codex/srepowers
 
 ```bash
 mkdir -p ~/.agents/skills
-ln -s ~/.codex/srepowers/skills ~/.agents/skills/srepowers
+ln -s ~/.codex/srepowers/.agents/skills/* ~/.agents/skills/
 ```
 
 3. Restart Codex.
 
-Codex will discover the SREPowers skills through `~/.agents/skills/srepowers`. Use `/skills` to inspect them, or mention a skill directly such as `$test-driven-operation`.
-
-Verify:
-
-```bash
-ls -la ~/.agents/skills/srepowers
-```
-
-You should see a symlink pointing at `~/.codex/srepowers/skills`.
+Codex will discover the SREPowers skills through `~/.agents/skills/`. Use `/skills` to inspect them, or mention a skill directly such as `$test-driven-operation`.
 
 Update:
 
 ```bash
 cd ~/.codex/srepowers && git pull
 ```
-
-This path updates cleanly because the skills are loaded directly from the cloned repository through the symlink.
 
 ### Codex Repo-Native Use
 
@@ -178,8 +206,6 @@ cd ~/.codex/plugins/srepowers && git pull
 
 Then restart Codex to pick up the new plugin files.
 
-The checked-in `.agents/plugins/marketplace.json` is for developing SREPowers from inside this repository. It is not the recommended global install path.
-
 ## Basic Workflow
 
 1. **Choose the route**
@@ -189,14 +215,14 @@ The checked-in `.agents/plugins/marketplace.json` is for developing SREPowers fr
    `safety-validator` for risky commands, `evidence-first-reporting` for precise status, `verification-before-completion` before any success claim.
 
 3. **Use the smallest workflow that fits**
-   `test-driven-operation` for small safe work, or `brainstorming-operations` → `writing-operation-plans` → `subagent-driven-operation`/`executing-operation-plans` for larger changes.
+   `test-driven-operation` for small safe work, or `brainstorming-operations` -> `writing-operation-plans` -> `subagent-driven-operation`/`executing-operation-plans` for larger changes.
 
-4. **`finishing-operation-branch`**  
+4. **`finishing-operation-branch`**
    Wraps up the branch cleanly after the operational work and verification are complete.
 
 ## Reference
 
-### Mandatory Gates
+### Mandatory Gates (core)
 
 | Skill | Purpose |
 |------|---------|
@@ -204,7 +230,7 @@ The checked-in `.agents/plugins/marketplace.json` is for developing SREPowers fr
 | `safety-validator` | Command safety gate for risky work |
 | `evidence-first-reporting` | Separate observation, inference, and unknowns in reports |
 
-### Workflow Skills
+### Workflow Skills (core)
 
 | Skill | Purpose |
 |------|---------|
@@ -213,18 +239,70 @@ The checked-in `.agents/plugins/marketplace.json` is for developing SREPowers fr
 | `subagent-driven-operation` | Run plan tasks with reviewed subagent execution |
 | `executing-operation-plans` | Run long plans with checkpoints |
 | `test-driven-operation` | Verification-first infrastructure changes |
-| `verification-before-completion` | Evidence before claims |
 | `finishing-operation-branch` | Clean completion workflow |
 
-### Operational Support
+### Incident Response (core)
 
-| Category | Representative Skills |
-|----------|-----------------------|
-| Incident response | `systematic-troubleshooting`, `incident-commander`, `post-mortem-writer`, `pcap-analysis` |
-| Safety and delivery | `safety-validator`, `progressive-delivery`, `observability-integration` |
-| Infra administration | `pve-admin`, `puppet-code-analyzer`, `puppet-merge-request`, `gitlab-ecr-pipeline` |
-| SRE practices | `sre-runbook`, `toil-analysis`, `cost-optimizer`, `environment-health-check` |
-| Domain expertise | Kubernetes, Terraform, Terragrunt, containers, networking, security, observability, PostgreSQL, Go, Python, Rust |
+| Skill | Purpose |
+|------|---------|
+| `systematic-troubleshooting` | 4-phase root cause analysis |
+| `incident-commander` | Major incident coordination |
+| `post-mortem-writer` | Blameless post-mortems |
+| `pcap-analysis` | Network packet capture investigation |
+
+### Operational Support (core)
+
+| Skill | Purpose |
+|------|---------|
+| `sre-runbook` | Structured runbook generation |
+| `toil-analysis` | Toil identification and reduction |
+| `progressive-delivery` | Canary and blue-green deployments |
+| `observability-integration` | Metric and alerting verification |
+| `observability-engineer` | Observability stack setup |
+| `sre-engineer` | SLO/SLI and error budget management |
+| `environment-health-check` | Verify SREPowers environment |
+| `playground-tutorial` | First-time SREPowers onboarding |
+| `dispatching-parallel-agents-sre` | Parallel SRE agent dispatch |
+| `using-git-worktrees-sre` | Isolated git worktrees for ops |
+| `code-reviewer` | PR reviews and code quality |
+| `receiving-code-review-sre` | Process code review feedback |
+| `devops-engineer` | CI/CD, containers, and IaC |
+| `writing-skills-sre` | Create and edit SRE skills |
+| `using-srepowers` | Meta-skill: how to find and use skills |
+
+### Domain Expertise (domain)
+
+| Skill | Domain |
+|------|--------|
+| `golang-pro` | Go: concurrency, generics, gRPC |
+| `python-pro` | Python: type hints, async, pytest |
+| `rust-engineer` | Rust: ownership, lifetimes, async |
+| `kubernetes-specialist` | K8s: Helm, RBAC, storage, security |
+| `terraform-engineer` | Terraform: modules, state, multi-env |
+| `terragrunt-expert` | Terragrunt: DRY configs, stacks |
+| `container-engineer` | Containers: builds, security, registries |
+| `network-engineer` | Networking: VPC, DNS, load balancing |
+| `security-reviewer` | Security: audits, SAST, DevSecOps |
+| `secure-code-guardian` | AppSec: auth, OWASP Top 10 |
+| `test-master` | Testing: unit, integration, E2E |
+| `cost-optimizer` | FinOps: right-sizing, reserved capacity |
+| `postgresql-engineer` | PostgreSQL: queries, replication, tuning |
+| `architecture-designer` | Architecture: design patterns, ADRs |
+| `microservices-architect` | Distributed systems: DDD, sagas |
+| `chaos-engineer` | Resilience: failure injection, game days |
+| `cloud-architect` | Cloud: migrations, Well-Architected |
+| `platform-engineer` | IDP: Backstage, golden paths |
+| `code-documenter` | Documentation: API specs, doc portals |
+
+### Infrastructure Administration (infra)
+
+| Skill | Purpose |
+|------|---------|
+| `pve-admin` | Proxmox VE/PBS: cluster, VM/CT, ZFS, HA |
+| `pve-vlan-trunk-troubleshooting` | PVE VLAN trunk debugging |
+| `puppet-code-analyzer` | Puppet code quality analysis |
+| `puppet-merge-request` | Puppet control repo MR creation |
+| `gitlab-ecr-pipeline` | GitLab CI/CD to AWS ECR |
 
 ### SRE Principles
 
@@ -304,5 +382,3 @@ Need infrastructure change
 ## License
 
 MIT License. See [LICENSE](LICENSE).
-
-Last Updated: 2026-04-26
