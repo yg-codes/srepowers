@@ -33,13 +33,84 @@ pass "Codex hooks config present"
 [ -f .codex/agents/infrastructure-reviewer.toml ] || fail "Codex infrastructure reviewer missing"
 pass "Codex custom agents present"
 
-[ -d skills ] || fail "skills directory missing"
 [ -d .agents/skills ] || fail ".agents/skills directory missing"
+[ -d .codex/skills ] || fail ".codex/skills directory missing"
 
-skill_count=$(find skills -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
-mirror_count=$(find .agents/skills -mindepth 1 -maxdepth 1 \( -type d -o -type l \) | wc -l | tr -d ' ')
-[ "$skill_count" = "$mirror_count" ] || fail "skill mirror count mismatch: skills=$skill_count mirror=$mirror_count"
-pass "Codex skill mirror count matches canonical skills"
+python3 - <<'PY'
+import json
+import re
+from pathlib import Path
+
+plugins = {
+    "srepowers-core": 28,
+    "srepowers-domain": 19,
+    "srepowers-infra": 5,
+}
+
+marketplace = json.loads(Path(".agents/plugins/marketplace.json").read_text())
+entries = {entry["name"]: entry for entry in marketplace["plugins"]}
+
+for plugin, expected_count in plugins.items():
+    plugin_root = Path("plugins") / plugin
+    codex_manifest = plugin_root / ".codex-plugin" / "plugin.json"
+    claude_manifest = plugin_root / ".claude-plugin" / "plugin.json"
+    skills_dir = plugin_root / "skills"
+    commands_dir = plugin_root / "commands"
+
+    if not codex_manifest.is_file():
+        raise SystemExit(f"{codex_manifest} missing")
+    if not claude_manifest.is_file():
+        raise SystemExit(f"{claude_manifest} missing")
+
+    manifest = json.loads(codex_manifest.read_text())
+    if manifest.get("name") != plugin:
+        raise SystemExit(f"{codex_manifest} name mismatch")
+    if manifest.get("skills") != "./skills/":
+        raise SystemExit(f"{codex_manifest} skills path must be ./skills/")
+
+    skills = sorted(path.parent.name for path in skills_dir.glob("*/SKILL.md"))
+    commands = sorted(path.stem for path in commands_dir.glob("*.md"))
+    if len(skills) != expected_count:
+        raise SystemExit(f"{plugin} skill count mismatch: expected {expected_count}, got {len(skills)}")
+    if skills != commands:
+        raise SystemExit(f"{plugin} skills and commands differ")
+
+    for skill in skills:
+        text = (skills_dir / skill / "SKILL.md").read_text()
+        match = re.search(r"^name:\s*(.+)$", text, re.MULTILINE)
+        if not match:
+            raise SystemExit(f"{plugin}/{skill} missing frontmatter name")
+        if match.group(1).strip() != skill:
+            raise SystemExit(f"{plugin}/{skill} frontmatter name mismatch")
+
+    entry = entries.get(plugin)
+    if not entry:
+        raise SystemExit(f"{plugin} missing from Codex marketplace")
+    source = entry.get("source")
+    if not isinstance(source, dict):
+        raise SystemExit(f"{plugin} marketplace source must be object")
+    if source.get("source") != "local":
+        raise SystemExit(f"{plugin} marketplace source.source must be local")
+    if source.get("path") != f"./plugins/{plugin}":
+        raise SystemExit(f"{plugin} marketplace source.path mismatch")
+    if entry.get("category") != "Engineering":
+        raise SystemExit(f"{plugin} marketplace category must be Engineering")
+
+canonical = sorted(
+    path.parent.name
+    for plugin in plugins
+    for path in (Path("plugins") / plugin / "skills").glob("*/SKILL.md")
+)
+for mirror in (Path(".agents/skills"), Path(".codex/skills")):
+    mirrored = sorted(path.name for path in mirror.iterdir() if path.is_dir() or path.is_symlink())
+    if mirrored != canonical:
+        raise SystemExit(f"{mirror} does not match canonical plugin skills")
+    broken = [path.name for path in mirror.iterdir() if path.is_symlink() and not path.exists()]
+    if broken:
+        raise SystemExit(f"{mirror} has broken symlinks: {', '.join(broken)}")
+PY
+
+pass "Codex marketplace, plugin manifests, skills, commands, and mirrors are consistent"
 
 if command -v codex >/dev/null 2>&1; then
   echo ""

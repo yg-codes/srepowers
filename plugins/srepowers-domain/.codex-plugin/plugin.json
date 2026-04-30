@@ -1,0 +1,29 @@
+{
+  "name": "srepowers-domain",
+  "version": "5.0.0",
+  "description": "Software engineering domain expertise — Go, Python, Rust, Kubernetes, Terraform, containers, networking, security, testing, and more",
+  "author": {
+    "name": "yg",
+    "email": "sre@example.com",
+    "url": "https://github.com/yg-codes/srepowers"
+  },
+  "homepage": "https://github.com/yg-codes/srepowers",
+  "repository": "https://github.com/yg-codes/srepowers",
+  "license": "MIT",
+  "keywords": [
+    "golang", "python", "rust", "kubernetes", "terraform", "terragrunt",
+    "containers", "networking", "security", "testing", "architecture",
+    "cloud", "postgresql", "microservices", "platform"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SREPowers Domain",
+    "shortDescription": "Domain expertise for infrastructure engineering",
+    "longDescription": "Domain expertise skills covering programming languages (Go, Python, Rust), infrastructure platforms (Kubernetes, Terraform, Terragrunt), containers, networking, security, databases, testing, architecture, cloud, and cost optimization.",
+    "developerName": "yg",
+    "category": "Engineering",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/yg-codes/srepowers",
+    "brandColor": "#1565C0"
+  }
+}

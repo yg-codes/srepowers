@@ -49,15 +49,18 @@ srepowers/
 ├── plugins/
 │   ├── srepowers-core/                 ← 28 skills
 │   │   ├── .claude-plugin/plugin.json
+│   │   ├── .codex-plugin/plugin.json
 │   │   ├── skills/
 │   │   ├── commands/
 │   │   └── hooks/
 │   ├── srepowers-domain/               ← 19 skills
 │   │   ├── .claude-plugin/plugin.json
+│   │   ├── .codex-plugin/plugin.json
 │   │   ├── skills/
 │   │   └── commands/
 │   └── srepowers-infra/                ← 5 skills
 │       ├── .claude-plugin/plugin.json
+│       ├── .codex-plugin/plugin.json
 │       ├── skills/
 │       └── commands/
 ├── .agents/skills/                     ← Codex skill mirror (52 symlinks)
@@ -83,6 +86,7 @@ Marketplace install pulls all three at once. Each plugin can also be installed i
 | `plugins/*/skills/` | Skill definitions, grouped by plugin |
 | `plugins/*/commands/` | Claude compatibility wrappers for `/command` usage |
 | `.claude-plugin/marketplace.json` | Marketplace manifest listing all plugins |
+| `plugins/*/.codex-plugin/plugin.json` | Codex plugin manifests for marketplace installation |
 | `.agents/skills/` | Codex skill mirror for repo-native discovery |
 | `.codex-plugin/` | Codex plugin manifest |
 | `.codex/agents/` | Codex custom infrastructure agents |

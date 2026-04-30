@@ -8,6 +8,7 @@ CLAUDE.md
 .claude/session-env/
 .claude/shell-snapshots/
 .claude/transcripts/
+.claude/SESSIONLOG.md
 
 # Serena MCP
 .serena/
