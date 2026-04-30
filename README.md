@@ -123,11 +123,16 @@ This is the recommended Codex setup if you want the simplest update path:
 git clone https://github.com/yg-codes/srepowers.git ~/.codex/srepowers
 ```
 
-2. Create the skills symlink.
+2. Create the skills symlinks.
 
 ```bash
 mkdir -p ~/.agents/skills
-ln -s ~/.codex/srepowers/.agents/skills/* ~/.agents/skills/
+for plugin in srepowers-core srepowers-domain srepowers-infra; do
+  for skill in ~/.codex/srepowers/plugins/$plugin/skills/*/; do
+    name=$(basename "$skill")
+    ln -s "$skill" ~/.agents/skills/$name
+  done
+done
 ```
 
 3. Restart Codex.
@@ -180,10 +185,34 @@ cat > ~/.agents/plugins/marketplace.json <<'EOF'
   },
   "plugins": [
     {
-      "name": "srepowers",
+      "name": "srepowers-core",
       "source": {
         "source": "local",
-        "path": "./.codex/plugins/srepowers"
+        "path": "./.codex/plugins/srepowers/plugins/srepowers-core"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Engineering"
+    },
+    {
+      "name": "srepowers-domain",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/srepowers/plugins/srepowers-domain"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Engineering"
+    },
+    {
+      "name": "srepowers-infra",
+      "source": {
+        "source": "local",
+        "path": "./.codex/plugins/srepowers/plugins/srepowers-infra"
       },
       "policy": {
         "installation": "AVAILABLE",
