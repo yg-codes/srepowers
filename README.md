@@ -117,36 +117,42 @@ Verify with `/help`. You should see commands such as `/test-driven-operation` an
 git clone https://github.com/yg-codes/srepowers.git ~/.claude/plugins/srepowers
 ```
 
-### Codex Native Skills Install
+### Codex Marketplace Install
 
-This is the recommended Codex setup if you want the simplest update path:
+This is the recommended Codex setup. Add the SREPowers marketplace, then install the plugins from Codex's `/plugins` UI.
 
-1. Clone the repository into your Codex workspace area.
-
-```bash
-git clone https://github.com/yg-codes/srepowers.git ~/.codex/srepowers
-```
-
-2. Create the skills symlinks.
+1. Add the marketplace.
 
 ```bash
-mkdir -p ~/.agents/skills
-for plugin in srepowers-core srepowers-domain srepowers-infra; do
-  for skill in ~/.codex/srepowers/plugins/$plugin/skills/*/; do
-    name=$(basename "$skill")
-    ln -s "$skill" ~/.agents/skills/$name
-  done
-done
+codex plugin marketplace add yg-codes/srepowers
 ```
 
-3. Restart Codex.
+2. Open Codex and launch the plugin UI.
 
-Codex will discover the SREPowers skills through `~/.agents/skills/`. Use `/skills` to inspect them, or mention a skill directly such as `$test-driven-operation`.
+```text
+/plugins
+```
+
+3. Search for `srepowers`, then install one or more plugins:
+
+- `srepowers-core` — workflow spine, mandatory gates, incident response
+- `srepowers-domain` — Go, Python, Rust, Kubernetes, Terraform, security, testing, and other domain skills
+- `srepowers-infra` — Proxmox, Puppet, and GitLab CI/CD skills
+
+Install all three for full SREPowers coverage.
+
+4. Verify installed skills.
+
+```text
+/skills
+```
+
+You should see skills such as `using-srepowers`, `test-driven-operation`, `kubernetes-specialist`, and `pve-admin`.
 
 Update:
 
 ```bash
-cd ~/.codex/srepowers && git pull
+codex plugin marketplace upgrade srepowers-marketplace
 ```
 
 ### Codex Repo-Native Use
@@ -166,78 +172,29 @@ Codex will load:
 - `.codex/agents/`
 - `.codex/hooks.json`
 
-### Codex Local Plugin Install
+### Codex Local Marketplace Development
 
-Use this when you specifically want SREPowers to appear in Codex `/plugins` as a local plugin:
+Use this only when testing local repository changes before they are pushed.
 
-1. Clone the plugin into your Codex plugins directory.
-
-```bash
-mkdir -p ~/.codex/plugins
-git clone https://github.com/yg-codes/srepowers.git ~/.codex/plugins/srepowers
-```
-
-2. Add a local plugin marketplace file.
+1. Add the local checkout as a marketplace.
 
 ```bash
-mkdir -p ~/.agents/plugins
-cat > ~/.agents/plugins/marketplace.json <<'EOF'
-{
-  "name": "local-plugins",
-  "interface": {
-    "displayName": "Local Plugins"
-  },
-  "plugins": [
-    {
-      "name": "srepowers-core",
-      "source": {
-        "source": "local",
-        "path": "./.codex/plugins/srepowers/plugins/srepowers-core"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Engineering"
-    },
-    {
-      "name": "srepowers-domain",
-      "source": {
-        "source": "local",
-        "path": "./.codex/plugins/srepowers/plugins/srepowers-domain"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Engineering"
-    },
-    {
-      "name": "srepowers-infra",
-      "source": {
-        "source": "local",
-        "path": "./.codex/plugins/srepowers/plugins/srepowers-infra"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Engineering"
-    }
-  ]
-}
-EOF
+codex plugin marketplace add /path/to/srepowers
 ```
 
-3. Restart Codex, open `/plugins`, find `srepowers`, and install or enable it.
-
-This method does not auto-update. You still need to run:
+For this repository checkout:
 
 ```bash
-cd ~/.codex/plugins/srepowers && git pull
+codex plugin marketplace add /home/yg/src/github/srepowers
 ```
 
-Then restart Codex to pick up the new plugin files.
+2. Open `/plugins`, search for `srepowers`, and install the local plugin entries.
+
+When local files change, restart Codex or run:
+
+```bash
+codex plugin marketplace upgrade srepowers-marketplace
+```
 
 ## Basic Workflow
 
