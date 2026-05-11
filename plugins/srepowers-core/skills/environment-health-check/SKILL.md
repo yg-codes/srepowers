@@ -63,32 +63,59 @@ Verify that required infrastructure tools are installed, accessible, and properl
 
 ### Step 1: Quick Scan
 
-Check for essential tools:
+Check for essential tools. **Important:** Not all tools use `--version` — use the per-tool version command lookup below.
 
 ```bash
 #!/usr/bin/env bash
 
-# Essential tools for SREPowers
-ESSENTIAL_TOOLS=("kubectl" "git" "curl")
+# Tool name -> version command (not all tools use --version)
+declare -A VERSION_CMD=(
+    [kubectl]="version --client 2>&1 | head -1"
+    [helm]="version 2>&1 | head -1"
+    [git]="--version"
+    [curl]="--version 2>&1 | head -1"
+    [terraform]="version 2>&1 | head -1"
+    [aws]="--version 2>&1 | head -1"
+    [jq]="--version"
+    [yq]="--version 2>&1 | head -1"
+    [docker]="--version"
+    [podman]="--version"
+    [k9s]="version 2>&1 | head -1"
+    [stern]="--version 2>&1 | head -1"
+    [kustomize]="version 2>&1 | head -1"
+    [argocd]="version --client 2>&1 | head -1"
+    [velero]="version --client-only 2>&1 | head -1"
+    [helmfile]="version 2>&1 | head -1"
+    [kubeseal]="--version 2>&1 | head -1"
+    [glab]="version 2>&1 | head -1"
+    [tshark]="--version 2>&1 | head -1"
+)
 
+# Essential tools
+ESSENTIAL_TOOLS=("kubectl" "git" "curl")
 # Extended tool set
 EXTENDED_TOOLS=("helm" "terraform" "aws" "jq" "yq" "docker")
-
 # SRE-specific tools
 SRE_TOOLS=("k9s" "stern" "kustomize")
+
+check_tool_version() {
+    local tool=$1
+    if command -v "$tool" >/dev/null 2>&1; then
+        local cmd="${VERSION_CMD[$tool]:---version}"
+        local version
+        version=$(eval "$tool $cmd" 2>&1 | head -1)
+        printf "  ✅ %-15s %s\n" "$tool" "$version"
+        return 0
+    else
+        printf "  ❌ %-15s NOT FOUND\n" "$tool"
+        return 1
+    fi
+}
 
 echo "=== Environment Health Check ==="
 echo ""
 echo "Checking essential tools..."
-
-for tool in "${ESSENTIAL_TOOLS[@]}"; do
-    if command -v "$tool" >/dev/null 2>&1; then
-        version=$($tool --version 2>&1 | head -1)
-        echo "  ✅ $tool: $version"
-    else
-        echo "  ❌ $tool: NOT FOUND"
-    fi
-done
+for tool in "${ESSENTIAL_TOOLS[@]}"; do check_tool_version "$tool"; done
 ```
 
 ### Step 2: Configuration Verification
@@ -106,6 +133,11 @@ if command -v kubectl >/dev/null 2>&1; then
     echo ""
     echo "Target context connectivity:"
     kubectl --context <context> cluster-info 2>&1 | head -3 || echo "  ❌ Cannot connect to target context"
+
+    echo ""
+    echo "Client/server version:"
+    kubectl version --client -o json 2>&1 | jq -r '"Client: " + .clientVersion.gitVersion' 2>/dev/null || kubectl version --client 2>&1 | head -2
+    kubectl --context <context> version -o json 2>&1 | jq -r '"Server: " + .serverVersion.gitVersion' 2>/dev/null || true
 else
     echo "  ❌ kubectl not installed"
 fi
@@ -332,6 +364,74 @@ mise use awscli@2.0.0
 
 ## Common Issues and Fixes
 
+### Issue: kubectl version flags not working as expected
+
+**Symptom:**
+```
+error: unknown flag: --version
+error: unknown flag: --short
+```
+
+**Context:**
+- `kubectl` does NOT support `--version` (use `kubectl version --client`)
+- `kubectl version --short` was removed in kubectl v1.33+ — use `kubectl version --client` or `kubectl version -o json`
+- `helm` uses `helm version` (no dashes), not `helm --version`
+- `k9s`, `kubecolor`, and some Go-based tools may not support any version flag — wrap in `2>&1 | head -1` and treat errors as "installed, version unavailable"
+
+**Fix:**
+```bash
+# Correct per-tool version commands
+kubectl version --client -o json 2>&1 | jq -r '"Client: " + .clientVersion.gitVersion'
+helm version --short 2>&1
+k9s version 2>&1 | head -1
+```
+
+### Issue: Vault status check fails with TLS error inside pod
+
+**Symptom:**
+```
+Error checking seal status: Get "https://127.0.0.1:8200/v1/sys/seal-status": tls: failed to verify certificate: x509: certificate signed by unknown authority
+```
+
+**Context:** When Vault uses custom TLS certificates (e.g., Vault PKI), the `vault` CLI inside the pod may not trust the local listener cert because it uses the system CA bundle instead of the Vault-specific CA.
+
+**Fix:**
+```bash
+# Option 1: Skip TLS verification (quick check)
+kubectl exec -n vault vault-0 -- vault status -tls-skip-verify
+
+# Option 2: Use the correct CA cert
+kubectl exec -n vault vault-0 -- vault status \
+  -ca-cert=/vault/tls/ca.crt
+
+# Option 3: Use wget from sidecar with --no-check-certificate
+kubectl exec -n vault vault-0 -c bank-vaults -- \
+  wget -qO- --no-check-certificate https://127.0.0.1:8200/v1/sys/seal-status
+```
+
+### Issue: Cannot check certificate expiry inside static pod containers
+
+**Symptom:**
+```
+exec: "openssl": executable file not found in $PATH
+```
+
+**Context:** etcd, kube-apiserver, and other Kubernetes static pod containers use minimal base images that do not include `openssl`.
+
+**Fix:**
+```bash
+# Option 1: Check cert expiry on the host node (not inside the container)
+ssh node.fsx.zone "openssl x509 -checkend 2592000 -noout -in /etc/kubernetes/pki/etcd/server.crt"
+
+# Option 2: Use kubectl to decode the cert from a secret (if certs are managed by cert-manager)
+kubectl --context <ctx> -n cert-manager get secret <secret-name> \
+  -o jsonpath='{.data.tls\.crt}' | base64 -d | openssl x509 -checkend 2592000 -noout
+
+# Option 3: Check kube-apiserver health endpoint
+kubectl --context <ctx> get --raw /livez
+kubectl --context <ctx> get --raw /readyz
+```
+
 ### Issue: kubectl not connected to cluster
 
 **Symptom:**
@@ -399,7 +499,10 @@ done
 | Check | Command |
 |-------|---------|
 | Tool installed | `command -v kubectl` |
-| Tool version | `kubectl version --client` |
+| Tool version (kubectl) | `kubectl version --client` |
+| Tool version (helm) | `helm version` |
+| Tool version (generic) | `<tool> --version 2>&1 \| head -1` |
 | K8s contexts | `kubectl config get-contexts -o name` |
+| K8s client/server skew | `kubectl version -o json \| jq` |
 | AWS identity | `aws sts get-caller-identity` |
 | All tools | Run this skill! |
