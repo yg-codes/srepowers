@@ -2,15 +2,21 @@
 
 SRE infrastructure skills for Claude Code and Codex.
 
-SREPowers adapts software development workflows like brainstorming, planning, subagent execution, and verification-first discipline to infrastructure operations. It is the SRE companion to [superpowers](https://github.com/obra/superpowers): same workflow spine, different domain.
+SREPowers adapts software development workflows like brainstorming, planning, subagent execution, and verification-first discipline to infrastructure operations. It is the SRE companion to [superpowers](https://github.com/obra/superpowers): same workflow spine, different domain and risk model.
 
 ## How It Works
 
 SREPowers starts by slowing the agent down before it does infrastructure work. Instead of jumping straight to `kubectl`, Terraform, or API calls, it pushes the agent to clarify the goal, write an execution plan, and define verification before making changes.
 
-Once the plan is approved, the execution skills apply Test-Driven Operation: write a verification command, watch it fail, make the smallest change, and verify again. For larger changes, SREPowers can break the work into reviewed subagent steps so execution stays aligned with the plan.
+Once the plan is approved, the execution skills apply Test-Driven Operation: define verification before execution, capture a failing check when the target state is absent or broken, capture a baseline when the current state is already valid, make the smallest change, and verify again. For larger changes, SREPowers can break the work into reviewed subagent steps so execution stays aligned with the plan.
 
 The result is not "more automation." The value is disciplined operations under pressure: verification before claims, rollback-aware planning, and explicit review of risky changes.
+
+## Relationship to Superpowers
+
+SREPowers uses Superpowers as a methodology reference, not as a strict downstream clone. It follows upstream for plugin layout, skill format, planning discipline, reviewed subagent execution, and evidence before success claims.
+
+It intentionally diverges for infrastructure operations: routing is risk-based, production/destructive actions require safety gates, incident response has its own workflow, and TDO means verification-first rather than always failing-first. Baseline capture, blast radius, rollback, evidence, and change-control context are first-class requirements.
 
 ## Minimum Sufficient Workflow
 

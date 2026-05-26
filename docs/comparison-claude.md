@@ -127,9 +127,9 @@ brainstorming-operations → git worktrees → writing-operation-plans → subag
                                                              (sit → uat → prod) promotion path
 ```
 
-**TDO Cycle:** Write verification command → watch it fail → execute minimal operation → watch it pass → document.
+**TDO Cycle:** Define verification → watch it fail when the target state is absent or broken, or capture baseline when failure is not meaningful → execute minimal operation → verify target state → document.
 
-**The Iron Law:** *"NO INFRASTRUCTURE CHANGE WITHOUT A FAILING VERIFICATION FIRST."*
+**Verification Rule:** *"Define verification before every state-changing infrastructure operation."*
 
 **Enforcement:** Same hard gates as Superpowers, plus:
 - Red flag detection for rationalization ("This is just a quick server check")
@@ -199,7 +199,7 @@ TDO directly solves infrastructure testing blindness. The `docs/testing-anti-pat
 - `API returned 200` ≠ correct response body structure
 - `MR created` ≠ CI passing
 
-The "watch verification fail first" requirement prevents false-positive success claims. **This is the highest-value mechanism.**
+Defining verification before execution, then either watching it fail for absent or broken target state or capturing a baseline for valid current state, prevents false-positive success claims. **This is the highest-value mechanism.**
 
 **2. Structured Incident Response**
 ICS-style role assignment (IC, Operations, Communications, Scribe), escalation triggers tied to impact scope, and pre-written communication templates systematize what many teams handle chaotically. The 4-phase troubleshooting approach (Understand → Isolate → Hypothesize → Verify) is a proven framework applied to infrastructure.

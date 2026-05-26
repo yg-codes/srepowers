@@ -70,8 +70,8 @@ kubectl --context <context> get events --all-namespaces --field-selector type=Wa
 **Default: First 3 tasks or first environment**
 
 For each task, follow **test-driven-operation** discipline:
-1. RED: Write failing verification
-2. Verify RED: Run and watch it fail
+1. RED: Define verification or baseline before execution
+2. Verify RED or baseline: Run and watch it fail when target state is absent/broken, or capture baseline when failure is not meaningful
 3. GREEN: Execute minimal operation
 4. Verify GREEN: Confirm success
 5. Check side effects

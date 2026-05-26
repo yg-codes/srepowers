@@ -1,10 +1,10 @@
 {
   "name": "srepowers-core",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "description": "SRE workflow spine, mandatory gates, and incident response — verification-first operations with Test-Driven Operation and Subagent-Driven Operation",
   "author": {
-    "name": "yg",
-    "email": "sre@example.com",
+    "name": "yg-codes",
+    "email": "yg-codes@users.noreply.github.com",
     "url": "https://github.com/yg-codes/srepowers"
   },
   "homepage": "https://github.com/yg-codes/srepowers",
@@ -19,7 +19,7 @@
     "displayName": "SREPowers Core",
     "shortDescription": "SRE workflow, quality gates, and incident response",
     "longDescription": "Core SRE plugin providing the operational workflow spine (TDO, SDO, brainstorming, planning, execution), mandatory quality gates (verification, safety, evidence-first), incident response skills, and SRE practices.",
-    "developerName": "yg",
+    "developerName": "yg-codes",
     "category": "Engineering",
     "capabilities": ["Read", "Write"],
     "websiteURL": "https://github.com/yg-codes/srepowers",

@@ -7,17 +7,17 @@ description: Use when executing infrastructure operations with verification comm
 
 ## Overview
 
-Write the verification command first. Run it and watch it fail. Execute minimal operation to pass.
+Define the verification command before execution. When the target state is absent or broken, run it first and watch it fail. When a failing verification is not meaningful, capture the current baseline, execute the smallest safe operation, then verify the target state.
 
-**Core principle:** If you didn't watch the verification fail, you don't know if it verifies the right thing.
+**Core principle:** Verification is designed before the change, and success is claimed only from fresh evidence.
 
-**Violating the letter of the rules is violating the spirit of the rules.**
+**When a RED failure is meaningful:** If you didn't watch the verification fail, you don't know if it verifies the right thing.
 
 **Announce at start:** "I'm using the test-driven-operation skill to execute this infrastructure operation."
 
 ## When to Use
 
-**Always:**
+**Use for state-changing work:**
 - API operations (REST, GraphQL, gRPC)
 - Kubernetes operations (kubectl, helm)
 - Keycloak/Identity provider operations (CRDs, admin APIs)
@@ -31,30 +31,30 @@ Write the verification command first. Run it and watch it fail. Execute minimal 
 - Read-only diagnostic operations
 - Dry-run exploration (first pass only)
 
-Thinking "skip TDO just this once"? Stop. That's rationalization.
+Thinking "skip verification just this once"? Stop. That's rationalization.
 
-## The Iron Law
+## Verification Model
 
 ```
-NO INFRASTRUCTURE CHANGE WITHOUT A FAILING VERIFICATION FIRST
+DEFINE VERIFICATION BEFORE EVERY STATE-CHANGING INFRASTRUCTURE OPERATION
 ```
 
-Execute operation before the verification? Rollback. Start over.
+For state-changing infrastructure work:
 
-**No exceptions:**
-- Don't keep it as "reference"
-- Don't "adapt" verification after the fact
-- Rollback means rollback (kubectl delete, git revert, API undo)
+- Define the verification command before execution
+- When the target state is currently absent or broken, run the verification first and observe the expected failure
+- When a failing verification is not meaningful, capture the current baseline first, execute the smallest safe change, then verify the target state
+- Do not adapt verification after the fact to match an unexpected result
 
-Execute fresh from verification. Period.
+Execute operation before defining verification? Rollback if safe and material. Otherwise stop, record the deviation, capture current state, and ask your human partner how to proceed.
 
 ## Red-Green-Refactor for Operations
 
 ```dot
 digraph tdo_cycle {
     rankdir=LR;
-    red [label="RED\nWrite failing verification", shape=box, style=filled, fillcolor="#ffcccc"];
-    verify_red [label="Verify fails\ncorrectly", shape=diamond];
+    red [label="RED\nWrite verification or baseline", shape=box, style=filled, fillcolor="#ffcccc"];
+    verify_red [label="Fails correctly\nor baseline captured", shape=diamond];
     green [label="GREEN\nMinimal operation", shape=box, style=filled, fillcolor="#ccffcc"];
     verify_green [label="Verify passes\nExpected output", shape=diamond];
     refactor [label="REFACTOR\nDocument and clean", shape=box, style=filled, fillcolor="#ccccff"];
@@ -72,9 +72,9 @@ digraph tdo_cycle {
 }
 ```
 
-### RED - Write Failing Verification
+### RED - Write Verification or Capture Baseline
 
-Write one minimal verification showing what should exist or happen.
+Write one minimal verification showing what should exist or happen. Run it before the operation when it should currently fail. If the current state is valid and the operation advances or refreshes it, capture a baseline instead.
 
 **Kubernetes:**
 ```bash
@@ -103,7 +103,7 @@ ssh prod-server "systemctl is-active nginx"
 
 ### Verify RED - Watch It Fail
 
-**MANDATORY. Never skip.**
+**MANDATORY when the desired state is absent or broken.**
 
 ```bash
 kubectl get pod -n production -l app=api-server
@@ -115,9 +115,23 @@ Confirm:
 - Failure reason is expected (resource doesn't exist)
 - Fails because operation not executed (not typos)
 
-**Verification passes?** You're verifying existing state. Fix verification.
+**Verification passes?** If the target state already exists, capture baseline evidence and switch to baseline-delta verification. If the verification is wrong, fix it before executing.
 
 **Verification errors?** Fix command, re-run until it fails correctly.
+
+### Baseline Path - When Failure Is Not Meaningful
+
+Use this path for operations such as service restarts, security updates, certificate rotation before expiry, or configuration refreshes where the current state is valid.
+
+```bash
+systemctl is-active nginx
+# Expected baseline: active
+```
+
+Confirm:
+- Baseline captures the current state before change
+- Target state is explicit
+- Post-check can prove the operation completed
 
 ### GREEN - Minimal Operation
 
@@ -384,14 +398,16 @@ See `testing-anti-patterns.md` in this skill directory for detailed examples of 
 
 ## Incident Response Integration
 
-Incident detected? Write failing verification reproducing it. Follow TDO cycle. Verification proves fix and prevents regression.
+Incident detected? Write verification that reproduces or measures the symptom before mitigation. Follow TDO cycle. Verification proves fix and prevents regression.
 
 Never fix incidents without verification.
 
 ## Final Rule
 
 ```
-Infrastructure change → verification exists and failed first
+Infrastructure change → verification defined before execution
+Absent or broken target state → verification failed first
+Valid current state → baseline captured first
 Otherwise → not TDO
 ```
 

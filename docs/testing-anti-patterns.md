@@ -175,7 +175,7 @@ kubectl get pod -n production app-pod
 
 **Correct approach (TDO):**
 ```bash
-# RED - Write verification FIRST, watch it fail
+# RED - Write verification FIRST, watch it fail when target state is absent
 kubectl get pod -n production app-pod -o jsonpath='{.status.phase}'
 # Expected: Error: not found
 
@@ -276,7 +276,7 @@ kubectl get configmap -n production app-config -o jsonpath='{.data.VERSION}'
 | Push succeeded | Verify MR exists: `glab mr list --source_branch` |
 | Manual check | Write automated verification command |
 | Dashboard green | Use command-based verification |
-| Verification before operation | Write verification FIRST, watch it fail |
+| Verification before operation | Define verification FIRST; watch it fail when target state is absent, or capture baseline when failure is not meaningful |
 | Partial check | Verify all aspects (replicas, pods, endpoints) |
 | "Should work" | Run verification, show evidence |
 

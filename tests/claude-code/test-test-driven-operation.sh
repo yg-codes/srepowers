@@ -41,18 +41,18 @@ fi
 
 echo ""
 
-# Test 3: Verify verification must fail first
-echo "Test 3: Verification failure requirement..."
+# Test 3: Verify failure or baseline requirement
+echo "Test 3: Verification failure or baseline requirement..."
 
-output=$(run_claude "In test-driven-operation, should you watch the verification command fail before executing the operation? Why or why not?" 30)
+output=$(run_claude "In test-driven-operation, when should you watch the verification command fail before executing, and what should you do when a failing verification is not meaningful?" 30)
 
-if assert_contains "$output" "watch.*fail\|must.*fail\|fail.*first" "Mentions watching verification fail"; then
+if assert_contains "$output" "watch.*fail\|fail.*first\|absent\|broken" "Mentions watching verification fail when appropriate"; then
     : # pass
 else
     exit 1
 fi
 
-if assert_contains "$output" "proves\|verifies\|correct" "Explains why failure is important"; then
+if assert_contains "$output" "baseline\|current state\|before.*after" "Mentions baseline path"; then
     : # pass
 else
     exit 1
@@ -76,9 +76,9 @@ echo ""
 # Test 5: Verify rollback requirement
 echo "Test 5: Rollback requirement..."
 
-output=$(run_claude "In test-driven-operation, what should you do if you execute an operation before writing the verification?" 30)
+output=$(run_claude "In test-driven-operation, what should you do if you execute an operation before defining verification?" 30)
 
-if assert_contains "$output" "rollback\|delete\|start over\|revert" "Mentions rollback"; then
+if assert_contains "$output" "rollback\|deviation\|current state\|ask" "Mentions rollback or deviation handling"; then
     : # pass
 else
     exit 1

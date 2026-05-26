@@ -407,10 +407,10 @@ curl -s https://my-app.example.com/healthz
 **The fix:**
 ```
 TDO cycle:
-1. Write verification command (RED)
-2. Run it, watch it fail
+1. Define verification command (RED)
+2. Run it and watch it fail when the target state is absent or broken, or capture baseline when failure is not meaningful
 3. Execute operation (GREEN)
-4. Run verification, watch it pass
+4. Run verification and confirm the target state
 5. Document and clean up (REFACTOR)
 6. THEN claim complete
 ```

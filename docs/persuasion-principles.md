@@ -207,7 +207,7 @@ LLMs respond to the same persuasion principles as humans. Understanding this psy
 
 ### For Test-Driven Operation (TDO)
 
-**Authority:** "NO INFRASTRUCTURE CHANGE WITHOUT A FAILING VERIFICATION FIRST"
+**Authority:** "DEFINE VERIFICATION BEFORE EVERY STATE-CHANGING INFRASTRUCTURE OPERATION"
 **Commitment:** Announce "I'm using TDO" at start
 **Social Proof:** "Verification before operation = confidence. Operation before verification = incidents. Every time."
 **Scarcity:** "Verification must happen in this message, before any claim"

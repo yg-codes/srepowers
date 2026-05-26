@@ -111,22 +111,22 @@ Every plan must make these sections obvious and complete:
 **Goal:** [One sentence]
 **Files/Resources:** Create/Modify `exact/resource/name.yaml`, Namespace: `namespace-name`
 **Verification:** `[exact verification command]`
-**Expected (RED):** `[exact failure output]`
+**Expected (Before):** `[exact failure output OR baseline output before the change]`
 **Expected (GREEN):** `[exact success output]`
 **Rollback:** `[exact rollback command]`
 **Side Effects Check:** `[command to verify adjacent systems]`
 
-**Step 1: RED - Write failing verification**
+**Step 1: RED - Define verification or baseline**
 
 ```bash
 kubectl get [resource] -n [namespace] [name] -o jsonpath='{.status.field}'
 ```
-**Expected:** [What failure looks like - e.g., "Error: not found"]
+**Expected:** [What failure looks like when target state is absent, or current baseline when failure is not meaningful]
 
-**Step 2: Verify RED - Run verification, watch it fail**
+**Step 2: Verify RED or capture baseline**
 
 Run: [verification command]
-Expected: [exact failure message]
+Expected: [exact failure message OR exact baseline output]
 
 **Step 3: Dry-run (validate before live)**
 
@@ -170,7 +170,7 @@ Each task MUST include these fields in its header for machine-parseable extracti
 | **Goal** | **Yes** | One-sentence objective |
 | **Files/Resources** | **Yes** | Exact paths and namespaces |
 | **Verification** | **Yes** | Exact command to prove success/failure |
-| **Expected (RED)** | **Yes** | What the verification command outputs before the change |
+| **Expected (Before)** | **Yes** | What the verification command outputs before the change: expected failure for absent/broken target state, or baseline output when current state is valid |
 | **Expected (GREEN)** | **Yes** | What the verification command outputs after the change |
 | **Rollback** | **Yes** | Exact command to undo this task |
 | **Side Effects Check** | **Yes** | Command to verify adjacent systems unaffected |
@@ -185,7 +185,7 @@ Each task MUST include these fields in its header for machine-parseable extracti
 | **Rollback per task** | Each task must be reversible |
 | **Dry-run first** | Validate with `--dry-run=client` before live |
 | **Side-effect check** | Verify adjacent systems weren't affected |
-| **TDO discipline** | RED → Verify RED → Dry-run → GREEN → Verify GREEN → Side effects → Commit |
+| **TDO discipline** | Define verification/baseline → Verify RED or capture baseline → Dry-run → GREEN → Verify GREEN → Side effects → Commit |
 
 ## Planning Anti-Patterns
 

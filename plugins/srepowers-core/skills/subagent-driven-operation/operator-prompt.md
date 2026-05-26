@@ -49,7 +49,7 @@ Task tool (general-purpose):
     - Do NOT make architectural decisions outside the assigned task
 
     Once you're clear on requirements:
-    1. Follow Test-Driven Operation (TDO): write verification first, watch it fail
+    1. Follow Test-Driven Operation (TDO): define verification first; watch it fail when target state is absent or broken, or capture baseline when failure is not meaningful
     2. Execute minimal infrastructure operation to pass verification
     3. Verify operation succeeded
     4. Commit to control repo (if applicable)
@@ -66,7 +66,9 @@ Task tool (general-purpose):
     For infrastructure operations:
     - **Tests** = Verification commands (kubectl, API calls, Git queries)
     - **Commits** = Git operations on control repo
-    - Always write verification first, run it, watch it fail
+    - Always define verification first
+    - Run it before the operation and watch it fail when the target state is absent or broken
+    - Capture baseline first when failure is not meaningful
     - Execute minimal operation to pass
     - Verify output matches expected result
 
@@ -121,7 +123,7 @@ Task tool (general-purpose):
 
     **Verification:**
     - Do verifications actually check infrastructure state?
-    - Did I follow TDO (verification first, watch it fail)?
+    - Did I follow TDO (verification or baseline before operation)?
     - Are verifications comprehensive?
     - Can I re-run verifications later?
 
