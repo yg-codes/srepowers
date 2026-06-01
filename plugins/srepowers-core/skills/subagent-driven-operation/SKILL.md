@@ -11,6 +11,8 @@ Execute infrastructure operation plan by dispatching fresh subagent per task, wi
 
 **Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
 
+**Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work. The same applies to the reviewer subagents: give each one precisely crafted review context, never your session history.
+
 **Announce at start:** "I'm using the subagent-driven-operation skill to execute this infrastructure operation plan."
 
 ## When to Use

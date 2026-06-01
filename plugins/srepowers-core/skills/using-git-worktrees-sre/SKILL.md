@@ -9,7 +9,7 @@ description: Use when you need an isolated workspace for infrastructure changes 
 
 Git worktrees create isolated workspaces sharing the same repository, allowing work on multiple infrastructure branches simultaneously without switching. Essential for safe control repo operations.
 
-**Core principle:** Systematic directory selection + environment verification + safety checks = reliable infrastructure isolation.
+**Core principle:** Detect existing isolation first. Then prefer the harness's native worktree tools. Fall back to manual `git worktree` only when no native tool exists. Never fight the harness. Then layer SRE safety on top: environment verification + ignore checks + clean baseline.
 
 **Announce at start:** "I'm using the using-git-worktrees-sre skill to set up an isolated workspace for infrastructure operations."
 
@@ -27,7 +27,52 @@ Git worktrees create isolated workspaces sharing the same repository, allowing w
 - `writing-operation-plans` execution
 - Any multi-step infrastructure change
 
+## Step 0: Detect Existing Isolation
+
+**Before creating anything, check if you are already in an isolated workspace.**
+
+```bash
+GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
+GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
+BRANCH=$(git branch --show-current)
+```
+
+**Submodule guard:** `GIT_DIR != GIT_COMMON` is also true inside git submodules. Before concluding "already in a worktree," verify you are not in a submodule:
+
+```bash
+# If this returns a path, you're in a submodule, not a worktree — treat as normal repo
+git rev-parse --show-superproject-working-tree 2>/dev/null
+```
+
+**If `GIT_DIR != GIT_COMMON` (and not a submodule):** You are already in a linked worktree. Skip worktree creation entirely — jump to Environment Detection and the verification steps. Do NOT create another worktree.
+
+Report with branch state:
+- On a branch: "Already in isolated workspace at `<path>` on branch `<name>`."
+- Detached HEAD: "Already in isolated workspace at `<path>` (detached HEAD, externally managed). Branch creation needed at finish time."
+
+**If `GIT_DIR == GIT_COMMON` (or in a submodule):** You are in a normal repo checkout.
+
+Has the user already declared a worktree preference in CLAUDE.md or your instructions? If not, ask for consent before creating one:
+
+> "Would you like me to set up an isolated worktree? It protects your current branch — and any in-flight environment — from changes."
+
+Honor any existing declared preference without asking. If the user declines, work in place and skip to Environment Detection.
+
+## Creation Mechanism
+
+**You have two mechanisms. Try them in this order.**
+
+### Native Worktree Tools (preferred)
+
+The user has consented (Step 0). Do you already have a way to create a worktree — a tool named something like `EnterWorktree`/`WorktreeCreate`, a `/worktree` command, or a `--worktree` flag? If so, use it, then skip to Environment Detection.
+
+Native tools handle directory placement, branch creation, and cleanup automatically. Using `git worktree add` when you have a native tool creates phantom state the harness can't see or manage.
+
+Only fall through to the **git worktree fallback** below if you have no native worktree tool.
+
 ## Directory Selection Process
+
+*(Git worktree fallback only — skip if a native tool handled creation.)*
 
 ### 1. Check Existing Directories
 
@@ -216,6 +261,11 @@ Next steps:
 
 | Situation | Action |
 |-----------|--------|
+| Already in linked worktree | Skip creation (Step 0) |
+| In a submodule | Treat as normal repo (Step 0 guard) |
+| Native worktree tool available | Use it, skip git fallback |
+| No native tool | Git worktree fallback |
+| No consent given | Ask before creating (Step 0) |
 | `.worktrees/` exists | Use it (verify ignored) |
 | `worktrees/` exists | Use it (verify ignored) |
 | Both exist | Use `.worktrees/` |
@@ -236,6 +286,9 @@ Next steps:
 ## Red Flags
 
 **Never:**
+- Create a worktree when Step 0 detects existing isolation
+- Use `git worktree add` when you have a native worktree tool (e.g., `EnterWorktree`) — this is the #1 mistake; if you have it, use it
+- Create a worktree without consent when in a normal checkout
 - Create worktree without verifying it's ignored (project-local)
 - Proceed with production operations without explicit confirmation
 - Skip environment detection
@@ -243,6 +296,8 @@ Next steps:
 - Assume control repo type without verification
 
 **Always:**
+- Run Step 0 detection first
+- Prefer native tools over git fallback
 - Follow directory priority: existing > CLAUDE.md > ask
 - Verify directory is ignored for project-local
 - Detect and report target environment

@@ -1,6 +1,6 @@
 {
   "name": "srepowers-infra",
-  "version": "5.0.3",
+  "version": "5.1.0",
   "description": "Infrastructure-specific administration — Proxmox VE, Puppet, and GitLab CI/CD pipelines",
   "author": {
     "name": "yg-codes",

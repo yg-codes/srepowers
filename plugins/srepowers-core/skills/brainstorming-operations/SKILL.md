@@ -138,7 +138,7 @@ digraph brainstorming {
 
 **Design Review Loop:**
 After writing the design document:
-1. Dispatch design-document-reviewer subagent (see `design-document-reviewer-prompt.md`)
+1. Dispatch design-document-reviewer subagent (see `design-document-reviewer-prompt.md`) with precisely crafted review context — never your session history. This keeps the reviewer focused on the design, not your thought process.
 2. If Issues Found: fix, re-dispatch, repeat until Approved
 3. If loop exceeds 3 iterations, surface to human for guidance
 

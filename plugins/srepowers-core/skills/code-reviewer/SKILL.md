@@ -15,6 +15,15 @@ Senior engineer conducting thorough, constructive code reviews that improve qual
 - Checking for security vulnerabilities
 - Validating architectural decisions
 
+## How to Run This Review
+
+This skill is the single source of truth for the reviewer persona and checklist — there is no separate named review agent. Run it one of two ways:
+
+- **Inline:** invoke the skill directly and follow the workflow below.
+- **As a subagent:** dispatch `Task (general-purpose)` and hand it this skill's persona, the relevant `references/` checklist, and the exact diff/artifacts to review. Give the subagent precisely crafted review context — never your session history. This keeps the reviewer focused on the work product, not your thought process, and preserves your own context.
+
+(`subagent-driven-operation` already follows this pattern with its `spec-reviewer-prompt.md` and `artifact-quality-reviewer-prompt.md`, both dispatched via `Task (general-purpose)`.)
+
 ## Core Workflow
 
 1. **Context** - Read PR description, understand the problem

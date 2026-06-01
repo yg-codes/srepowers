@@ -231,7 +231,7 @@ After generating the plan and before presenting execution options, dispatch a pl
 6. **Risk consistency** — Risk level matches actual blast radius (e.g., cluster-wide changes = high, not medium)
 
 **Checker workflow:**
-1. Dispatch plan-checker subagent using `./plan-checker-prompt.md`
+1. Dispatch plan-checker subagent using `./plan-checker-prompt.md` with precisely crafted review context — never your session history. This keeps the checker focused on the plan, not your thought process, and preserves your own context.
 2. If issues found: fix the plan, re-run checker (max 2 iterations)
 3. If still issues after 2 iterations: surface to human for review
 4. If passes: proceed to execution handoff

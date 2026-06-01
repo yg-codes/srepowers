@@ -39,12 +39,25 @@ Stop. Don't proceed to Step 2.
 
 **If verification passes:** Continue to Step 2.
 
-### Step 2: Determine Target Environment
+### Step 2: Detect Workspace State and Target Environment
+
+First, detect the workspace shape — this governs which menu to show and how cleanup works:
 
 ```bash
-# Detect environment from branch name or directory structure
-current_branch=$(git branch --show-current)
+GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
+GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
+current_branch=$(git branch --show-current)   # empty = detached HEAD
+```
 
+| State | Menu | Cleanup |
+|-------|------|---------|
+| `GIT_DIR == GIT_COMMON` (normal repo) | Full 5 options | No worktree to clean up |
+| `GIT_DIR != GIT_COMMON`, named branch | Full 5 options | Provenance-based (Step 6) |
+| `GIT_DIR != GIT_COMMON`, detached HEAD | Drop merge/promote (Options 1 & 3) — offer MR-from-new-branch, keep, discard | No cleanup (externally managed) |
+
+Then determine the target environment from the branch name / directory structure:
+
+```bash
 # sit → uat → prod promotion path
 ```
 
@@ -126,7 +139,7 @@ EOF
 )"
 ```
 
-Then: Document rollback (Step 5), Cleanup worktree (Step 6)
+Then: Document rollback (Step 5). **Keep the worktree** — you need it alive to iterate on MR feedback (Step 6 does not clean up for Option 2).
 
 #### Option 3: Promote to Next Environment
 
@@ -148,7 +161,7 @@ git push -u origin promote-to-<next-env>
 glab mr create --title "[PROMOTION] <current-env> → <next-env>: <change>"
 ```
 
-Then: Document rollback (Step 5), Cleanup worktree (Step 6)
+Then: Document rollback (Step 5). **Keep the worktree** — you need it alive for the next promotion step (Step 6 does not clean up for Option 3).
 
 #### Option 4: Keep As-Is
 
@@ -199,14 +212,30 @@ kubectl get <resources> -n <namespace>
 EOF
 ```
 
-### Step 6: Cleanup Worktree
+### Step 6: Cleanup Workspace
 
-**For Options 1, 2, 3, 5:**
+**Only runs for Option 1 (merge & deploy) and Option 5 (discard).** Options 2 (MR) and 3 (promote) keep the worktree alive so you can iterate on review feedback or run the next promotion; Option 4 keeps it by definition.
+
 ```bash
-git worktree list | grep $(git branch --show-current) && git worktree remove <worktree-path>
+GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
+GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
+WORKTREE_PATH=$(git rev-parse --show-toplevel)
 ```
 
-**For Option 4:** Keep worktree.
+**If `GIT_DIR == GIT_COMMON`:** Normal repo, no worktree to clean up. Done.
+
+**If the worktree path is under `.worktrees/`, `worktrees/`, or `~/.config/srepowers/worktrees/`:** SREPowers created this worktree — we own cleanup. Remove from the main repo root, never from inside the worktree:
+
+```bash
+MAIN_ROOT=$(git -C "$(git rev-parse --git-common-dir)/.." rev-parse --show-toplevel)
+cd "$MAIN_ROOT"
+git worktree remove "$WORKTREE_PATH"
+git worktree prune  # Self-healing: clear any stale registrations
+```
+
+**Otherwise:** The harness owns this workspace (provenance check failed). Do NOT remove it. If your platform provides a workspace-exit tool (e.g., `ExitWorktree`), use it. Otherwise leave the workspace in place.
+
+**Detached HEAD:** No branch was created here and the workspace is externally managed — skip removal entirely.
 
 ## Quick Reference
 
@@ -244,12 +273,18 @@ git worktree list | grep $(git branch --show-current) && git worktree remove <wo
 - Delete work without confirmation
 - Skip rollback documentation for deployed changes
 - Allow sit → prod promotion
+- Clean up a worktree you didn't create (provenance check must pass)
+- Run `git worktree remove` from inside the worktree being removed
+- Remove a worktree before confirming the merge succeeded
 
 **Always:**
+- Detect workspace state before presenting the menu
 - Verify infrastructure state before offering options
 - Require typed confirmation for production operations
 - Document rollback procedure
 - Get explicit confirmation for Option 5 (discard)
+- `cd` to the main repo root before worktree removal, then `git worktree prune`
+- Prefer the harness's native workspace-exit tool when the worktree is harness-owned
 
 ## Integration
 
