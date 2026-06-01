@@ -1,6 +1,6 @@
 {
   "name": "srepowers-core",
-  "version": "5.0.3",
+  "version": "5.1.0",
   "description": "SRE workflow spine, mandatory gates, and incident response — verification-first operations with Test-Driven Operation and Subagent-Driven Operation",
   "author": {
     "name": "yg-codes",

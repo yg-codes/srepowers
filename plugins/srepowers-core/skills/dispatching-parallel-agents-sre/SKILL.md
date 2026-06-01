@@ -11,6 +11,8 @@ When you have multiple unrelated infrastructure failures (different services, re
 
 **Core principle:** Dispatch one agent per independent problem domain. Let them work concurrently.
 
+**Context isolation:** You delegate to specialized agents with isolated context. By precisely crafting each agent's instructions and the evidence it needs, you keep it focused on its domain. Agents should never inherit your session's history — you construct exactly what they need. This also preserves your own context for coordination.
+
 **Announce at start:** "I'm using the dispatching-parallel-agents-sre skill to coordinate parallel infrastructure investigations."
 
 ## When to Use
