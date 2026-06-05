@@ -66,10 +66,12 @@ Each agent gets:
 
 ```typescript
 // All three run concurrently
-Agent("Investigate api-prod CrashLoopBackOff pods")
-Agent("Fix data-staging liveness probe failures")
-Agent("Resolve monitoring PVC mounting problems")
+Task("Investigate api-prod CrashLoopBackOff pods")
+Task("Fix data-staging liveness probe failures")
+Task("Resolve monitoring PVC mounting problems")
 ```
+
+Dispatch with the runtime's parallel-agent tool (`Task` / subagent dispatch). Each dispatched agent performs its own work directly — it must **not** re-invoke `dispatching-parallel-agents-sre`. This skill runs only at the coordinator level; re-entering it inside a dispatched agent causes runaway recursive fan-out.
 
 ### 4. Review and Integrate
 
@@ -159,9 +161,9 @@ Always include in infrastructure agent prompts:
 
 **Dispatch:**
 ```
-Agent 1 → Investigate api-prod CrashLoopBackOff (memory limits)
-Agent 2 → Fix data-staging liveness probe failures
-Agent 3 → Resolve monitoring PVC capacity issue
+Task 1 → Investigate api-prod CrashLoopBackOff (memory limits)
+Task 2 → Fix data-staging liveness probe failures
+Task 3 → Resolve monitoring PVC capacity issue
 ```
 
 **Results:**
