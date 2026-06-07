@@ -33,6 +33,7 @@ Load detailed guidance based on context:
 | Generics | `references/generics.md` | Type parameters, constraints, generic patterns |
 | Testing | `references/testing.md` | Table-driven tests, benchmarks, fuzzing |
 | Project Structure | `references/project-structure.md` | Module layout, internal packages, go.mod |
+| Code Review | `references/code-review.md` | Reviewing Go code, anti-patterns, architecture checks, performance profiling |
 
 ## Red Flags — Stop and Verify
 
