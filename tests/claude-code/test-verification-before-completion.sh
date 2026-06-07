@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SKILL="$REPO_ROOT/skills/verification-before-completion/SKILL.md"
+SKILL="$REPO_ROOT/plugins/srepowers-core/skills/verification-before-completion/SKILL.md"
 
 echo "=== Test: verification-before-completion skill ==="
 

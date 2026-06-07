@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SKILL="$REPO_ROOT/skills/cost-optimizer/SKILL.md"
+SKILL="$REPO_ROOT/plugins/srepowers-domain/skills/cost-optimizer/SKILL.md"
 
 echo "=== Test: cost-optimizer skill ==="
 
@@ -17,7 +17,7 @@ if ! rg -q "cost.allocation|cost.driver" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:cost-optimizer" "$REPO_ROOT/commands/cost-optimizer.md"; then
+if ! rg -q "srepowers:cost-optimizer" "$REPO_ROOT/plugins/srepowers-domain/commands/cost-optimizer.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

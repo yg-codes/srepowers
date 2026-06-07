@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SKILL="$REPO_ROOT/skills/toil-analysis/SKILL.md"
+SKILL="$REPO_ROOT/plugins/srepowers-core/skills/toil-analysis/SKILL.md"
 
 echo "=== Test: toil-analysis skill ==="
 
@@ -17,7 +17,7 @@ if ! rg -q "measure|reduce|priorit" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:toil-analysis" "$REPO_ROOT/commands/toil-analysis.md"; then
+if ! rg -q "srepowers:toil-analysis" "$REPO_ROOT/plugins/srepowers-core/commands/toil-analysis.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

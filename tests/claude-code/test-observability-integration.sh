@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SKILL="$REPO_ROOT/skills/observability-integration/SKILL.md"
+SKILL="$REPO_ROOT/plugins/srepowers-core/skills/observability-integration/SKILL.md"
 
 echo "=== Test: observability-integration skill ==="
 
@@ -17,7 +17,7 @@ if ! rg -q "metric|alert" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:observability-integration" "$REPO_ROOT/commands/observability-integration.md"; then
+if ! rg -q "srepowers:observability-integration" "$REPO_ROOT/plugins/srepowers-core/commands/observability-integration.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

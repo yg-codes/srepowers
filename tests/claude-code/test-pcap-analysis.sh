@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SKILL="$REPO_ROOT/skills/pcap-analysis/SKILL.md"
+SKILL="$REPO_ROOT/plugins/srepowers-core/skills/pcap-analysis/SKILL.md"
 
 echo "=== Test: pcap-analysis skill ==="
 
@@ -17,7 +17,7 @@ if ! rg -q "TSV|fields" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:pcap-analysis" "$REPO_ROOT/commands/pcap-analysis.md"; then
+if ! rg -q "srepowers:pcap-analysis" "$REPO_ROOT/plugins/srepowers-core/commands/pcap-analysis.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

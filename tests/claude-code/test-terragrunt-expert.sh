@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SKILL="$REPO_ROOT/skills/terragrunt-expert/SKILL.md"
+SKILL="$REPO_ROOT/plugins/srepowers-domain/skills/terragrunt-expert/SKILL.md"
 
 echo "=== Test: terragrunt-expert skill ==="
 
@@ -17,7 +17,7 @@ if ! rg -q "DRY|dependency|run.all|state.backend" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:terragrunt-expert" "$REPO_ROOT/commands/terragrunt-expert.md"; then
+if ! rg -q "srepowers:terragrunt-expert" "$REPO_ROOT/plugins/srepowers-domain/commands/terragrunt-expert.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

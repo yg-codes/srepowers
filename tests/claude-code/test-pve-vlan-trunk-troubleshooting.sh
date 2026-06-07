@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SKILL="$REPO_ROOT/skills/pve-vlan-trunk-troubleshooting/SKILL.md"
+SKILL="$REPO_ROOT/plugins/srepowers-infra/skills/pve-vlan-trunk-troubleshooting/SKILL.md"
 
 echo "=== Test: pve-vlan-trunk-troubleshooting skill ==="
 
@@ -17,7 +17,7 @@ if ! rg -q "bridge|trunk|tcpdump|Proxmox" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:pve-vlan-trunk-troubleshooting" "$REPO_ROOT/commands/pve-vlan-trunk-troubleshooting.md"; then
+if ! rg -q "srepowers:pve-vlan-trunk-troubleshooting" "$REPO_ROOT/plugins/srepowers-infra/commands/pve-vlan-trunk-troubleshooting.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SKILL="$REPO_ROOT/skills/writing-skills-sre/SKILL.md"
+SKILL="$REPO_ROOT/plugins/srepowers-core/skills/writing-skills-sre/SKILL.md"
 
 echo "=== Test: writing-skills-sre skill ==="
 

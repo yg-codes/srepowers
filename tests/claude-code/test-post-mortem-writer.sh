@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SKILL="$REPO_ROOT/skills/post-mortem-writer/SKILL.md"
+SKILL="$REPO_ROOT/plugins/srepowers-core/skills/post-mortem-writer/SKILL.md"
 
 echo "=== Test: post-mortem-writer skill ==="
 
@@ -17,7 +17,7 @@ if ! rg -q "timeline|root.cause|action.item" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:post-mortem-writer" "$REPO_ROOT/commands/post-mortem-writer.md"; then
+if ! rg -q "srepowers:post-mortem-writer" "$REPO_ROOT/plugins/srepowers-core/commands/post-mortem-writer.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

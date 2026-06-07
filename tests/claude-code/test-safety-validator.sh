@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SKILL="$REPO_ROOT/skills/safety-validator/SKILL.md"
+SKILL="$REPO_ROOT/plugins/srepowers-core/skills/safety-validator/SKILL.md"
 
 echo "=== Test: safety-validator skill ==="
 

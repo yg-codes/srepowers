@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SKILL="$REPO_ROOT/skills/dispatching-parallel-agents-sre/SKILL.md"
+SKILL="$REPO_ROOT/plugins/srepowers-core/skills/dispatching-parallel-agents-sre/SKILL.md"
 
 echo "=== Test: dispatching-parallel-agents-sre skill ==="
 
@@ -17,7 +17,7 @@ if ! rg -q "isolation|shared.state" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:dispatching-parallel-agents-sre" "$REPO_ROOT/commands/dispatching-parallel-agents-sre.md"; then
+if ! rg -q "srepowers:dispatching-parallel-agents-sre" "$REPO_ROOT/plugins/srepowers-core/commands/dispatching-parallel-agents-sre.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

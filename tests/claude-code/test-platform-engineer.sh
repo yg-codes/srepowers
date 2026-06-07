@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SKILL="$REPO_ROOT/skills/platform-engineer/SKILL.md"
+SKILL="$REPO_ROOT/plugins/srepowers-domain/skills/platform-engineer/SKILL.md"
 
 echo "=== Test: platform-engineer skill ==="
 
@@ -17,7 +17,7 @@ if ! rg -q "self.service|service.catalog" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:platform-engineer" "$REPO_ROOT/commands/platform-engineer.md"; then
+if ! rg -q "srepowers:platform-engineer" "$REPO_ROOT/plugins/srepowers-domain/commands/platform-engineer.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

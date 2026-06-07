@@ -3,7 +3,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-SKILL="$REPO_ROOT/skills/network-engineer/SKILL.md"
+SKILL="$REPO_ROOT/plugins/srepowers-domain/skills/network-engineer/SKILL.md"
 
 echo "=== Test: network-engineer skill ==="
 
@@ -17,7 +17,7 @@ if ! rg -q "DNS|load.balanc" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:network-engineer" "$REPO_ROOT/commands/network-engineer.md"; then
+if ! rg -q "srepowers:network-engineer" "$REPO_ROOT/plugins/srepowers-domain/commands/network-engineer.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

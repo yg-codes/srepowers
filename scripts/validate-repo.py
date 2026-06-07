@@ -121,11 +121,22 @@ def validate_mirrors() -> None:
             fail(f"{mirror.relative_to(ROOT)} has broken symlinks: {', '.join(broken)}")
 
 
+def validate_claude_tests() -> None:
+    obsolete = []
+    for path in sorted((ROOT / "tests" / "claude-code").glob("test-*.sh")):
+        text = path.read_text()
+        if "$REPO_ROOT/skills/" in text or "$REPO_ROOT/commands/" in text:
+            obsolete.append(str(path.relative_to(ROOT)))
+    if obsolete:
+        fail(f"Claude tests reference obsolete root paths: {', '.join(obsolete)}")
+
+
 def main() -> None:
     validate_json_files()
     validate_versions()
     validate_skills()
     validate_mirrors()
+    validate_claude_tests()
     print("[PASS] repository metadata, skills, commands, versions, and mirrors are valid")
 
 
