@@ -1,6 +1,6 @@
 ---
 name: golang-pro
-description: Use when building Go applications requiring concurrent programming, microservices architecture, or high-performance systems. Invoke for goroutines, channels, Go generics, gRPC integration.
+description: Use when building or reviewing Go applications requiring concurrent programming, microservices architecture, or high-performance systems. Invoke for Go code review, goroutines, channels, generics, and gRPC integration.
 ---
 
 # Golang Pro
@@ -13,6 +13,7 @@ description: Use when building Go applications requiring concurrent programming,
 - Optimizing Go code for performance and memory efficiency
 - Designing interfaces and using Go generics
 - Setting up testing with table-driven tests and benchmarks
+- Reviewing Go code for correctness, concurrency, security, and performance issues
 
 ## Core Workflow
 

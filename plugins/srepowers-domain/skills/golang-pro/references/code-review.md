@@ -330,10 +330,10 @@ func DoSomething(k Key, v Value) {
 }
 ```
 
-### time.Ticker not stopped — memory leak
+### time.Ticker lifecycle not explicit
 
 ```go
-// BAD — ticker never stopped, goroutine leaks
+// BAD — ticker delivery is not stopped explicitly when polling ends
 func poll(ctx context.Context) {
     ticker := time.NewTicker(5 * time.Second)
     for {
@@ -341,12 +341,14 @@ func poll(ctx context.Context) {
         case <-ticker.C:
             doPoll()
         case <-ctx.Done():
-            return // ticker.Goroutine still running
+            return
         }
     }
 }
 
-// GOOD — always stop the ticker
+// GOOD — stop delivery explicitly when the ticker is no longer needed.
+// Go 1.23+ can garbage-collect unreferenced tickers, but Stop still makes
+// the lifecycle clear and supports older Go versions.
 func poll(ctx context.Context) {
     ticker := time.NewTicker(5 * time.Second)
     defer ticker.Stop()
@@ -411,7 +413,7 @@ func NewUserGetter(db *sql.DB) UserGetter {  // Returns interface
 }
 
 // GOOD — return concrete type, accept interface where polymorphism is needed
-func NewUserGetter(db *sql.DB) *UserGetter {  // Returns struct
+func NewUserGetter(db *sql.DB) *userGetter {  // Returns struct
     return &userGetter{db: db}
 }
 ```
@@ -923,7 +925,7 @@ func GenerateToken() string {
 import "crypto/rand"
 
 func GenerateToken() string {
-    return rand.Text() // Go 1.22+: crypto/rand.Text
+    return rand.Text() // crypto/rand.Text requires Go 1.24+
 }
 ```
 

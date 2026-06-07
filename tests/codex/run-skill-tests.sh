@@ -49,6 +49,8 @@ plugins = {
 
 marketplace = json.loads(Path(".agents/plugins/marketplace.json").read_text())
 entries = {entry["name"]: entry for entry in marketplace["plugins"]}
+root_manifest = json.loads(Path(".codex-plugin/plugin.json").read_text())
+versions = {root_manifest["version"]}
 
 for plugin, expected_count in plugins.items():
     plugin_root = Path("plugins") / plugin
@@ -62,7 +64,19 @@ for plugin, expected_count in plugins.items():
     if not claude_manifest.is_file():
         raise SystemExit(f"{claude_manifest} missing")
 
+    entry = entries.get(plugin)
+    if not entry:
+        raise SystemExit(f"{plugin} missing from Codex marketplace")
+
     manifest = json.loads(codex_manifest.read_text())
+    claude_plugin_manifest = json.loads(claude_manifest.read_text())
+    versions.update(
+        {
+            entry["version"],
+            manifest["version"],
+            claude_plugin_manifest["version"],
+        }
+    )
     if manifest.get("name") != plugin:
         raise SystemExit(f"{codex_manifest} name mismatch")
     if manifest.get("skills") != "./skills/":
@@ -83,9 +97,6 @@ for plugin, expected_count in plugins.items():
         if match.group(1).strip() != skill:
             raise SystemExit(f"{plugin}/{skill} frontmatter name mismatch")
 
-    entry = entries.get(plugin)
-    if not entry:
-        raise SystemExit(f"{plugin} missing from Codex marketplace")
     source = entry.get("source")
     if not isinstance(source, dict):
         raise SystemExit(f"{plugin} marketplace source must be object")
@@ -95,6 +106,9 @@ for plugin, expected_count in plugins.items():
         raise SystemExit(f"{plugin} marketplace source.path mismatch")
     if entry.get("category") != "Engineering":
         raise SystemExit(f"{plugin} marketplace category must be Engineering")
+
+if len(versions) != 1:
+    raise SystemExit(f"Codex marketplace and plugin versions differ: {sorted(versions)}")
 
 canonical = sorted(
     path.parent.name
