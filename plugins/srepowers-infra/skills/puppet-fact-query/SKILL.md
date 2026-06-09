@@ -309,15 +309,16 @@ from hostname prefix. **Adapt this table to your environment's naming convention
 
 | Hostname prefix | Environment | Example source |
 |----------------|-------------|----------------|
-| `site-a-dev-*`, `site-a-sit-*` | `infra_sit` | control/infra |
-| `site-a-uat-*` | `infra_uat` | control/infra |
-| `site-a-mgmt-*` | `infra_prod` | control/infra |
-| `site-b-dev-*`, `site-b-sit-*` | `jax_sit` | control/jax |
-| `site-b-uat-*` | `jax_uat` | control/jax |
-| `site-b-mgmt-*` | `jax_prod` | control/jax |
+| `site-a-dev-*`, `site-a-sit-*` | `site_a_sit` | control/site-a |
+| `site-a-uat-*` | `site_a_uat` | control/site-a |
+| `site-a-mgmt-*` | `site_a_prod` | control/site-a |
+| `site-b-dev-*`, `site-b-sit-*` | `site_b_sit` | control/site-b |
+| `site-b-uat-*` | `site_b_uat` | control/site-b |
+| `site-b-mgmt-*` | `site_b_prod` | control/site-b |
 | `pve*` | `proxmox_prod` | control/proxmox |
 
-Replace `site-a`/`site-b` with your actual site prefixes.
+Replace `site-a`/`site-b` with your actual site prefixes and the
+`site_a_`/`site_b_` environment prefixes with your control-repo names.
 
 ## IP Resolution
 

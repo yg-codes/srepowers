@@ -863,8 +863,6 @@ lvm_vg_0
 lvm_vg_1
 lvm_vg_datavg_pvs
 lvm_vg_logvg_pvs
-lvm_vg_rl_fsx-dev-avalon-app01_pvs
-lvm_vg_rl_fsx-dev-netsniff01_pvs
 lvm_vg_rl_pvs
 lvm_vg_rocky_pvs
 lvm_vgs
