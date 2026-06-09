@@ -296,6 +296,9 @@ glab variable set DEPLOY_KEY "-----BEGIN..." --masked --protected
 - `srepowers:safety-validator` — before merging pipeline changes to protected branches
 - `srepowers:test-driven-operation` — for verifying pipeline changes
 
+**See also:**
+- `gitlab-cli` (private skill) — full `glab` CLI command reference (all subcommands: MR, issue, repo, release, API). This skill has a brief `glab` quick reference; the private skill covers every `glab` subcommand in depth.
+
 ## SRE Principles
 
 ### Safety First

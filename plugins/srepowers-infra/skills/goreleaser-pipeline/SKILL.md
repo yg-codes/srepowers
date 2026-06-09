@@ -286,6 +286,10 @@ ldflags:
 **Pairs with:**
 - `srepowers:gitlab-ecr-pipeline` — when also pushing Docker images alongside binaries
 
+**Site-specific overlays** (private skills — invoke this skill first, then the overlay for platform-specific details):
+- `github-goreleaser-pipeline` — GitHub Actions workflow (auto `GITHUB_TOKEN`, `gh` verification, permissions model)
+- `gitlab-goreleaser-pipeline` — GitLab token minting, protected tag ordering, API quirks, `CI_JOB_TOKEN` vs real token
+
 ## SRE Principles
 
 ### Safety First

@@ -113,6 +113,7 @@ Portable infrastructure administration — no organization-specific values.
 | `srepowers:pve-admin` | Proxmox VE/PBS administration |
 | `srepowers:pve-vlan-trunk-troubleshooting` | Debugging PVE VLAN trunk connectivity |
 | `srepowers:puppet-code-analyzer` | Puppet code quality analysis |
+| `srepowers:puppet-fact-query` | Querying PuppetDB for host inventories by OS, environment, or custom facts |
 | `srepowers:dns-operations` | DNS administration and troubleshooting |
 | `srepowers:certificate-management` | TLS/SSL certificate lifecycle management |
 | `srepowers:backup-and-recovery` | Backup strategy and disaster recovery |

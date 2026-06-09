@@ -64,7 +64,7 @@ srepowers/
 │   │   ├── .codex-plugin/plugin.json
 │   │   ├── skills/
 │   │   └── commands/
-│   ├── srepowers-infra/                ← 10 skills (portable)
+│   ├── srepowers-infra/                ← 11 skills (portable)
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── .codex-plugin/plugin.json
 │   │   ├── skills/
@@ -74,7 +74,7 @@ srepowers/
 │       ├── .codex-plugin/plugin.json
 │       ├── skills/
 │       └── commands/
-├── .agents/skills/                     ← Codex skill mirror (64 symlinks)
+├── .agents/skills/                     ← Codex skill mirror (65 symlinks)
 ├── .codex/skills/                      ← Codex repo-native symlinks
 ├── .codex/agents/                      ← Codex custom agents
 ├── .codex-plugin/                      ← Codex plugin manifest
@@ -86,7 +86,7 @@ srepowers/
 |--------|--------|-------|
 | `srepowers-core` | 28 | Workflow spine, mandatory gates, incident response, SRE practices |
 | `srepowers-domain` | 20 | Software engineering depth: Go, Python, Rust, K8s, Terraform, containers, networking, security, testing, databases |
-| `srepowers-infra` | 10 | Portable infrastructure administration: Proxmox VE, Puppet code analysis, DNS, TLS/PKI, backup/recovery, change management, GitLab CI/CD (incl. ECR & GoReleaser) |
+| `srepowers-infra` | 11 | Portable infrastructure administration: Proxmox VE, Puppet code analysis, PuppetDB queries, DNS, TLS/PKI, backup/recovery, change management, GitLab CI/CD (incl. ECR & GoReleaser) |
 | `srepowers-private` | 6 | Site-specific operational workflows (sanitized templates): Puppet deploy/release/MR lifecycle, Hiera debugging, Ansible — substitute placeholders with your environment's values |
 
 Marketplace install pulls all four at once. Each plugin can also be installed individually if you only need a subset.
@@ -306,6 +306,7 @@ codex plugin marketplace upgrade srepowers-marketplace
 | `pve-admin` | Proxmox VE/PBS: cluster, VM/CT, ZFS, HA |
 | `pve-vlan-trunk-troubleshooting` | PVE VLAN trunk debugging |
 | `puppet-code-analyzer` | Puppet code quality analysis |
+| `puppet-fact-query` | PuppetDB host inventory queries (read-only) |
 | `puppet-merge-request` | Puppet control repo MR creation |
 | `puppet-deploy` | Puppet environment deployment workflow |
 | `puppet-release` | Puppet module release process |

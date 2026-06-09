@@ -62,6 +62,10 @@ Depending on the task, provide:
 3. **Doc Sites:** Site configuration + content structure + build instructions
 4. **Guides/Tutorials:** Structured markdown with examples + diagrams
 
+## See also
+
+- `sre-readme` (private skill) — operational/infrastructure README generation (deploy/verify/rollback template, sizing guide). Use this skill for code documentation (docstrings, API specs, doc sites); use `sre-readme` for SRE-facing operational READMEs.
+
 ## Knowledge Reference
 
 Google/NumPy/Sphinx docstrings, JSDoc, OpenAPI 3.0/3.1, AsyncAPI, gRPC/protobuf, FastAPI, Django, NestJS, Express, GraphQL, Docusaurus, MkDocs, VitePress, Swagger UI, Redoc, Stoplight
