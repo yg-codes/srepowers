@@ -59,17 +59,17 @@ srepowers/
 │   │   ├── skills/
 │   │   ├── commands/
 │   │   └── hooks/
-│   ├── srepowers-domain/               ← 19 skills
+│   ├── srepowers-domain/               ← 20 skills
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── .codex-plugin/plugin.json
 │   │   ├── skills/
 │   │   └── commands/
-│   └── srepowers-infra/                ← 5 skills
+│   └── srepowers-infra/                ← 16 skills
 │       ├── .claude-plugin/plugin.json
 │       ├── .codex-plugin/plugin.json
 │       ├── skills/
 │       └── commands/
-├── .agents/skills/                     ← Codex skill mirror (52 symlinks)
+├── .agents/skills/                     ← Codex skill mirror (64 symlinks)
 ├── .codex/skills/                      ← Codex repo-native symlinks
 ├── .codex/agents/                      ← Codex custom agents
 ├── .codex-plugin/                      ← Codex plugin manifest
@@ -80,8 +80,8 @@ srepowers/
 | Plugin | Skills | Focus |
 |--------|--------|-------|
 | `srepowers-core` | 28 | Workflow spine, mandatory gates, incident response, SRE practices |
-| `srepowers-domain` | 19 | Software engineering depth: Go, Python, Rust, K8s, Terraform, containers, networking, security, testing, databases |
-| `srepowers-infra` | 5 | Infrastructure administration: Proxmox VE, Puppet, GitLab CI/CD |
+| `srepowers-domain` | 20 | Software engineering depth: Go, Python, Rust, K8s, Terraform, containers, networking, security, testing, databases |
+| `srepowers-infra` | 16 | Infrastructure administration: Proxmox VE, Puppet, Ansible, DNS, GitLab CI/CD, certificates, backup/recovery, change management |
 
 Marketplace install pulls all three at once. Each plugin can also be installed individually if you only need a subset.
 
@@ -289,6 +289,7 @@ codex plugin marketplace upgrade srepowers-marketplace
 | `cloud-architect` | Cloud: migrations, Well-Architected |
 | `platform-engineer` | IDP: Backstage, golden paths |
 | `code-documenter` | Documentation: API specs, doc portals |
+| `linux-admin` | Linux system administration and operations |
 
 ### Infrastructure Administration (infra)
 
@@ -298,7 +299,18 @@ codex plugin marketplace upgrade srepowers-marketplace
 | `pve-vlan-trunk-troubleshooting` | PVE VLAN trunk debugging |
 | `puppet-code-analyzer` | Puppet code quality analysis |
 | `puppet-merge-request` | Puppet control repo MR creation |
+| `puppet-deploy` | Puppet environment deployment workflow |
+| `puppet-release` | Puppet module release process |
+| `puppet-module-init` | Puppet module scaffolding and initialization |
 | `gitlab-ecr-pipeline` | GitLab CI/CD to AWS ECR |
+| `ansible-operations` | Ansible playbook development and execution |
+| `hiera-debugging` | Debugging Puppet Hiera data resolution |
+| `dns-operations` | DNS administration and troubleshooting |
+| `gitlab-cicd` | GitLab CI/CD pipeline authoring and debugging |
+| `certificate-management` | TLS/SSL certificate lifecycle management |
+| `backup-and-recovery` | Backup strategy and disaster recovery |
+| `change-management` | Change control board processes and procedures |
+| `goreleaser-pipeline` | GoReleaser pipeline setup and releases |
 
 ### SRE Principles
 

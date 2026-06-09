@@ -11,8 +11,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PLUGINS = {
     "srepowers-core": 28,
-    "srepowers-domain": 19,
-    "srepowers-infra": 5,
+    "srepowers-domain": 20,
+    "srepowers-infra": 16,
 }
 
 

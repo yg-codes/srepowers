@@ -62,7 +62,7 @@ SRE workflow spine, mandatory gates, and incident response.
 
 ---
 
-## Plugin: srepowers-domain (19 skills)
+## Plugin: srepowers-domain (20 skills)
 
 Software engineering domain expertise.
 
@@ -83,6 +83,7 @@ Software engineering domain expertise.
 | `srepowers:terragrunt-expert` | Terragrunt module orchestration |
 | `srepowers:container-engineer` | Container builds and security |
 | `srepowers:network-engineer` | Cloud and hybrid networking |
+| `srepowers:linux-admin` | Linux system administration and operations |
 
 ### Languages
 | Skill | Use When |
@@ -103,7 +104,7 @@ Software engineering domain expertise.
 
 ---
 
-## Plugin: srepowers-infra (5 skills)
+## Plugin: srepowers-infra (16 skills)
 
 Infrastructure-specific administration.
 
@@ -113,4 +114,15 @@ Infrastructure-specific administration.
 | `srepowers:pve-vlan-trunk-troubleshooting` | Debugging PVE VLAN trunk connectivity |
 | `srepowers:puppet-code-analyzer` | Puppet code quality analysis |
 | `srepowers:puppet-merge-request` | Creating Puppet control repo merge requests |
+| `srepowers:puppet-deploy` | Puppet environment deployment workflow |
+| `srepowers:puppet-release` | Puppet module release process |
+| `srepowers:puppet-module-init` | Puppet module scaffolding and initialization |
 | `srepowers:gitlab-ecr-pipeline` | GitLab CI/CD → AWS ECR |
+| `srepowers:ansible-operations` | Ansible playbook development and execution |
+| `srepowers:hiera-debugging` | Debugging Puppet Hiera data resolution |
+| `srepowers:dns-operations` | DNS administration and troubleshooting |
+| `srepowers:gitlab-cicd` | GitLab CI/CD pipeline authoring and debugging |
+| `srepowers:certificate-management` | TLS/SSL certificate lifecycle management |
+| `srepowers:backup-and-recovery` | Backup strategy and disaster recovery |
+| `srepowers:change-management` | Change control board processes and procedures |
+| `srepowers:goreleaser-pipeline` | GoReleaser pipeline setup and releases |
