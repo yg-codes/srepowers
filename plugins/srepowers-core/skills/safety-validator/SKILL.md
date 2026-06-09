@@ -94,17 +94,27 @@ RISK_PATTERNS = {
         r'kubectl\s+delete\s+all',
         r'DROP\s+DATABASE',
         r'terraform\s+destroy',
+        r'zpool\s+upgrade',
+        r'qm\s+destroy',
+        r'pvecm\s+delnode',
+        r'qm\s+migrate.*--force',
     ],
     'high': [
         r'kubectl\s+delete',
         r'aws\s+.*\s+terminate',
         r'docker\s+system\s+prune',
         r'git\s+push\s+.*--force',
+        r'zfs\s+destroy\s+-r',
+        r'pvesr\s+delete.*-job',
+        r'apt\s+dist-upgrade',
+        r'\breboot\b',
     ],
     'medium': [
         r'kubectl\s+apply',
         r'terraform\s+apply',
         r'systemctl\s+restart',
+        r'pvesm\s+set.*--disable',
+        r'ha-manager\s+remove',
     ],
 }
 ```
@@ -230,6 +240,51 @@ rules:
     message: "Modifying system configuration"
 ```
 
+### Proxmox VE / ZFS Commands
+
+```yaml
+rules:
+  - pattern: "zpool\s+upgrade"
+    risk: critical
+    message: "Pool cannot be imported by older ZFS versions. Irreversible."
+
+  - pattern: "qm\s+destroy"
+    risk: critical
+    message: "Permanently deletes VM and all disks"
+
+  - pattern: "pvecm\s+delnode"
+    risk: critical
+    message: "Permanent cluster removal. Cannot rejoin without full re-provision."
+
+  - pattern: "qm\s+migrate.*--force"
+    risk: critical
+    message: "Bypasses safety checks during migration"
+
+  - pattern: "zfs\s+destroy\s+-r"
+    risk: high
+    message: "Recursive irreversible data loss"
+
+  - pattern: "pvesr\s+delete.*-job"
+    risk: high
+    message: "Destroys replication configuration and failover capability"
+
+  - pattern: "apt\s+dist-upgrade.*-y"
+    risk: high
+    message: "Major upgrade without draining VMs or draining quorum"
+
+  - pattern: "reboot"
+    risk: high
+    message: "Unclean VM shutdown if guests still running. Drain first."
+
+  - pattern: "pvesm\s+set.*--disable\s+1"
+    risk: medium
+    message: "Disables storage for all VMs using it"
+
+  - pattern: "ha-manager\s+remove"
+    risk: medium
+    message: "Removes HA protection from managed resource"
+```
+
 ## Safe Alternatives
 
 ### Instead of Delete
@@ -248,6 +303,17 @@ rules:
 | `git push --force` | `git push --force-with-lease` |
 | `kubectl apply --force` | `kubectl --context <context> apply` (normal) |
 | `rm -f` | `rm -i` (interactive) |
+
+### Instead of PVE Destructive Operations
+
+| Dangerous | Safer Alternative |
+|-----------|-------------------|
+| `zpool upgrade <pool>` | `zpool upgrade -n <pool>` (dry-run) — DO NOT upgrade until rollback window closes |
+| `qm destroy <vmid>` | `qm snapshot <vmid> pre-delete` → confirm no references → then destroy |
+| `zfs destroy -r <dataset>` | `zfs destroy -nrv <dataset>` (dry-run recursive) → verify scope → destroy without `-r` if possible |
+| `reboot` on node with VMs | `qm migrate <vmid> <target>` per VM → verify quorum → then reboot |
+| `pvesr delete-local-job <id>` | `pvesr verify-local-job <id>` — confirm replication target is healthy first |
+| `apt dist-upgrade -y` | `apt dist-upgrade --simulate` → review → drain VMs → upgrade one node at a time |
 
 ## SRE Principles
 

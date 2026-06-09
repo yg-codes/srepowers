@@ -431,37 +431,78 @@ dmesg -T | tail -50
 
 ## Upgrade Procedures
 
-### PVE Minor Upgrade
+### PVE Minor Upgrade (Point Release)
+
+Minor upgrades are relatively safe but still require node-by-node execution:
 
 ```bash
-# Update package list
-apt update
+# Per node — one at a time, never simultaneously
 
-# Check for updates
+# 1. Check what will change
+apt update
 apt list --upgradable
 
-# Upgrade packages
+# 2. Simulate first
+apt dist-upgrade --simulate
+
+# 3. Apply
 apt dist-upgrade
 
-# Reboot if kernel updated
+# 4. Reboot if kernel updated
+#    FIRST: migrate or verify no critical VMs are running
+#    pvecm status  # confirm quorum will hold
 reboot
 ```
 
-### PVE Major Upgrade
+### PVE Major Upgrade (Version Bump)
 
-1. Read release notes for target version
-2. Backup all VMs/CTs and configurations
-3. Check upgrade checklist in Proxmox documentation
-4. Update apt sources for new version
-5. Run upgrade commands
-6. Verify all services after upgrade
+**⚠️ Major PVE upgrades are high-risk operations. Do NOT follow a simplified procedure.**
+
+A major upgrade (e.g., 7.x → 8.x, 8.x → 9.x) must follow a comprehensive upgrade plan that covers:
+
+**Pre-upgrade requirements:**
+- Verify cluster quorum on all nodes before starting
+- Create ZFS snapshots on all pools (`zfs snapshot -r <pool>@pre-upgrade`)
+- Live-migrate all VMs off the target node (or accept downtime)
+- Verify replication jobs are healthy (`pvesr status`)
+- Confirm all backups are current
+
+**Critical irreversible operations to avoid during upgrade:**
+- `zpool upgrade <pool>` — pool becomes unreadable by previous ZFS version. Do NOT run until the entire cluster is upgraded and validated, rollback window has passed.
+- `pvecm delnode` — permanent cluster removal. Never needed for upgrades.
+
+**One-node-at-a-time constraint:**
+- Upgrade exactly one node at a time
+- After upgrading each node, verify: cluster quorum, storage accessibility, VM functionality
+- Do not proceed to next node until current node is fully validated
+
+**If a comprehensive upgrade plan template exists** in the project (e.g., `docs/plans/upgrade-plan-template.md`), populate it rather than following a generic procedure. The template covers replication pre-sync, live-migration drain, quorum gates, single-vs-dual-pool conditionals, and rollback procedures.
 
 ```bash
-# Example for 8.x to 9.x (always check official docs)
-sed -i 's/bookworm/trixie/g' /etc/apt/sources.list
+# DO NOT use this as your upgrade procedure.
+# This shows ONLY the package-level commands for reference.
+# Always use a comprehensive plan template.
+
+# Per node (one at a time):
+sed -i 's/bookworm/trixie/g' /etc/apt/sources.list  # example — verify codename
 apt update
+apt dist-upgrade --simulate  # review before applying
 apt dist-upgrade
+reboot
+
+# Post-upgrade verification per node:
+pvecm status          # quorum OK?
+zpool status          # pools healthy?
+pvesm status          # storage accessible?
+qm list               # VMs visible?
+pvesr status          # replication OK?
 ```
+
+**Known pitfalls:**
+- ZFS ARC cache incompatibility between versions — verify `zfs_arc_max` module parameter loads correctly after upgrade
+- Replication jobs may fail if `pvesr` state is inconsistent — verify and re-sync before migrating VMs that depend on replication
+- Mixed-storage VMs (local + shared) require special handling during live migration drain
+- Always run `apt dist-upgrade --simulate` and review the package list before applying — kernel and ZFS package changes are the highest risk
 
 ## Troubleshooting
 
@@ -554,6 +595,20 @@ grep -i "cluster" references/*.pdf  # Won't work directly on PDF
 | `scripts/check-pve-cluster.sh` | Comprehensive cluster health check |
 | `scripts/check-pve-capacity.sh` | Capacity, allocation, and inventory reporting |
 | `scripts/phase0-replication.sh` | ZFS replication job management |
+
+> **Note:** These scripts are the versions bundled with this skill. If a canonical version exists in the operational PVE repository, prefer the repository version — it may include updates not yet synced to this skill.
+
+### Air-Gapped Data Collection
+
+For PVE clusters without direct SSH access, use the upload-run-collect relay pattern:
+
+1. **Bundle the collection script** into a self-contained archive (no external dependencies)
+2. **Upload** to the target node via available channel (web console file upload, manual USB, etc.)
+3. **Run** on the target node — script writes JSON output to a known path
+4. **Collect** the output — user copies/pastes the JSON output or downloads via the same channel
+5. **Validate** — verify JSON is well-formed (`jq -e . < output.json`) before integrating with aggregated data
+
+**Validation requirement:** When accepting pasted JSON output, always validate with `jq -e .` since the exit code comes from SSH or the paste operation, not from the script that generated the output. A truncated or malformed paste will silently produce bad data in the aggregate report.
 
 ### External Resources
 

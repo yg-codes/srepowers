@@ -297,6 +297,62 @@ done
 
 For these: **document the human checkpoint explicitly.** Do not claim automated verification where none exists.
 
+## Read-Only Pipeline Verification
+
+When the task is data collection (SSH → collect → aggregate → report) rather than state change, the standard RED/GREEN cycle doesn't apply — there's no target state to fail first. Instead, verify the pipeline integrity:
+
+**Pipeline TDO discipline:**
+
+1. **Validate each collection output** — verify JSON is well-formed before integrating
+   ```bash
+   jq -e . node-output.json  # exits 1 on malformed JSON
+   ```
+
+2. **Verify aggregation reconciles with raw data** — counts, sums, and key fields must match
+   ```bash
+   # Raw count from all sources
+   RAW_COUNT=$(cat raw/*.json | jq 'length')
+   # Aggregate count
+   AGG_COUNT=$(jq 'length' aggregate.json)
+   [ "$RAW_COUNT" -eq "$AGG_COUNT" ] && echo "PASS: counts match" || echo "FAIL: $RAW_COUNT != $AGG_COUNT"
+   ```
+
+3. **Spot-check report numbers against raw data** — pick 2-3 entries and verify they appear correctly in the final report
+
+4. **Verify no silent truncation** — piped SSH output can be truncated; verify record counts match expected host counts
+
+**When a validation step fails:** Do not proceed to the next stage. Investigate and fix the data quality issue first. Aggregating bad data produces a bad report.
+
+## Puppet Verification Examples
+
+TDO applies to Puppet infrastructure changes with `ppr` (the `puppet agent -t` wrapper):
+
+**RED — verify class not yet applied:**
+```bash
+ssh host "puppet resource --environment <env> file /etc/app/config.yaml" 2>&1
+# Expected: file { '/etc/app/config.yaml': ensure => 'absent' }
+```
+
+**GREEN — puppet apply:**
+```bash
+ssh host "sudo ppr --no-noop --environment <env>" 2>&1 | tail -20
+# Check: exit ∈ {0, 2}, no "Error:" lines
+```
+
+**Verify GREEN — confirm resource state:**
+```bash
+ssh host "puppet resource file /etc/app/config.yaml" 2>&1
+# Expected: file { '/etc/app/config.yaml': ensure => 'file', content => '{md5}abc123' }
+```
+
+**Idempotency check — noop after apply should show zero changes:**
+```bash
+ssh host "sudo ppr --environment <env>" 2>&1 | grep "changed"
+# Expected: changed=0
+```
+
+**Important:** Puppet exit codes are subtle — exit 2 means "changes applied successfully" (not failure), exit 6 means "changes applied AND failures occurred." Always check for `Error:` lines in output, not just the exit code.
+
 ## Why Order Matters
 
 **"I'll verify after to confirm it worked"**

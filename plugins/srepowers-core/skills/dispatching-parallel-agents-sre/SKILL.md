@@ -197,3 +197,40 @@ After agents return:
 - **kubernetes-specialist** - K8s-specific debugging
 - **terraform-engineer** - Terraform state issues
 - **network-engineer** - Network layer debugging
+
+## Lightweight Pattern: Parallel SSH Without Subagents
+
+Not every parallel task needs a full Claude subagent. When the work is **mechanical command execution** (run script on N hosts, collect output, aggregate), use `parallel-ssh` directly instead of dispatching N reasoning agents.
+
+**When to use this pattern instead of subagent dispatch:**
+
+| Condition | Use parallel-ssh |
+|-----------|-----------------|
+| Same command on all hosts | ✅ |
+| No reasoning needed per host | ✅ |
+| No file edits per host | ✅ |
+| Output is structured (JSON, TSV) | ✅ |
+| Each host needs different logic | ❌ — use subagents |
+| Need to debug per-host failures | ❌ — use subagents |
+
+**Pattern:**
+
+```bash
+# 1. Collect from all hosts
+parallel-ssh -h hosts.txt -o /tmp/pssh-out "bash -s" < collect-data.sh
+
+# 2. Validate each output
+for f in /tmp/pssh-out/*; do
+  if ! jq -e . "$f" > /dev/null 2>&1; then
+    echo "INVALID: $(basename $f)"
+  fi
+done
+
+# 3. Aggregate
+jq -s '.' /tmp/pssh-out/* > aggregate.json
+
+# 4. Verify aggregate
+jq 'length' aggregate.json  # should match host count
+```
+
+**Why not subagents for this:** Subagents don't inherit shell environment variables (e.g., `SSHPASS`), require significantly more tokens, and add latency for what is fundamentally a script execution problem. Reserve subagents for tasks that require reasoning, debugging, or multi-step decision-making.

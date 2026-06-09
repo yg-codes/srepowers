@@ -77,6 +77,9 @@ Task tool (general-purpose):
     - Keycloak: `kubectl get keycloakrealm/example -o jsonpath='{.status.ready}'`
     - API: `curl -s https://api.example.com/users/123 | jq '.email'`
     - Git: `git log --oneline -1 control-repo/`
+    - SSH/Puppet: `ssh host "puppet resource file /etc/app/config.yaml" 2>&1`
+    - SSH/PVE: `ssh host "pvecm status" | grep Quorum`
+    - SSH/Service: `ssh host "systemctl is-active nginx"`
 
     ## Deviation Handling
 

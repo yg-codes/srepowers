@@ -186,6 +186,17 @@ Each task MUST include these fields in its header for machine-parseable extracti
 | **Dry-run first** | Validate with `--dry-run=client` before live |
 | **Side-effect check** | Verify adjacent systems weren't affected |
 | **TDO discipline** | Define verification/baseline → Verify RED or capture baseline → Dry-run → GREEN → Verify GREEN → Side effects → Commit |
+| **Template-first** | If an existing plan template exists in the project, populate it rather than generating a new structure |
+
+## Template-First Planning
+
+Before generating a plan from the standard format above, check whether the project already has a plan template:
+
+1. **Search for existing templates** in `docs/plans/`, looking for files named `*-template.md` or `*-template*.md`
+2. **If a template exists:** Populate it with the operation's specific values rather than creating a new structure. Templates encode domain-specific safety gates, conditional sections, and lessons learned that the generic format doesn't cover.
+3. **If no template exists:** Use the standard format in this skill.
+
+Existing templates are authoritative for their domain — they may include sections (replication pre-sync, quorum gates, pool conditionals) that are essential for that specific operation type.
 
 ## Planning Anti-Patterns
 
