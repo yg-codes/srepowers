@@ -1,6 +1,6 @@
 ---
 name: puppet-release
-description: Use when releasing Puppet modules through the cross-repo workflow — tagging modules, bumping Puppetfile references, and promoting through the sit -> uat -> prod merge chain on gitlab.fsx.zone. Also use for "bump module", "release module X", "promote to sit/uat/prod", "update Puppetfile", "tag module", or any Puppet cross-repo release operation.
+description: Use when releasing Puppet modules through the cross-repo workflow — tagging modules, bumping Puppetfile references, and promoting through the sit -> uat -> prod merge chain on gitlab.example.com. Also use for "bump module", "release module X", "promote to sit/uat/prod", "update Puppetfile", "tag module", or any Puppet cross-repo release operation.
 ---
 
 # Puppet Cross-Repo Release
@@ -23,8 +23,8 @@ Each arrow is a manual operation (tag, Puppetfile edit, MR). This skill automate
 
 ## Prerequisites
 
-- Working in the Puppet multi-repo workspace (`~/src/fsx/puppet` or equivalent)
-- `glab` CLI authenticated to `gitlab.fsx.zone`
+- Working in the Puppet multi-repo workspace (`~/src/puppet` or equivalent)
+- `glab` CLI authenticated to `gitlab.example.com`
 - `git` configured with correct author email (company domain)
 - Module repo has a clean working tree on the topic branch
 - Ticket ID known (e.g., INFRA-1234)
@@ -66,7 +66,7 @@ Create a descriptive tag on the module's topic branch for testing via g10k.
 
 ```bash
 # cd to module repo root
-cd ~/src/fsx/puppet/modules/<module_name>
+cd ~/src/puppet/modules/<module_name>
 
 # Verify on topic branch
 git branch --show-current
@@ -116,7 +116,7 @@ If this is the first iteration, update the control repo's Puppetfile to point to
 
 ```bash
 # cd to control repo topic branch
-cd ~/src/fsx/puppet/control/<infra|jax>
+cd ~/src/puppet/control/<site-a|site-b>
 git checkout cu_<ticket>_<description>
 git pull
 
@@ -127,7 +127,7 @@ git pull
 
 Then validate and commit:
 ```bash
-./bin/fsx-puppetfile-format check Puppetfile
+./bin/puppetfile-format check Puppetfile
 # Must pass — git modules before forge modules, correct key ordering
 
 git add Puppetfile
@@ -146,7 +146,7 @@ After SIT validation passes, merge the module topic branch to `main` and create 
 ### Step 2.1: Verify Module Tests Pass on Latest
 
 ```bash
-cd ~/src/fsx/puppet/modules/<module_name>
+cd ~/src/puppet/modules/<module_name>
 git checkout cu_<ticket>_<description>
 git pull
 pdk validate && bundle exec rake lint && bundle exec rake spec
@@ -204,7 +204,7 @@ Update the Puppetfile in each control repo environment branch to reference the n
 ### Step 3.1: Determine Scope
 
 Ask the user:
-- Which control repo? (`infra`, `jax`, or both)
+- Which control repo? (`site-a`, `site-b`, or both)
 - Which module was updated?
 - What is the date tag?
 
@@ -213,7 +213,7 @@ Ask the user:
 For each control repo that needs updating:
 
 ```bash
-cd ~/src/fsx/puppet/control/<infra|jax>
+cd ~/src/puppet/control/<site-a|site-b>
 git checkout cu_<ticket>_<description>
 git pull
 
@@ -224,7 +224,7 @@ git pull
 
 Validate:
 ```bash
-./bin/fsx-puppetfile-format check Puppetfile
+./bin/puppetfile-format check Puppetfile
 # Must pass
 ```
 
@@ -240,14 +240,14 @@ git push
 If auto-deploy is not active, trigger manually:
 
 ```bash
-ssh fsx-mgmt-puppet01.fsx.zone "sudo -u puppet env https_proxy=http://proxy:3128 \
+ssh <puppet-master> "sudo -u puppet env https_proxy=http://proxy:3128 \
   /opt/puppetlabs/puppet/bin/g10k -config /etc/puppetlabs/g10k/g10k.yaml"
 ```
 
 ### Step 3.4: Verify Environment Deployment
 
 ```bash
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "cat /etc/puppetlabs/code/environments/<source>_<topic_branch>/.g10k-deploy.json"
 # Confirm the new date tag appears in the deploy signature
 ```
@@ -272,14 +272,14 @@ After each MR merges, update the Puppetfile on the next branch:
 # After sit merge, update on uat branch
 git checkout uat && git pull
 # Edit Puppetfile to same date tag
-./bin/fsx-puppetfile-format check Puppetfile
+./bin/puppetfile-format check Puppetfile
 git add Puppetfile && git commit -m "<TICKET-ID>: Release <module> to YYYY-MM-DD"
 git push
 
 # After uat merge, update on prod branch
 git checkout prod && git pull
 # Edit Puppetfile to same date tag
-./bin/fsx-puppetfile-format check Puppetfile
+./bin/puppetfile-format check Puppetfile
 git add Puppetfile && git commit -m "<TICKET-ID>: Release <module> to YYYY-MM-DD"
 git push
 ```
@@ -292,13 +292,13 @@ git push
 
 | Control repo | Source prefix | Branch pattern | Example environment |
 |-------------|---------------|----------------|---------------------|
-| `control/infra` | `infra` | `infra_<branch>` | `infra_cu_infra_11349_modulejail` |
-| `control/jax` | `jax` | `jax_<branch>` | `jax_cu_exch_717_auto_reboot` |
-| `control/proxmox` | `proxmox` | `proxmox_<branch>` | `proxmox_prod` |
+| `control/site-a` | `site_a` | `site_a_<branch>` | `site_a_cu_1234_example` |
+| `control/site-b` | `site_b` | `site_b_<branch>` | `site_b_cu_100_example` |
+| `control/pve` | `pve` | `pve_<branch>` | `pve_prod` |
 
-**Default branch**: `main` for modules, `prod` for control repos (except proxmox which uses `prod`).
+**Default branch**: `main` for modules, `prod` for control repos (except pve which uses `prod`).
 
-**Modules using `master` instead of `main`:** `fsx_pcap`, `fsx_repo`, `puppet-keepalived`, `fsx_tacacs`. Adjust `--target-branch` accordingly.
+**Modules using `master` instead of `main`:** `mymodule`, `webserver`, `monitoring`. Adjust `--target-branch` accordingly.
 
 ---
 
@@ -307,7 +307,7 @@ git push
 | Issue | Cause | Fix |
 |-------|-------|-----|
 | Tag push rejected | Tag name already exists | Check `git tag -l` — use a different suffix or verify the existing tag points to the right commit |
-| Puppetfile format check fails | Module in wrong position or missing key | Run `./bin/fsx-puppetfile-format fix Puppetfile` then review the diff |
+| Puppetfile format check fails | Module in wrong position or missing key | Run `./bin/puppetfile-format fix Puppetfile` then review the diff |
 | Server hook rejects MR | Commit not reachable from target branch | Rebase topic branch from the target branch first |
 | g10k deploy shows stale tag | Cache or webhook delay | Trigger manual g10k deploy (see Step 3.3) |
 | "Branch name contains non-word characters" | Hyphens/slashes in branch name | Rename branch: `git branch -m <old> <new>` |

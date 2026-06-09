@@ -42,11 +42,11 @@ Create CSR → Sign with CA → Deploy → Monitor → Rotate before expiry
 openssl req -new -newkey rsa:4096 -nodes \
   -keyout server.key \
   -out server.csr \
-  -subj "/C=JP/ST=Tokyo/O=FSX/CN=server.fsx.zone"
+  -subj "/C=JP/ST=Tokyo/O=Example/CN=server.example.com"
 
 # Generate CSR from existing key
 openssl req -new -key server.key -out server.csr \
-  -subj "/C=JP/ST=Tokyo/O=FSX/CN=server.fsx.zone"
+  -subj "/C=JP/ST=Tokyo/O=Example/CN=server.example.com"
 
 # Verify the CSR
 openssl req -text -noout -in server.csr
@@ -70,7 +70,7 @@ openssl x509 -req -in server.csr \
   -days 365 \
   -out server.crt \
   -sha256 \
-  -extfile <(printf "subjectAltName=DNS:server.fsx.zone,DNS:server,DNS:server.internal")
+  -extfile <(printf "subjectAltName=DNS:server.example.com,DNS:server,DNS:server.internal")
 
 # Verify the signed certificate
 openssl x509 -text -noout -in server.crt
@@ -95,32 +95,32 @@ Deploy certificate and key to the target service. Common targets:
 
 ```bash
 # Copy to remote host (stage via /tmp)
-scp /tmp/server.crt server.fsx.zone:/etc/ssl/certs/server.crt
-scp /tmp/server.key server.fsx.zone:/etc/ssl/private/server.key
+scp /tmp/server.crt server.example.com:/etc/ssl/certs/server.crt
+scp /tmp/server.key server.example.com:/etc/ssl/private/server.key
 
 # Set correct permissions
-ssh server.fsx.zone 'chmod 644 /etc/ssl/certs/server.crt'
-ssh server.fsx.zone 'chmod 600 /etc/ssl/private/server.key'
-ssh server.fsx.zone 'chown root:ssl-cert /etc/ssl/private/server.key'
+ssh server.example.com 'chmod 644 /etc/ssl/certs/server.crt'
+ssh server.example.com 'chmod 600 /etc/ssl/private/server.key'
+ssh server.example.com 'chown root:ssl-cert /etc/ssl/private/server.key'
 
 # Reload the service to pick up new certificate
-ssh server.fsx.zone 'sudo systemctl reload nginx'
+ssh server.example.com 'sudo systemctl reload nginx'
 # or
-ssh server.fsx.zone 'sudo systemctl reload haproxy'
+ssh server.example.com 'sudo systemctl reload haproxy'
 ```
 
 ### Step 5: Verify the Deployment
 
 ```bash
 # Check the served certificate
-echo | openssl s_client -connect server.fsx.zone:443 -servername server.fsx.zone 2>/dev/null | \
+echo | openssl s_client -connect server.example.com:443 -servername server.example.com 2>/dev/null | \
   openssl x509 -noout -dates -subject
 
 # Verify the full chain from client perspective
-echo | openssl s_client -connect server.fsx.zone:443 -servername server.fsx.zone -CAfile ca.crt
+echo | openssl s_client -connect server.example.com:443 -servername server.example.com -CAfile ca.crt
 
 # Check for upcoming expiry (days until expiry)
-echo | openssl s_client -connect server.fsx.zone:443 -servername server.fsx.zone 2>/dev/null | \
+echo | openssl s_client -connect server.example.com:443 -servername server.example.com 2>/dev/null | \
   openssl x509 -noout -enddate | cut -d= -f2
 ```
 
@@ -142,7 +142,7 @@ spec:
     name: ca-issuer
     kind: ClusterIssuer
   dnsNames:
-    - server.fsx.zone
+    - server.example.com
     - server
     - server.internal
 ```
@@ -193,7 +193,7 @@ kubectl get trustbundle <name> -o yaml
 
 ```bash
 # Check expiry on a remote host
-ssh server.fsx.zone \
+ssh server.example.com \
   "echo | openssl s_client -connect localhost:443 2>/dev/null | openssl x509 -noout -enddate"
 
 # Check local certificate files
@@ -218,7 +218,7 @@ done | sort -t= -k2
 
 ```bash
 # Verbose TLS connection attempt
-openssl s_client -connect server.fsx.zone:443 -servername server.fsx.zone -showcerts
+openssl s_client -connect server.example.com:443 -servername server.example.com -showcerts
 
 # Common errors and causes:
 # "unable to verify the first certificate" → incomplete chain

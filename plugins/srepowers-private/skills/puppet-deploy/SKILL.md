@@ -30,7 +30,7 @@ Skipping noop requires explicit user approval. This is non-negotiable unless the
 - Environment name derived from hostname (see Environment Reference below)
 - `parallel-ssh` installed (for fleet operations)
 - `sshpass` or SSH key access to target hosts
-- Puppet master accessible at `fsx-mgmt-puppet01.fsx.zone`
+- Puppet master accessible at `<puppet-master>`
 
 Verify before starting:
 ```bash
@@ -44,22 +44,22 @@ Derive the `--environment` value from the target host's hostname prefix. **Branc
 
 | Host prefix | Environment prefix | Default suffix | Example |
 |-------------|-------------------|----------------|---------|
-| `fsx-*` | `infra_` | From hostname (see below) | `infra_sit`, `infra_uat`, `infra_prod` |
-| `jax-*` | `jax_` | From hostname (see below) | `jax_sit`, `jax_uat`, `jax_prod` |
-| `pve*` | `proxmox_` | `prod` | `proxmox_prod` |
+| `site-a-*` | `site_a_` | From hostname (see below) | `site_a_sit`, `site_a_uat`, `site_a_prod` |
+| `site-b-*` | `site_b_` | From hostname (see below) | `site_b_sit`, `site_b_uat`, `site_b_prod` |
+| `pve*` | `pve_` | `prod` | `pve_prod` |
 
 **Hostname suffix → environment suffix:**
 
 | Hostname pattern | Suffix | Full environment |
 |-----------------|--------|-----------------|
-| `fsx-dev-*`, `fsx-sit-*` | `sit` | `infra_sit` |
-| `fsx-uat-*` | `uat` | `infra_uat` |
-| `fsx-mgmt-*` (production) | `prod` | `infra_prod` |
-| `jax-dev-*`, `jax-sit-*` | `sit` | `jax_sit` |
-| `jax-uat-*` | `uat` | `jax_uat` |
-| `jax-mgmt-*` (production) | `prod` | `jax_prod` |
+| `site-a-dev-*`, `site-a-sit-*` | `sit` | `site_a_sit` |
+| `site-a-uat-*` | `uat` | `site_a_uat` |
+| `site-a-mgmt-*` (production) | `prod` | `site_a_prod` |
+| `site-b-dev-*`, `site-b-sit-*` | `sit` | `site_b_sit` |
+| `site-b-uat-*` | `uat` | `site_b_uat` |
+| `site-b-mgmt-*` (production) | `prod` | `site_b_prod` |
 
-**Unmerged branch override:** Validating branch `cu_infra_10689` on `fsx-uat-rsyslog01` → use `infra_cu_infra_10689` (branch wins over `infra_uat`).
+**Unmerged branch override:** Validating branch `cu_1234_example` on `<uat-host>` → use `site_a_cu_1234_example` (branch wins over `site_a_uat`).
 
 ---
 
@@ -68,13 +68,13 @@ Derive the `--environment` value from the target host's hostname prefix. **Branc
 Confirm the environment exists and g10k has deployed it before touching any agent.
 
 ```bash
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "cat /etc/puppetlabs/code/environments/<env_name>/.g10k-deploy.json"
 ```
 
 **If environment is missing or stale:**
 ```bash
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "sudo -u puppet env https_proxy=http://proxy:3128 \
   /opt/puppetlabs/puppet/bin/g10k -config /etc/puppetlabs/g10k/g10k.yaml"
 ```
@@ -88,7 +88,7 @@ ssh fsx-mgmt-puppet01.fsx.zone \
 Spot-check critical Hiera keys before running noop. This catches hierarchy misresolution before it surfaces as compilation errors.
 
 ```bash
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "sudo puppet lookup --environment <env_name> --node <node_fqdn> <key>"
 ```
 
@@ -108,7 +108,7 @@ Run puppet agent in noop mode across all target hosts. **ppr defaults to noop** 
 ### Single Host
 
 ```bash
-ssh <host>.fsx.zone 'sudo ppr --environment <env_name>' 2>&1 | tail -20
+ssh <host> 'sudo ppr --environment <env_name>' 2>&1 | tail -20
 ```
 
 ### Fleet (parallel-ssh)
@@ -120,7 +120,7 @@ parallel-ssh -h <hosts_file> -o /tmp/pssh-noop -e /tmp/pssh-noop \
 
 Or with inline hosts:
 ```bash
-parallel-ssh -H "host01.fsx.zone host02.fsx.zone" -i \
+parallel-ssh -H "host01.example.com host02.example.com" -i \
   "sudo ppr --environment <env_name>" 2>&1 | tail -40
 ```
 
@@ -130,7 +130,7 @@ parallel-ssh -h <hosts_file> -o /tmp/pssh-noop -e /tmp/pssh-noop \
   "sudo ppr --environment <env_name>"
 
 # Review per-host results
-for f in /tmp/pssh-noop/*.fsx.zone; do
+for f in /tmp/pssh-noop/*; do
   echo "=== $(basename $f) ==="
   tail -10 "$f"
 done
@@ -201,7 +201,7 @@ Puppet honors the **last flag** for conflicting options, so `--no-noop` wins. Th
 ### Single Host Apply
 
 ```bash
-ssh <host>.fsx.zone 'sudo ppr --no-noop --environment <env_name>' 2>&1 | tail -20
+ssh <host> 'sudo ppr --no-noop --environment <env_name>' 2>&1 | tail -20
 ```
 
 ### Fleet Apply
@@ -233,7 +233,7 @@ When hosts must be updated one at a time:
 ```bash
 hosts=(host01 host02 host03)
 for host in "${hosts[@]}"; do
-  fqdn="${host}.fsx.zone"
+  fqdn=".example.com"
   echo "--- Applying on $fqdn ---"
   ssh "$fqdn" 'sudo ppr --no-noop --environment <env_name>' 2>&1 | tail -20 || true
   ssh "$fqdn" 'sudo pplog' 2>&1 | tail -10
@@ -286,18 +286,18 @@ Present a structured summary to the user:
 
 ```
 Host                           Status    Errors  Catalog Time
-fsx-sit-rsyslog01.fsx.zone     OK        0       12.4s
-fsx-sit-rsyslog02.fsx.zone     OK        0       11.8s
-fsx-uat-rsyslog01.fsx.zone     FAILED    2       8.2s
+<sit-host>     OK        0       12.4s
+<sit-host-2>     OK        0       11.8s
+<uat-host>     FAILED    2       8.2s
 
-Action required: Investigate failures on fsx-uat-rsyslog01 before promoting to prod.
+Action required: Investigate failures on <uat-host> before promoting to prod.
 ```
 
 ---
 
 ## Guardrails
 
-- **Never** execute commands against PROD hosts (`fsx-mgmt-*`, `jax-mgmt-*`, `pve*` with `*_prod` environment) without the user's explicit demand in the current turn
+- **Never** execute commands against PROD hosts (`site-a-mgmt-*`, `site-b-mgmt-*`, `pve*` with `*_prod` environment) without the user's explicit demand in the current turn
 - **Never** skip noop — dry run is mandatory before apply unless the user explicitly approves skipping in this turn
 - **Never** apply to all hosts at once if the change affects clustered services — use Rolling Apply
 - **Never** classify a run as success without applying the single decision rule. Exit 2 alone is not enough — exit 6 also signals failure

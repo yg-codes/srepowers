@@ -7,8 +7,8 @@
 #   scripts/phase0-replication.sh
 #
 # Usage:
-#   ssh root@<source-node>.fsx.zone 'bash -s -- --target <target-node> setup 22001 22013 22009' < scripts/phase0-replication.sh
-#   ssh root@<source-node>.fsx.zone 'bash -s -- --target <target-node> verify 22001 22013 22009' < scripts/phase0-replication.sh
+#   ssh root@<source-node>.example.com 'bash -s -- --target <target-node> setup 22001 22013 22009' < scripts/phase0-replication.sh
+#   ssh root@<source-node>.example.com 'bash -s -- --target <target-node> verify 22001 22013 22009' < scripts/phase0-replication.sh
 #
 # Prerequisites:
 #   - jq installed on all nodes (apt install -y jq)
@@ -16,7 +16,7 @@
 #   - Run setup well before the maintenance window
 #
 # Created: 2026-03-16
-# Cluster: jax-mgmt-pve00 (UAT)
+# Cluster: pve-node00 (UAT)
 
 set -euo pipefail
 
@@ -62,15 +62,15 @@ Options:
 	--yes                    Skip confirmation prompt for delete (non-interactive mode)
 
 Examples:
-	${0##*/} --target fsx-dev-pve21 setup 98701 99609
-	${0##*/} --target jax-mgmt-pve03 setup 22001 22013 22009
-	${0##*/} --target jax-mgmt-pve03 verify 22001 22013 22009
-	${0##*/} --target jax-mgmt-pve03 delete 22001 22013 22009
+	${0##*/} --target pve-node21 setup 98701 99609
+	${0##*/} --target pve-node03 setup 22001 22013 22009
+	${0##*/} --target pve-node03 verify 22001 22013 22009
+	${0##*/} --target pve-node03 delete 22001 22013 22009
 
 Remote usage:
-	ssh root@fsx-dev-pve23.fsx.zone 'bash -s -- --target fsx-dev-pve21 setup 98701 99609' < ${0##*/}
-	ssh root@jax-mgmt-pve01.fsx.zone 'bash -s -- --target jax-mgmt-pve03 verify 22001 22013 22009' < ${0##*/}
-	ssh root@jax-mgmt-pve01.fsx.zone 'bash -s -- --target jax-mgmt-pve03 delete 22001 22013 22009' < ${0##*/}
+	ssh root@pve-node23.example.com 'bash -s -- --target pve-node21 setup 98701 99609' < ${0##*/}
+	ssh root@pve-node01.example.com 'bash -s -- --target pve-node03 verify 22001 22013 22009' < ${0##*/}
+	ssh root@pve-node01.example.com 'bash -s -- --target pve-node03 delete 22001 22013 22009' < ${0##*/}
 EOF
 }
 

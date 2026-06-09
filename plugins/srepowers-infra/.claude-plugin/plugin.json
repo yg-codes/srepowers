@@ -1,7 +1,7 @@
 {
   "name": "srepowers-infra",
-  "version": "5.1.3",
-  "description": "Infrastructure-specific administration — Proxmox VE, Puppet, and GitLab CI/CD pipelines",
+  "version": "5.2.0",
+  "description": "Portable infrastructure administration — Proxmox VE, Puppet code analysis, DNS, TLS/PKI, backup, change management, and GitLab CI/CD pipelines",
   "author": {
     "name": "yg-codes",
     "email": "yg-codes@users.noreply.github.com",
@@ -12,13 +12,13 @@
   "license": "MIT",
   "keywords": [
     "proxmox", "pve", "puppet", "gitlab", "ci-cd", "ecr",
-    "infrastructure", "vlan", "merge-request"
+    "infrastructure", "vlan", "dns", "tls", "backup", "goreleaser"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "SREPowers Infra",
-    "shortDescription": "Proxmox, Puppet, and GitLab CI/CD skills",
-    "longDescription": "Infrastructure administration skills for Proxmox VE/PBS management, Puppet code analysis and merge requests, and GitLab CI/CD pipelines pushing to AWS ECR.",
+    "shortDescription": "Proxmox, Puppet analysis, DNS, TLS, backup, and GitLab CI/CD skills",
+    "longDescription": "Portable infrastructure administration skills with no organization-specific values: Proxmox VE/PBS management, Puppet code analysis, DNS and TLS/PKI operations, backup and recovery, change management, and GitLab CI/CD pipelines (including AWS ECR and GoReleaser).",
     "developerName": "yg-codes",
     "category": "Engineering",
     "capabilities": ["Read", "Write"],

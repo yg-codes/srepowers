@@ -286,7 +286,7 @@ For collecting captures from remote hosts, follow toolchains.md file relay and m
 ### Stale Capture Check (MANDATORY before new captures)
 
 ```bash
-for HOST in host01.fsx.zone host02.fsx.zone; do
+for HOST in host01.example.com host02.example.com; do
   echo "=== $HOST ==="
   sshpass -e ssh root@"$HOST" 'ps -ef | grep "[t]cpdump"'
   echo
@@ -297,7 +297,7 @@ done
 
 ```bash
 CAPTURE_ID="dns_err"  # unique per investigation
-for HOST in host01.fsx.zone host02.fsx.zone; do
+for HOST in host01.example.com host02.example.com; do
   sshpass -e ssh root@"$HOST" \
     "nohup /usr/sbin/tcpdump -i any -nn -U -s 0 -C 100 -W 10 \
     -w /var/tmp/${CAPTURE_ID}.pcap '<BPF filter>' </dev/null >/dev/null 2>&1 &"
@@ -309,7 +309,7 @@ done
 
 ```bash
 CAPTURE_ID="dns_err"  # must match start
-for HOST in host01.fsx.zone host02.fsx.zone; do
+for HOST in host01.example.com host02.example.com; do
   echo "=== $HOST ==="
   sshpass -e ssh root@"$HOST" \
     "ps aux | grep \"[t]cpdump.*-w /var/tmp/${CAPTURE_ID}.pcap\" | head -3; \
@@ -322,13 +322,13 @@ done
 ```bash
 TS=$(date +%Y%m%d_%H%M%S)
 CAPTURE_ID="dns_err"
-for HOST in host01.fsx.zone host02.fsx.zone; do
+for HOST in host01.example.com host02.example.com; do
   HOST_SHORT=$(echo "$HOST" | sed 's/\..*//')
   mkdir -p "data/${HOST_SHORT}-${TS}"
   sshpass -e scp root@"$HOST":/var/tmp/${CAPTURE_ID}.pcap* "data/${HOST_SHORT}-${TS}/"
 done
 
-for HOST in host01.fsx.zone host02.fsx.zone; do
+for HOST in host01.example.com host02.example.com; do
   sshpass -e ssh root@"$HOST" "pkill -f 'tcpdump.*-w /var/tmp/${CAPTURE_ID}.pcap'"
   echo "Stopped capture on $HOST"
 done

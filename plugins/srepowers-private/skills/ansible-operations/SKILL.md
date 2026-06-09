@@ -30,7 +30,7 @@ Author, validate, and execute Ansible playbooks for fleet automation. Covers the
 
 | Path Pattern | Type | Notes |
 |-------------|------|-------|
-| `~/src/fsx/ansible-playbooks-prod/` | Main playbook repo | INI inventory in `inventory/`, variables in `group_vars/` and `host_vars/` |
+| `~/src/ansible-playbooks-prod/` | Main playbook repo | INI inventory in `inventory/`, variables in `group_vars/` and `host_vars/` |
 | `ansible.cfg` present | Playbook root | Ansible configuration file |
 | `roles/` directory | Role structure | Standard or custom role layout |
 | `*.yml` / `*.yaml` with `---` and `hosts:` | Playbook file | Ansible YAML playbook |
@@ -98,7 +98,7 @@ ansible-playbook --list-tasks playbook.yml
 
 ```bash
 # Run on a single host via SSH (playbook has connection: local)
-ssh host01.fsx.zone 'cd /path/to/playbooks && ansible-playbook playbook.yml'
+ssh host01.example.com 'cd /path/to/playbooks && ansible-playbook playbook.yml'
 
 # Run with verbose output for debugging
 ansible-playbook -vv playbook.yml
@@ -187,11 +187,11 @@ ansible-vault rekey group_vars/secrets.yml
 **INI format** (most common in this environment):
 ```ini
 [web_servers]
-web01.fsx.zone
-web02.fsx.zone
+web01.example.com
+web02.example.com
 
 [db_servers]
-db01.fsx.zone
+db01.example.com
 
 [production:children]
 web_servers
@@ -205,11 +205,11 @@ env=prod
 
 | Hostname prefix | Group | Environment |
 |----------------|-------|-------------|
-| `fsx-dev-*` | development | SIT |
-| `fsx-sit-*` | sit | SIT |
-| `fsx-uat-*` | uat | UAT |
-| `fsx-mgmt-*` | management | PROD |
-| `jax-*` | jax | varies |
+| `site-a-dev-*` | development | SIT |
+| `site-a-sit-*` | sit | SIT |
+| `site-a-uat-*` | uat | UAT |
+| `site-a-mgmt-*` | management | PROD |
+| `site-b-*` | site-b | varies |
 
 ## Common Modules Quick Reference
 
@@ -249,7 +249,7 @@ env=prod
 
 ### Safety First
 - Always run `--check --diff` before `--diff` (apply mode) — the dry-run is not optional
-- Never run against production (`fsx-mgmt-*`, `jax-mgmt-*`) without explicit user approval
+- Never run against production (`site-a-mgmt-*`, `site-b-mgmt-*`) without explicit user approval
 - Use `--limit` to scope execution to intended hosts only
 
 ### Structured Output

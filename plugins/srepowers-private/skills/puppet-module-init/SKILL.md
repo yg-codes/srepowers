@@ -15,14 +15,14 @@ Set up the development context for a new Puppet infrastructure ticket: read the 
 
 - ClickUp MCP tools available (for ticket lookup)
 - Git configured with correct author email (company domain)
-- Module repo already cloned locally under `~/src/fsx/puppet/modules/`
-- `glab` CLI authenticated to `gitlab.fsx.zone`
+- Module repo already cloned locally under `~/src/puppet/modules/`
+- `glab` CLI authenticated to `gitlab.example.com`
 
 Verify before starting:
 ```bash
 git config user.email              # Must be company email
 glab auth status                   # Must show authenticated
-ls ~/src/fsx/puppet/modules/       # Module must exist locally
+ls ~/src/puppet/modules/       # Module must exist locally
 ```
 
 ---
@@ -31,7 +31,7 @@ ls ~/src/fsx/puppet/modules/       # Module must exist locally
 
 Fetch the ticket details from ClickUp.
 
-### If the user provides a ticket ID (e.g., "INFRA-11349"):
+### If the user provides a ticket ID (e.g., "INFRA-1234"):
 
 ```bash
 # Use ClickUp search to find the ticket
@@ -52,7 +52,7 @@ Extract the task ID from the URL and fetch directly.
 After fetching the ticket, present a structured summary:
 
 ```
-Ticket: INFRA-11349 — Modulejail kernel module blacklist
+Ticket: INFRA-1234 — Kernel module blacklist
 Status: In Progress
 Priority: High
 CCB State: Approved
@@ -75,46 +75,46 @@ If the ticket description mentions specific modules, suggest them. Otherwise, he
 
 ```bash
 # List available modules
-ls ~/src/fsx/puppet/modules/ | sort
+ls ~/src/puppet/modules/ | sort
 ```
 
 ### Module Selection Guide
 
 | Change Type | Likely Module |
 |-------------|--------------|
-| Kernel/security hardening | `fsx_infra`, `fsx_kernel_security` |
-| Monitoring/checks | `fsx_nrpe` |
-| Log management | `fsx_rsyslog`, `fsx_logrotate` |
-| User management | `fsx_accounts` (via control repo Hiera) |
-| DNS configuration | `fsx_unbound` |
-| SSH/server hardening | `fsx_infra` |
-| Proxmox management | `fsx_proxmox` |
-| JAX business apps | `fsx_jax` |
-| Utility/cron jobs | `fsx_run` |
-| FreeIPA/SSSD | `fsx_ipa` |
-| SFTP configuration | `fsx_sftp` |
-| Squid proxy | `fsx_squid` |
-| Container runtime | `fsx_podman` |
+| Kernel/security hardening | `base`, `kernel_security` |
+| Monitoring/checks | `monitoring` |
+| Log management | `rsyslog`, `logrotate` |
+| User management | `accounts` (via control repo Hiera) |
+| DNS configuration | `dns` |
+| SSH/server hardening | `base` |
+| Proxmox management | `pve` |
+| Business apps | `webserver` |
+| Utility/cron jobs | `cron` |
+| Directory/SSSD | `ipa` |
+| SFTP configuration | `sftp` |
+| Proxy | `proxy` |
+| Container runtime | `container` |
 
 ### Check Module Status
 
 Once the module is identified, verify its current state:
 
 ```bash
-cd ~/src/fsx/puppet/modules/<module_name>
+cd ~/src/puppet/modules/<module_name>
 git status
 git branch --show-current       # Should be on main (or master for exceptions)
 git log --oneline -5             # Recent activity
 ```
 
-**Exception modules** that use `master` instead of `main`: `fsx_pcap`, `fsx_repo`, `puppet-keepalived`, `fsx_tacacs`.
+**Exception modules** that use `master` instead of `main`: `mymodule`, `webserver`, `monitoring`.
 
 ### Read Module Conventions
 
 Read the module's `CLAUDE.md` file for coding conventions, testing patterns, and module-specific rules:
 
 ```bash
-cat ~/src/fsx/puppet/modules/<module_name>/CLAUDE.md
+cat ~/src/puppet/modules/<module_name>/CLAUDE.md
 ```
 
 Key things to extract:
@@ -143,15 +143,15 @@ Topic branches **must** follow these rules (enforced by server-side hooks):
 
 **Examples:**
 ```
-cu_infra_11349_modulejail
-cu_exch_717_auto_reboot
-cu_infra_10615_logrotate
+cu_1234_example
+cu_100_example
+cu_1234_logrotate
 ```
 
 ### Create the Branch
 
 ```bash
-cd ~/src/fsx/puppet/modules/<module_name>
+cd ~/src/puppet/modules/<module_name>
 
 # Ensure on default branch and up to date
 git checkout main          # or 'master' for exception modules
@@ -186,9 +186,9 @@ Present the developer with a comprehensive context summary for working on this t
 ```
 ═══ Development Context ═══
 
-Ticket: INFRA-11349 — Modulejail kernel module blacklist
-Module: fsx_infra (20 manifests, 41 templates)
-Branch: cu_infra_11349_modulejail (from main @ <latest-commit>)
+Ticket: INFRA-1234 — Kernel module blacklist
+Module: base (20 manifests, 41 templates)
+Branch: cu_1234_example (from main @ <latest-commit>)
 
 Module Conventions:
   - Default branch: main
@@ -197,13 +197,13 @@ Module Conventions:
   - Lint overrides: relative, 140chars, documentation, parameter_documentation
 
 Likely Files to Modify:
-  - manifests/security/modulejail.pp (existing class)
+  - manifests/security/blacklist.pp (existing class)
   - data/common.yaml (module data)
-  - templates/security/modulejail_blacklist.conf.epp (new template)
+  - templates/security/module_blacklist.conf.epp (new template)
 
 Related Files:
-  - Control repo: control/infra/data/profile/ (Hiera profiles)
-  - Test specs: spec/classes/security/modulejail_spec.rb
+  - Control repo: control/site-a/data/profile/ (Hiera profiles)
+  - Test specs: spec/classes/security/blacklist_spec.rb
 
 ════════════════════════════
 ```
@@ -220,7 +220,7 @@ Based on the ticket description and module structure, suggest:
 
 ```bash
 # Find related manifests
-cd ~/src/fsx/puppet/modules/<module_name>
+cd ~/src/puppet/modules/<module_name>
 grep -rl "<keyword>" manifests/ 2>/dev/null
 
 # Find related templates
@@ -239,7 +239,7 @@ Create the `docs/<ticket>` directory and an initial `CLAUDE.md` for tracking wor
 ### Create Directory
 
 ```bash
-mkdir -p ~/src/fsx/puppet/docs/<TICKET_ID>
+mkdir -p ~/src/puppet/docs/<TICKET_ID>
 ```
 
 ### Write Skeleton CLAUDE.md
@@ -267,7 +267,7 @@ Write the initial documentation file with ticket metadata and placeholder sectio
 
 ## Control Repo Changes
 
-### control/<infra|jax>
+### control/<site-a|site-b>
 
 - <change description>
 
@@ -296,8 +296,8 @@ This skeleton becomes the living document for the ticket. Update it as work prog
 
 | Issue | Cause | Fix |
 |-------|-------|-----|
-| Module not cloned locally | Module exists on GitLab but not checked out | `cd ~/src/fsx/puppet && git clone <url> modules/<name>` |
-| Branch name rejected by server | Contains hyphens, slashes, or dots | Use underscores only: `cu_infra_1234_my_feature` |
+| Module not cloned locally | Module exists on GitLab but not checked out | `cd ~/src/puppet && git clone <url> modules/<name>` |
+| Branch name rejected by server | Contains hyphens, slashes, or dots | Use underscores only: `cu_1234_my_feature` |
 | ClickUp ticket not found | Ticket ID doesn't match any task name | Ask user for the exact ClickUp task URL or task ID |
 | Module uses `master` not `main` | Exception modules listed above | Use `git checkout master` and `git pull` instead |
 | `glab auth` fails | Token expired | User needs to re-authenticate |

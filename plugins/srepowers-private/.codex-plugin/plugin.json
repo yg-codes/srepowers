@@ -1,0 +1,28 @@
+{
+  "name": "srepowers-private",
+  "version": "5.2.0",
+  "description": "Site-specific operational workflows — Puppet deploy/release/MR lifecycle, Hiera debugging, and Ansible operations. Sanitized templates: replace placeholders with your environment's values.",
+  "author": {
+    "name": "yg-codes",
+    "email": "yg-codes@users.noreply.github.com",
+    "url": "https://github.com/yg-codes/srepowers"
+  },
+  "homepage": "https://github.com/yg-codes/srepowers",
+  "repository": "https://github.com/yg-codes/srepowers",
+  "license": "MIT",
+  "keywords": [
+    "puppet", "ansible", "hiera", "deploy", "release",
+    "merge-request", "g10k", "workflow", "private"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SREPowers Private",
+    "shortDescription": "Site-specific Puppet, Hiera, and Ansible workflow skills",
+    "longDescription": "Organization-specific operational workflow skills for the Puppet cross-repo release lifecycle (module init, release, control-repo merge requests, fleet deploy), Hiera data debugging, and Ansible automation. Shipped as sanitized templates — substitute placeholders (puppet master host, environment names, ticket prefixes) with your own environment's values, which belong in your project CLAUDE.md, not in the skill.",
+    "developerName": "yg-codes",
+    "category": "Engineering",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/yg-codes/srepowers",
+    "brandColor": "#6A1B9A"
+  }
+}

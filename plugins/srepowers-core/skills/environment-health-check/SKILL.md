@@ -421,7 +421,7 @@ exec: "openssl": executable file not found in $PATH
 **Fix:**
 ```bash
 # Option 1: Check cert expiry on the host node (not inside the container)
-ssh node.fsx.zone "openssl x509 -checkend 2592000 -noout -in /etc/kubernetes/pki/etcd/server.crt"
+ssh node.example.com "openssl x509 -checkend 2592000 -noout -in /etc/kubernetes/pki/etcd/server.crt"
 
 # Option 2: Use kubectl to decode the cert from a secret (if certs are managed by cert-manager)
 kubectl --context <ctx> -n cert-manager get secret <secret-name> \

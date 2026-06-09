@@ -34,11 +34,11 @@ Identify the exact key and the host where it fails:
 
 ```bash
 # On puppet master — look up the key for the specific node
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "sudo puppet lookup --environment <env> --node <node_fqdn> <key>"
 
 # With explain — shows the full resolution path
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "sudo puppet lookup --environment <env> --node <node_fqdn> <key> --explain"
 ```
 
@@ -53,7 +53,7 @@ The `--explain` output shows:
 Read the `hiera.yaml` for the environment:
 
 ```bash
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "cat /etc/puppetlabs/code/environments/<env>/hiera.yaml"
 ```
 
@@ -69,15 +69,15 @@ Walk the hierarchy manually to find where the value comes from:
 ```bash
 # Check each level of the hierarchy
 # Level 1: node-specific
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "cat /etc/puppetlabs/code/environments/<env>/data/nodes/<node_fqdn>.yaml 2>/dev/null | grep '<key>'"
 
 # Level 2: role (if using role/profile pattern)
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "cat /etc/puppetlabs/code/environments/<env>/data/roles/<role>.yaml 2>/dev/null | grep '<key>'"
 
 # Level 3: common
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "cat /etc/puppetlabs/code/environments/<env>/data/common.yaml 2>/dev/null | grep '<key>'"
 ```
 
@@ -87,10 +87,10 @@ Compare the Hiera value against the class parameter type:
 
 ```bash
 # Get the class parameter type declaration
-grep -A2 "<parameter>" ~/src/fsx/puppet/modules/<module>/manifests/<file>.pp
+grep -A2 "<parameter>" ~/src/puppet/modules/<module>/manifests/<file>.pp
 
 # Get the actual resolved value
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "sudo puppet lookup --environment <env> --node <node_fqdn> <class>::<parameter> --render-as json"
 ```
 
@@ -112,7 +112,7 @@ If the `hiera-validator` tool is available:
 
 ```bash
 # Validate all Hiera data against class parameter types
-~/src/fsx/it/sre/hiera-validator/bin/hiera-validator \
+~/src/sre/hiera-validator/bin/hiera-validator \
   --hiera-data /path/to/data/ \
   --module-path /path/to/modules/ \
   --environment <env>
@@ -129,7 +129,7 @@ Apply the fix to the correct hierarchy level, then verify:
 
 ```bash
 # Re-run lookup to confirm the fix
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "sudo puppet lookup --environment <env> --node <node_fqdn> <key>"
 
 # Run noop on the affected node to confirm no compilation errors
@@ -186,11 +186,11 @@ mymodule::config::port: 8080
 **Fix:**
 ```bash
 # Check g10k deploy timestamp
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "cat /etc/puppetlabs/code/environments/<env>/.g10k-deploy.json"
 
 # Force g10k redeploy if needed
-ssh fsx-mgmt-puppet01.fsx.zone \
+ssh <puppet-master> \
   "sudo -u puppet /opt/puppetlabs/puppet/bin/g10k -config /etc/puppetlabs/g10k/g10k.yaml"
 ```
 

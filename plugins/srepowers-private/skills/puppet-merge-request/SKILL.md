@@ -1,11 +1,11 @@
 ---
 name: puppet-merge-request
-description: Use when creating Puppet control repo merge requests for the sit → uat → prod pipeline on gitlab.fsx.zone - includes branch rename validation, conflict pre-check, and glab MR creation
+description: Use when creating Puppet control repo merge requests for the sit → uat → prod pipeline on gitlab.example.com - includes branch rename validation, conflict pre-check, and glab MR creation
 ---
 
 # Puppet Merge Request
 
-Create merge requests for Puppet control repo branches (`control/infra`, `control/jax`) targeting the `sit → uat → prod` pipeline on `gitlab.fsx.zone`.
+Create merge requests for Puppet control repo branches (`control/site-a`, `control/site-b`) targeting the `sit → uat → prod` pipeline on `gitlab.example.com`.
 
 **Core principle:** Validate branch name → Pre-check conflicts → Create MRs → Report results.
 
@@ -13,9 +13,9 @@ Create merge requests for Puppet control repo branches (`control/infra`, `contro
 
 ## Prerequisites
 
-- Working inside a Puppet control repo (`control/infra` or `control/jax`)
+- Working inside a Puppet control repo (`control/site-a` or `control/site-b`)
 - On a topic branch with commits ready to merge
-- `glab` CLI authenticated to `gitlab.fsx.zone`
+- `glab` CLI authenticated to `gitlab.example.com`
 - Clean working tree (no uncommitted changes)
 
 Verify before starting:
@@ -32,24 +32,24 @@ Topic branches **must** use `cu_` prefix with word characters only (no hyphens, 
 ```bash
 current_branch=$(git branch --show-current)
 
-# Valid: cu_infra_10768_subid_sss, cu_infra_10615_logrotate
-# Invalid: cu_infra-10768-subid, cu_infra/10615, cu_infra.10615
+# Valid: cu_1234_example, cu_1234_logrotate
+# Invalid: cu_1234-example, cu_1234/example, cu_1234.example
 ```
 
 **If the branch name contains non-word characters** (common mistake: missing underscores), rename it:
 
 ```bash
 # Rename local branch
-git branch -m "$current_branch" "cu_infra_<ticketid>_<description>"
+git branch -m "$current_branch" "cu_<ticketid>_<description>"
 
 # Push the renamed branch
-git push origin "cu_infra_<ticketid>_<description>"
+git push origin "cu_<ticketid>_<description>"
 
 # Delete the old branch from origin
 git push origin --delete "$current_branch"
 
 # Fix upstream tracking
-git branch --set-upstream-to="origin/cu_infra_<ticketid>_<description>" "cu_infra_<ticketid>_<description>"
+git branch --set-upstream-to="origin/cu_<ticketid>_<description>" "cu_<ticketid>_<description>"
 ```
 
 **Verify the rename:**
@@ -157,9 +157,9 @@ Present a summary table with all created MRs:
 ```
 | Target | MR | URL |
 |--------|-----|-----|
-| sit    | !NNN | https://gitlab.fsx.zone/puppet/control/infra/-/merge_requests/NNN |
-| uat    | !NNN | https://gitlab.fsx.zone/puppet/control/infra/-/merge_requests/NNN |
-| prod   | !NNN | https://gitlab.fsx.zone/puppet/control/infra/-/merge_requests/NNN |
+| sit    | !NNN | https://gitlab.example.com/puppet/control/site-a/-/merge_requests/NNN |
+| uat    | !NNN | https://gitlab.example.com/puppet/control/site-a/-/merge_requests/NNN |
+| prod   | !NNN | https://gitlab.example.com/puppet/control/site-a/-/merge_requests/NNN |
 ```
 
 Remind the user of the merge order:
@@ -172,16 +172,16 @@ The Puppet environment is derived from the branch name via g10k as `{source}_{br
 
 | Control Repo | Source Prefix | Example Branch | Environment |
 |---|---|---|---|
-| `control/infra` | `infra_` | `cu_infra_10768_subid_sss` | `infra_cu_infra_10768_subid_sss` |
-| `control/jax` | `jax_` | `cu_exch_685_splunk` | `jax_cu_exch_685_splunk` |
-| `control/proxmox` | `proxmox_` | N/A | No env branches, uses facts |
+| `control/site-a` | `site_a_` | `cu_1234_example` | `site_a_cu_1234_example` |
+| `control/site-b` | `site_b_` | `cu_100_example` | `site_b_cu_100_example` |
+| `control/pve` | `pve_` | N/A | No env branches, uses facts |
 
 ## Common Issues
 
 | Issue | Cause | Fix |
 |-------|-------|-----|
 | `Branches with non-'word' characters cannot be deployed` | Hyphens/slashes/dots in branch name | Rename branch with underscores only |
-| `a1b2c3 has a bad author email` | Git configured with personal email | `git config user.email "firstname.lastname@finstadiumx.co.jp"` |
+| `a1b2c3 has a bad author email` | Git configured with personal email | `git config user.email "firstname.lastname@example.com"` |
 | `Commit a1b2c3 is not in the official uat branch` | Trying to merge to prod before uat | Merge to uat first |
 | `You are pushing N commits` | Too many commits in one MR | Split into smaller MRs |
 | Conflict on `Puppetfile` | Module version bumps clash | Rebase onto target, resolve version conflicts |

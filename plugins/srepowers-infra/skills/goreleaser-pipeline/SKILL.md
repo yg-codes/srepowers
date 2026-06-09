@@ -210,7 +210,7 @@ glab release view v1.2.3
 
 # Download and test the binary
 curl -L -o mytool.tar.gz \
-  "https://gitlab.fsx.zone/api/v4/projects/<id>/packages/generic/mytool/v1.2.3/mytool_v1.2.3_linux_amd64.tar.gz"
+  "https://gitlab.example.com/api/v4/projects/<id>/packages/generic/mytool/v1.2.3/mytool_v1.2.3_linux_amd64.tar.gz"
 tar xzf mytool.tar.gz
 ./mytool --version
 ```

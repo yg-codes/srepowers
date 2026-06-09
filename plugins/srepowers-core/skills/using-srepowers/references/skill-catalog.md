@@ -104,25 +104,47 @@ Software engineering domain expertise.
 
 ---
 
-## Plugin: srepowers-infra (16 skills)
+## Plugin: srepowers-infra (10 skills)
 
-Infrastructure-specific administration.
+Portable infrastructure administration — no organization-specific values.
 
 | Skill | Use When |
 |-------|----------|
 | `srepowers:pve-admin` | Proxmox VE/PBS administration |
 | `srepowers:pve-vlan-trunk-troubleshooting` | Debugging PVE VLAN trunk connectivity |
 | `srepowers:puppet-code-analyzer` | Puppet code quality analysis |
-| `srepowers:puppet-merge-request` | Creating Puppet control repo merge requests |
-| `srepowers:puppet-deploy` | Puppet environment deployment workflow |
-| `srepowers:puppet-release` | Puppet module release process |
-| `srepowers:puppet-module-init` | Puppet module scaffolding and initialization |
-| `srepowers:gitlab-ecr-pipeline` | GitLab CI/CD → AWS ECR |
-| `srepowers:ansible-operations` | Ansible playbook development and execution |
-| `srepowers:hiera-debugging` | Debugging Puppet Hiera data resolution |
 | `srepowers:dns-operations` | DNS administration and troubleshooting |
-| `srepowers:gitlab-cicd` | GitLab CI/CD pipeline authoring and debugging |
 | `srepowers:certificate-management` | TLS/SSL certificate lifecycle management |
 | `srepowers:backup-and-recovery` | Backup strategy and disaster recovery |
 | `srepowers:change-management` | Change control board processes and procedures |
-| `srepowers:goreleaser-pipeline` | GoReleaser pipeline setup and releases |
+
+**GitLab CI family** — pick the most specific skill; each handles a distinct
+pipeline shape and cross-references the others. Not duplicates.
+
+| Skill | Use When |
+|-------|----------|
+| `srepowers:gitlab-cicd` | Base: `.gitlab-ci.yml` authoring, runners, pipeline debugging |
+| `srepowers:gitlab-ecr-pipeline` | Specialization: build/mirror container images → AWS ECR |
+| `srepowers:goreleaser-pipeline` | Specialization: Go binary cross-compile/release via GoReleaser |
+
+---
+
+## Plugin: srepowers-private (6 skills)
+
+Site-specific operational workflows, shipped as **sanitized templates**.
+Substitute placeholders (`<puppet-master>`, `<host>`, `site-a`/`site-b`
+prefixes, `<TICKET-ID>`) with your environment's values — those belong in your
+project `CLAUDE.md`, not in the skill.
+
+**Puppet lifecycle family** — complementary phases of one cross-repo workflow,
+not duplicates. Typical order: init → analyze → release → merge-request →
+deploy; debug Hiera at any point.
+
+| Skill | Use When |
+|-------|----------|
+| `srepowers:puppet-module-init` | Start a ticket: topic branch, dev context, doc skeleton |
+| `srepowers:puppet-release` | Tag module, bump Puppetfile, promote through env chain |
+| `srepowers:puppet-merge-request` | Create control-repo MRs for the sit → uat → prod chain |
+| `srepowers:puppet-deploy` | Run noop/apply across hosts or fleets; classify exit codes |
+| `srepowers:hiera-debugging` | Trace why a Hiera key resolves to an unexpected value |
+| `srepowers:ansible-operations` | Ansible playbook development, inventory, vault, execution |

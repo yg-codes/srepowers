@@ -47,11 +47,11 @@ Use the fast path only for low-risk, read-only, or single-file/local-only work w
 
 ## Plugin Structure
 
-SREPowers is distributed as a marketplace containing three plugins, each with its own skills and commands.
+SREPowers is distributed as a marketplace containing four plugins, each with its own skills and commands.
 
 ```
 srepowers/
-├── .claude-plugin/marketplace.json     ← lists all 3 plugins
+├── .claude-plugin/marketplace.json     ← lists all 4 plugins
 ├── plugins/
 │   ├── srepowers-core/                 ← 28 skills
 │   │   ├── .claude-plugin/plugin.json
@@ -64,7 +64,12 @@ srepowers/
 │   │   ├── .codex-plugin/plugin.json
 │   │   ├── skills/
 │   │   └── commands/
-│   └── srepowers-infra/                ← 16 skills
+│   ├── srepowers-infra/                ← 10 skills (portable)
+│   │   ├── .claude-plugin/plugin.json
+│   │   ├── .codex-plugin/plugin.json
+│   │   ├── skills/
+│   │   └── commands/
+│   └── srepowers-private/              ← 6 skills (sanitized site templates)
 │       ├── .claude-plugin/plugin.json
 │       ├── .codex-plugin/plugin.json
 │       ├── skills/
@@ -81,9 +86,10 @@ srepowers/
 |--------|--------|-------|
 | `srepowers-core` | 28 | Workflow spine, mandatory gates, incident response, SRE practices |
 | `srepowers-domain` | 20 | Software engineering depth: Go, Python, Rust, K8s, Terraform, containers, networking, security, testing, databases |
-| `srepowers-infra` | 16 | Infrastructure administration: Proxmox VE, Puppet, Ansible, DNS, GitLab CI/CD, certificates, backup/recovery, change management |
+| `srepowers-infra` | 10 | Portable infrastructure administration: Proxmox VE, Puppet code analysis, DNS, TLS/PKI, backup/recovery, change management, GitLab CI/CD (incl. ECR & GoReleaser) |
+| `srepowers-private` | 6 | Site-specific operational workflows (sanitized templates): Puppet deploy/release/MR lifecycle, Hiera debugging, Ansible — substitute placeholders with your environment's values |
 
-Marketplace install pulls all three at once. Each plugin can also be installed individually if you only need a subset.
+Marketplace install pulls all four at once. Each plugin can also be installed individually if you only need a subset.
 
 ## What's Inside
 
@@ -107,12 +113,13 @@ Marketplace install pulls all three at once. Each plugin can also be installed i
 /plugin install srepowers-core@srepowers-marketplace
 /plugin install srepowers-domain@srepowers-marketplace
 /plugin install srepowers-infra@srepowers-marketplace
+/plugin install srepowers-private@srepowers-marketplace
 ```
 
-Or install all three at once:
+Or install all four at once:
 
 ```bash
-/plugin install srepowers-core@srepowers-marketplace srepowers-domain@srepowers-marketplace srepowers-infra@srepowers-marketplace
+/plugin install srepowers-core@srepowers-marketplace srepowers-domain@srepowers-marketplace srepowers-infra@srepowers-marketplace srepowers-private@srepowers-marketplace
 ```
 
 Verify with `/help`. You should see commands such as `/test-driven-operation` and `/subagent-driven-operation`.
@@ -143,9 +150,10 @@ codex plugin marketplace add yg-codes/srepowers
 
 - `srepowers-core` — workflow spine, mandatory gates, incident response
 - `srepowers-domain` — Go, Python, Rust, Kubernetes, Terraform, security, testing, and other domain skills
-- `srepowers-infra` — Proxmox, Puppet, and GitLab CI/CD skills
+- `srepowers-infra` — portable Proxmox, Puppet analysis, DNS, TLS, backup, and GitLab CI/CD skills
+- `srepowers-private` — sanitized site-specific Puppet/Hiera/Ansible workflow templates
 
-Install all three for full SREPowers coverage.
+Install all four for full SREPowers coverage.
 
 4. Verify installed skills.
 
