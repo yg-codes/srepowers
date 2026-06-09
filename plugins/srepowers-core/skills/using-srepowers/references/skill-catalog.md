@@ -62,7 +62,7 @@ SRE workflow spine, mandatory gates, and incident response.
 
 ---
 
-## Plugin: srepowers-domain (20 skills)
+## Plugin: srepowers-domain (21 skills)
 
 Software engineering domain expertise.
 
@@ -71,6 +71,7 @@ Software engineering domain expertise.
 |-------|----------|
 | `srepowers:architecture-designer` | System architecture design |
 | `srepowers:cloud-architect` | Cloud architecture and migrations |
+| `srepowers:aws-account-inspection` | Read-only AWS account audit / resource discovery + Well-Architected scorecard |
 | `srepowers:microservices-architect` | Distributed systems design |
 | `srepowers:platform-engineer` | Internal developer platforms |
 | `srepowers:cost-optimizer` | Cloud cost optimization |

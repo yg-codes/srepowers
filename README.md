@@ -59,7 +59,7 @@ srepowers/
 │   │   ├── skills/
 │   │   ├── commands/
 │   │   └── hooks/
-│   ├── srepowers-domain/               ← 20 skills
+│   ├── srepowers-domain/               ← 21 skills
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── .codex-plugin/plugin.json
 │   │   ├── skills/
