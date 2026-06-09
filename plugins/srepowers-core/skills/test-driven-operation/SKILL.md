@@ -347,7 +347,7 @@ ssh host "puppet resource file /etc/app/config.yaml" 2>&1
 
 **Idempotency check — noop after apply should show zero changes:**
 ```bash
-ssh host "sudo ppr --environment <env>" 2>&1 | grep "changed"
+ssh host "sudo ppr --environment <env>" 2>&1 | grep -E "changed="
 # Expected: changed=0
 ```
 

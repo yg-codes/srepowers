@@ -442,8 +442,8 @@ Minor upgrades are relatively safe but still require node-by-node execution:
 apt update
 apt list --upgradable
 
-# 2. Simulate first
-apt dist-upgrade --simulate
+# 2. Simulate first (dry-run, no changes made)
+apt dist-upgrade --simulate  # review output before proceeding
 
 # 3. Apply
 apt dist-upgrade

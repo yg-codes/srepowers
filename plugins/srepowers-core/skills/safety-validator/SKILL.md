@@ -264,6 +264,10 @@ rules:
     risk: high
     message: "Recursive irreversible data loss"
 
+  - pattern: "zfs\s+destroy\s+"
+    risk: medium
+    message: "Destroys dataset and dependent snapshots. Use zfs destroy -n to preview."
+
   - pattern: "pvesr\s+delete.*-job"
     risk: high
     message: "Destroys replication configuration and failover capability"
@@ -272,9 +276,10 @@ rules:
     risk: high
     message: "Major upgrade without draining VMs or draining quorum"
 
-  - pattern: "reboot"
+  - pattern: "\breboot\b"
     risk: high
     message: "Unclean VM shutdown if guests still running. Drain first."
+    note: "Flags the reboot command, not the word in comments or documentation."
 
   - pattern: "pvesm\s+set.*--disable\s+1"
     risk: medium
