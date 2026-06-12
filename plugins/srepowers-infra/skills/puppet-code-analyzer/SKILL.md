@@ -119,6 +119,9 @@ scripts/check_best_practices.py --json ~/src/fsx/puppet/modules/fsx_dns > practi
 **Validates:**
 - **Naming conventions**: Class names, resource types, variables (lowercase with underscores)
 - **String quotes**: Prefer single quotes for static strings
+- **Hiera YAML quoting**: All string values quoted — single quotes default, double only for `%{}` interpolation or embedded single quotes; enforced by yamllint `quoted-strings` rule (see `references/puppet-style-guide.md` § Hiera YAML String Quoting)
+- **Psych semantics**: Judge Hiera data types as Ruby Psych (YAML 1.1) resolves them, not YAML 1.2 — unquoted `yes`/`on` are booleans; bulk YAML edits must verify semantic equivalence via Psych parse comparison
+- **eYAML integrity**: `ENC[...]` blobs never reflowed; original line-wrapping preserved verbatim (see style guide § eYAML / ENC Value Handling)
 - **Parameter handling**: Type specifications, default values
 - **Required parameters without defaults**: CRITICAL - causes bootstrap failures when Hiera data doesn't match
 - **Hiera lookups**: Automatic parameter lookup vs. `hiera()` function
@@ -172,7 +175,7 @@ The skill automatically identifies project type and applies appropriate analysis
 |--------------|--------------|----------------|
 | Control repo environment | `~/src/fsx/puppet/control/{infra,jax,...}` | `environment.conf`, `Puppetfile`, role/profile patterns |
 | Module | `~/src/fsx/puppet/modules/fsx_*` | Class structure, parameter handling, documentation |
-| Hiera data | `*.yaml`, `*.yml` | YAML syntax, key references, hierarchy |
+| Hiera data | `*.yaml`, `*.yml` | YAML syntax, string quoting convention, Psych (YAML 1.1) type resolution, eyaml ENC integrity, key references, hierarchy |
 
 ## Configuration Sources
 
@@ -214,6 +217,8 @@ The skill wraps and enhances existing Puppet tooling:
 | **puppet-lint** | Structured output, `--fix` support, project config detection |
 | **PDK** | `pdk validate` integration, metadata-based checks |
 | **puppet parser** | Syntax validation via lint script |
+| **yamllint** | `yamllint --strict data/` per control repo `.yamllint.yml` (incl. `quoted-strings` rule) |
+| **fsx-puppetfile-format** | `./bin/fsx-puppetfile-format check Puppetfile` in control repos (git-before-Forge ordering) |
 | **Git** | Pre-commit hooks (optional), staged file scanning |
 
 ## SRE Principles

@@ -320,6 +320,41 @@ profile::web_server::port_number: 8080
 profile::web_server::enable_ssl: true
 ```
 
+### Hiera YAML String Quoting
+
+**Always quote string values in Hiera YAML.** Single quotes by default; double quotes only where required.
+
+Applies to every string value — mapping values and sequence items, including class names under `classes:`. Keys stay unquoted. Non-strings (booleans, integers, floats) stay unquoted so typed class parameters bind correctly.
+
+```yaml
+# Good
+classes:
+  - 'profile::web_server'
+profile::web_server::admin_key: 'ssh-ed25519 AAAA... admin@host'
+profile::web_server::instance: "%{facts.hostname}-web"   # %{} interpolation → double
+profile::web_server::port_number: 8080                   # integer, not a string
+profile::web_server::enable_ssl: true                    # boolean, not a string
+
+# Bad — unquoted strings (fragile YAML 1.1 behavior)
+profile::web_server::admin_key: ssh-ed25519 AAAA... admin@host
+profile::web_server::alert_url: https://alert.example.com?token=abc&channel=x
+profile::web_server::country: no        # parses as boolean false, not 'no'
+# Bad — double quotes where single suffice
+profile::web_server::timeout: "40s"
+```
+
+**Double quotes are required for:** Hiera `%{}` interpolation (convention — visually flags interpolated values), strings containing single quotes, escape sequences.
+
+**Why — Psych (YAML 1.1) semantics:** Puppet parses Hiera with Ruby Psych, not YAML 1.2: unquoted `yes`/`no`/`on`/`off` become booleans (the Norway problem), `1:23` becomes the integer 83 (sexagesimal), and values starting with `%`/`&`/`*` break parsing. When validating data types or doing bulk YAML rewrites, verify semantic equivalence with **Psych** (`ruby -ryaml -e 'p YAML.unsafe_load_file(f)'`) — PyYAML and YAML 1.2 parsers resolve these scalars differently and will mislead you.
+
+**Enforcement:** control repos carry `quoted-strings: {quote-type: any, required: true}` in `.yamllint.yml`; `yamllint --strict data/` fails on unquoted string values.
+
+### eYAML / ENC Value Handling
+
+- Never reflow, re-wrap, or collapse line-wrapped `ENC[PKCS7,...]` blobs — preserve their original folding verbatim. Collapsing is value-identical (YAML folds line breaks to spaces) but introduces spaces into the long line, breaking yamllint's non-breakable-word line-length exemption.
+- Folded block scalar entries (`key: >`) legitimately carry a trailing newline in the parsed value — validation regexes must allow `\]\s*\z`, not anchor on `\]\z`, or healthy values get false-flagged.
+- Treat ENC values as ordinary YAML strings for quoting purposes; hiera-eyaml tolerates embedded whitespace in the ciphertext.
+
 ## Best Practices
 
 ### Idempotence
