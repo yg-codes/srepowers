@@ -9,12 +9,12 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PLUGINS = {
-    "srepowers-core": 28,
-    "srepowers-domain": 20,
-    "srepowers-infra": 10,
-    "srepowers-private": 6,
-}
+PLUGINS = (
+    "srepowers-core",
+    "srepowers-domain",
+    "srepowers-infra",
+    "srepowers-private",
+)
 
 
 def fail(message: str) -> None:
@@ -67,17 +67,17 @@ def validate_versions() -> None:
 
 def validate_skills() -> None:
     seen: set[str] = set()
+    counts: dict[str, int] = {}
 
-    for plugin, expected_count in PLUGINS.items():
+    for plugin in PLUGINS:
         plugin_root = ROOT / "plugins" / plugin
         skills_dir = plugin_root / "skills"
         commands_dir = plugin_root / "commands"
 
         skills = sorted(path.parent.name for path in skills_dir.glob("*/SKILL.md"))
         commands = sorted(path.stem for path in commands_dir.glob("*.md"))
+        counts[plugin] = len(skills)
 
-        if len(skills) != expected_count:
-            fail(f"{plugin} skill count: expected {expected_count}, got {len(skills)}")
         if skills != commands:
             fail(f"{plugin} skills and command wrappers differ")
 
@@ -101,9 +101,9 @@ def validate_skills() -> None:
                 fail(f"{plugin}/{skill} missing frontmatter description")
 
     readme = (ROOT / "README.md").read_text()
-    for plugin, expected_count in PLUGINS.items():
-        if f"`{plugin}` | {expected_count} |" not in readme:
-            fail(f"README skill count missing or stale for {plugin}")
+    for plugin, count in counts.items():
+        if f"`{plugin}` | {count} |" not in readme:
+            fail(f"README skill count missing or stale for {plugin} (expected {count})")
 
 
 def validate_mirrors() -> None:

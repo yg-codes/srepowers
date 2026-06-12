@@ -85,7 +85,7 @@ srepowers/
 | Plugin | Skills | Focus |
 |--------|--------|-------|
 | `srepowers-core` | 28 | Workflow spine, mandatory gates, incident response, SRE practices |
-| `srepowers-domain` | 20 | Software engineering depth: Go, Python, Rust, K8s, Terraform, containers, networking, security, testing, databases |
+| `srepowers-domain` | 21 | Software engineering depth: Go, Python, Rust, K8s, Terraform, containers, networking, security, testing, databases |
 | `srepowers-infra` | 11 | Portable infrastructure administration: Proxmox VE, Puppet code analysis, PuppetDB queries, DNS, TLS/PKI, backup/recovery, change management, GitLab CI/CD (incl. ECR & GoReleaser) |
 | `srepowers-private` | 6 | Site-specific operational workflows (sanitized templates): Puppet deploy/release/MR lifecycle, Hiera debugging, Ansible — substitute placeholders with your environment's values |
 
