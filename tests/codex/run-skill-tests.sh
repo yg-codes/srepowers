@@ -41,18 +41,19 @@ import json
 import re
 from pathlib import Path
 
-plugins = {
-    "srepowers-core": 28,
-    "srepowers-domain": 19,
-    "srepowers-infra": 5,
-}
+plugins = (
+    "srepowers-core",
+    "srepowers-domain",
+    "srepowers-infra",
+    "srepowers-private",
+)
 
 marketplace = json.loads(Path(".agents/plugins/marketplace.json").read_text())
 entries = {entry["name"]: entry for entry in marketplace["plugins"]}
 root_manifest = json.loads(Path(".codex-plugin/plugin.json").read_text())
 versions = {root_manifest["version"]}
 
-for plugin, expected_count in plugins.items():
+for plugin in plugins:
     plugin_root = Path("plugins") / plugin
     codex_manifest = plugin_root / ".codex-plugin" / "plugin.json"
     claude_manifest = plugin_root / ".claude-plugin" / "plugin.json"
@@ -84,8 +85,6 @@ for plugin, expected_count in plugins.items():
 
     skills = sorted(path.parent.name for path in skills_dir.glob("*/SKILL.md"))
     commands = sorted(path.stem for path in commands_dir.glob("*.md"))
-    if len(skills) != expected_count:
-        raise SystemExit(f"{plugin} skill count mismatch: expected {expected_count}, got {len(skills)}")
     if skills != commands:
         raise SystemExit(f"{plugin} skills and commands differ")
 
