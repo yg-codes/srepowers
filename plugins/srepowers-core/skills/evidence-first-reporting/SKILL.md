@@ -30,6 +30,17 @@ Use it especially when:
 - Multiple hypotheses remain plausible
 - You are summarizing another agent's work
 - A stakeholder needs a precise status without false confidence
+- **You are writing up a full health check, resource audit, or cluster review** —
+  these read like confident conclusions but rest on inference. Invoking this
+  skill is not optional for audit findings; **the `Unknowns` section is the whole
+  point** — it forces you to name what you asserted ("likely stranded on node X")
+  but never proved, and the exact command that would close each gap. An audit
+  report with no `Unknowns` is almost always hiding them.
+
+**Invoke, do not paraphrase.** This is a mandatory gate. When the trigger fires,
+call the Skill and use its Output Contract — do not "apply the principles inline"
+from memory. Inline imitation reliably drops the `Unknowns` and `Next
+Verification` sections, which are exactly the parts that prevent overconfidence.
 
 ## Output Contract
 

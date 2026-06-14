@@ -129,6 +129,8 @@ Use this when the task is not eligible for the fast path:
 | "This doesn't count as a task" | Action = task. Route it. |
 | "Agent reported success" | Verify independently. Trust output, not reports. |
 | "The log line proves the cause" | One signal is not root cause. Use evidence-first reporting. |
+| "Let me re-read the skill file to be sure" | The Skill tool already loaded its full content — follow that. Do not `Read` the SKILL.md from the plugin cache again. |
+| "I'll apply the gate's principles inline" | A gate is invoked, not paraphrased. If `evidence-first-reporting` or `verification-before-completion` is triggered, call the Skill — don't just imitate its spirit. |
 
 ## Skill Priority
 
@@ -147,6 +149,8 @@ Never:
 - Mix observation and inference in the same sentence without labeling them
 - Force a full planning workflow onto a read-only or trivial local task
 - Skip gates just because the workflow is short
+- Treat a triggered gate as "applied inline" without actually invoking the Skill
+- Re-`Read` a skill's SKILL.md after the Skill tool already presented its content
 
 ## Skill Types
 

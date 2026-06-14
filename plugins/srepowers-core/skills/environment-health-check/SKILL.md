@@ -26,6 +26,19 @@ Verify that required infrastructure tools are installed, accessible, and properl
 - Session start hook (optional configuration)
 - Other skills before critical operations
 
+**Stay in scope.** This skill verifies *tool and connectivity readiness* only —
+installed binaries, kubeconfig contexts, API reachability, auth. Stop there. The
+moment you start enumerating cluster resources (node inventory, pod health,
+storage), you have left pre-flight and entered the audit/troubleshooting task —
+that work belongs to the domain skill or `systematic-troubleshooting`, reported
+through `evidence-first-reporting`. Letting the health check sprawl blurs where
+verification ends and the task begins.
+
+**Do not re-read this file.** When the Skill tool presented this content, that
+*is* the skill — follow it directly. Do not `Read` the SKILL.md from the plugin
+cache to "double-check"; the cache is the installed copy and re-reading wastes a
+step.
+
 ## Tool Categories
 
 ### Core Infrastructure Tools
