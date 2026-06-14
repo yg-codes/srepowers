@@ -183,9 +183,11 @@ Each task MUST include these fields in its header for machine-parseable extracti
 | **Complete YAML** | No "add labels" → full YAML with all fields |
 | **Expected outputs** | Show what success looks like for every command |
 | **Rollback per task** | Each task must be reversible |
-| **Dry-run first** | Validate with `--dry-run=client` before live |
+| **Pre-mutation safety gate** | Reversible changes: `--dry-run`/`plan`/`diff` before live. Irreversible changes (quorum/membership surgery, disk/filesystem ops, DNS cutover, node wipe): capture state (snapshot/backup) before the first mutation, since dry-run does not exist for them |
+| **Irreversible last** | Order tasks so all reversible prep and the state-capture safety gate complete *before* any irreversible step; place a STOP gate immediately before the first irreversible task |
+| **Command correctness** | Every command must run as written in the target env: correct tool flags, no fragile text parsing, no assumed-but-unverified binaries/paths |
 | **Side-effect check** | Verify adjacent systems weren't affected |
-| **TDO discipline** | Define verification/baseline → Verify RED or capture baseline → Dry-run → GREEN → Verify GREEN → Side effects → Commit |
+| **TDO discipline** | Define verification/baseline → Verify RED or capture baseline → Dry-run/safety-gate → GREEN → Verify GREEN → Side effects → Commit |
 | **Template-first** | If an existing plan template exists in the project, populate it rather than generating a new structure |
 
 ## Template-First Planning
@@ -207,6 +209,8 @@ Never:
 - Mix multiple risky changes into one task
 - Omit environment or blast-radius context
 - Create a full plan for a trivial fast-path task just to satisfy process
+- Schedule an irreversible step before its state-capture safety gate, or rely on `--dry-run` for an operation that has no dry-run (membership surgery, disk ops, DNS cutover, node wipe)
+- Reference a binary or path without confirming it exists in the target environment, or parse tool output with fragile commands like `tail -1`
 
 ## Final Verification Section
 
@@ -232,17 +236,23 @@ If any verification fails:
 
 ## Plan Quality Gate
 
-After generating the plan and before presenting execution options, dispatch a plan-checker subagent to validate the plan against these 6 dimensions:
+The checker validates the dimensions defined in `plan-checker-prompt.md` (that file is the single source of truth — keep dimensions there, not duplicated here). As of this version it checks **7 dimensions**:
 
-1. **Rollback coverage** — Every task has a rollback command (not just "git revert")
+1. **Rollback coverage** — Every task has a concrete rollback command (not just "git revert")
 2. **Verification concreteness** — All verification commands are exact (no "check that X works", no placeholders)
 3. **Environment boundary** — No task touches an environment outside the declared `environment` field
-4. **Dry-run presence** — Every kubectl/terraform apply includes a `--dry-run` step
+4. **Pre-mutation safety gate** — Reversible changes include `--dry-run`/`plan`/`diff`; **irreversible** changes (membership/quorum surgery, disk/filesystem ops, DNS cutover, node wipe — which cannot be dry-run) instead require a state capture (snapshot/backup) *before* the first mutation and an explicit STOP gate before the irreversible step
 5. **Side-effect checks** — Every task specifies how to verify no collateral damage
 6. **Risk consistency** — Risk level matches actual blast radius (e.g., cluster-wide changes = high, not medium)
+7. **Command correctness** — Every command runs as written in the target environment: correct tool flags, no fragile text parsing (e.g., `tail -1` on multi-line tool output), no assumed-but-unverified binaries or paths (e.g., a host-installed `etcdctl` on a kubeadm node where etcd is a static-pod container), correct path/glob expansion
+
+**Author self-check (do this BEFORE dispatching the checker — don't burn an iteration on self-catchable defects):**
+- Every binary and path referenced is confirmed to exist in the target environment (state it in the plan's Prerequisites)
+- No command depends on fragile text parsing of tool output
+- Every irreversible step has a preceding state-capture safety gate and a STOP gate
 
 **Checker workflow:**
-1. Dispatch plan-checker subagent using `./plan-checker-prompt.md` with precisely crafted review context — never your session history. This keeps the checker focused on the plan, not your thought process, and preserves your own context.
+1. Dispatch plan-checker subagent using `./plan-checker-prompt.md` with precisely crafted review context — never your session history. This keeps the checker focused on the plan, not your thought process, and preserves your own context. Fill in the prompt's **Environment Facts** block (tool versions, where binaries live, static-pod vs host install) so the checker validates commands against stated reality, not assumptions.
 2. If issues found: fix the plan, re-run checker (max 2 iterations)
 3. If still issues after 2 iterations: surface to human for review
 4. If passes: proceed to execution handoff
