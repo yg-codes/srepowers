@@ -10,7 +10,7 @@ You run scenarios without the skill (RED - watch agent fail), write skill addres
 
 **Core principle:** If you didn't watch an agent fail without the skill, you don't know if the skill prevents the right failures.
 
-**REQUIRED BACKGROUND:** You MUST understand srepowers:test-driven-operation before using this reference. That skill defines the fundamental verification-first cycle. This reference provides skill-specific test formats (pressure scenarios, rationalization tables).
+**REQUIRED BACKGROUND:** You MUST understand srepowers-core:test-driven-operation before using this reference. That skill defines the fundamental verification-first cycle. This reference provides skill-specific test formats (pressure scenarios, rationalization tables).
 
 ## TDD Mapping for Infrastructure Skill Testing
 

@@ -254,7 +254,7 @@ ssh <puppet-master> \
 
 ### Step 3.5: Invoke puppet-merge-request
 
-Once the Puppetfile bump is verified, invoke the `srepowers:puppet-merge-request` skill to create the MR chain through sit → uat → prod.
+Once the Puppetfile bump is verified, invoke the `srepowers-private:puppet-merge-request` skill to create the MR chain through sit → uat → prod.
 
 The merge chain follows strict ordering — server-side hooks enforce that commits must be reachable from the previous environment branch before merging to the next:
 
@@ -331,8 +331,8 @@ git push
 ## Integration
 
 **Pairs with:**
-- `srepowers:puppet-merge-request` — creates the MR chain (invoked during Phase 3)
-- `srepowers:puppet-code-analyzer` — validates module code before tagging
-- `srepowers:puppet-deploy` — applies the released code to target hosts
-- `srepowers:test-driven-operation` — verification discipline for each phase gate
+- `srepowers-private:puppet-merge-request` — creates the MR chain (invoked during Phase 3)
+- `srepowers-infra:puppet-code-analyzer` — validates module code before tagging
+- `srepowers-private:puppet-deploy` — applies the released code to target hosts
+- `srepowers-core:test-driven-operation` — verification discipline for each phase gate
 - `gitlab-cli` — reference for `glab` commands when troubleshooting MR issues

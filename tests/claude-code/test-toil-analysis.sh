@@ -17,7 +17,7 @@ if ! rg -q "measure|reduce|priorit" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:toil-analysis" "$REPO_ROOT/plugins/srepowers-core/commands/toil-analysis.md"; then
+if ! rg -q "srepowers-core:toil-analysis" "$REPO_ROOT/plugins/srepowers-core/commands/toil-analysis.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

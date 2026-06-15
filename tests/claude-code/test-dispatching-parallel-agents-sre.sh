@@ -17,7 +17,7 @@ if ! rg -q "isolation|shared.state" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:dispatching-parallel-agents-sre" "$REPO_ROOT/plugins/srepowers-core/commands/dispatching-parallel-agents-sre.md"; then
+if ! rg -q "srepowers-core:dispatching-parallel-agents-sre" "$REPO_ROOT/plugins/srepowers-core/commands/dispatching-parallel-agents-sre.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

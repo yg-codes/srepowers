@@ -17,7 +17,7 @@ if ! rg -q "metric|alert" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:observability-integration" "$REPO_ROOT/plugins/srepowers-core/commands/observability-integration.md"; then
+if ! rg -q "srepowers-core:observability-integration" "$REPO_ROOT/plugins/srepowers-core/commands/observability-integration.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

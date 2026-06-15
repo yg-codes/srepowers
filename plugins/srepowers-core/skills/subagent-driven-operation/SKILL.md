@@ -291,11 +291,11 @@ After each task completes (including review), update the plan file's `## Executi
 ## Integration
 
 **Required workflow skills:**
-- **srepowers:writing-operation-plans** - Creates the operation plan this skill executes
-- **srepowers:brainstorming-operations** - Design operations before planning (optional)
+- **srepowers-core:writing-operation-plans** - Creates the operation plan this skill executes
+- **srepowers-core:brainstorming-operations** - Design operations before planning (optional)
 
 **Subagents should use:**
-- **srepowers:test-driven-operation** - Subagents follow TDO for each operation
+- **srepowers-core:test-driven-operation** - Subagents follow TDO for each operation
 
 **Completion:**
-- After all tasks complete, use `srepowers:finishing-operation-branch`
+- After all tasks complete, use `srepowers-core:finishing-operation-branch`

@@ -373,13 +373,13 @@ systemctl list-timers
 ## Integration
 
 **Called by:**
-- `srepowers:systematic-troubleshooting` — for service and system debugging
-- `srepowers:puppet-deploy` — when managing services via Puppet
-- `srepowers:test-driven-operation` — for verification commands
+- `srepowers-core:systematic-troubleshooting` — for service and system debugging
+- `srepowers-private:puppet-deploy` — when managing services via Puppet
+- `srepowers-core:test-driven-operation` — for verification commands
 
 **Pairs with:**
-- `srepowers:observability-engineer` — for monitoring and alerting on system metrics
-- `srepowers:security-reviewer` — for hardening systemd services
+- `srepowers-core:observability-engineer` — for monitoring and alerting on system metrics
+- `srepowers-domain:security-reviewer` — for hardening systemd services
 
 ## SRE Principles
 

@@ -31,7 +31,7 @@ cat <<EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<EXTREMELY_IMPORTANT>\nYou have SREPowers - SRE infrastructure skills for disciplined operations.\n\nBelow is the full content of your 'srepowers:using-srepowers' skill. Follow it to select and use the correct SRE workflow in your current runtime.\n\n${using_srepowers_escaped}\n\n</EXTREMELY_IMPORTANT>"
+    "additionalContext": "<EXTREMELY_IMPORTANT>\nYou have SREPowers - SRE infrastructure skills for disciplined operations.\n\nBelow is the full content of your 'srepowers-core:using-srepowers' skill. Follow it to select and use the correct SRE workflow in your current runtime.\n\n${using_srepowers_escaped}\n\n</EXTREMELY_IMPORTANT>"
   }
 }
 EOF

@@ -319,9 +319,9 @@ This skeleton becomes the living document for the ticket. Update it as work prog
 ## Integration
 
 **Pairs with:**
-- `srepowers:puppet-release` — after development is complete, use to release the module
-- `srepowers:puppet-deploy` — to deploy and validate changes on target hosts
-- `srepowers:puppet-code-analyzer` — to validate code quality during development
-- `srepowers:puppet-merge-request` — to create MRs when the branch is ready for review
-- `srepowers:test-driven-operation` — for verification discipline during development
+- `srepowers-private:puppet-release` — after development is complete, use to release the module
+- `srepowers-private:puppet-deploy` — to deploy and validate changes on target hosts
+- `srepowers-infra:puppet-code-analyzer` — to validate code quality during development
+- `srepowers-private:puppet-merge-request` — to create MRs when the branch is ready for review
+- `srepowers-core:test-driven-operation` — for verification discipline during development
 - `clickup-ticket-searcher` — to find the ClickUp ticket details

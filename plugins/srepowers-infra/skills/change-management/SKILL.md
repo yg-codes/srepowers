@@ -202,14 +202,14 @@ ssh host 'sudo app --validate-config'
 ## Integration
 
 **Called by:**
-- `srepowers:writing-operation-plans` — for structured operation planning
-- `srepowers:puppet-deploy` — for changes requiring formal CCB approval
-- `srepowers:pve-admin` — for Proxmox changes requiring CCB records
+- `srepowers-core:writing-operation-plans` — for structured operation planning
+- `srepowers-private:puppet-deploy` — for changes requiring formal CCB approval
+- `srepowers-infra:pve-admin` — for Proxmox changes requiring CCB records
 
 **Pairs with:**
-- `srepowers:safety-validator` — for risk assessment validation
-- `srepowers:evidence-first-reporting` — for change result reporting
-- `srepowers:verification-before-completion` — for post-change verification
+- `srepowers-core:safety-validator` — for risk assessment validation
+- `srepowers-core:evidence-first-reporting` — for change result reporting
+- `srepowers-core:verification-before-completion` — for post-change verification
 
 ## SRE Principles
 

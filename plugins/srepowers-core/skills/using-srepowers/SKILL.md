@@ -17,7 +17,11 @@ Do not stack extra workflow skills "just in case." Over-process is a failure mod
 
 **In Codex:** Use repo or plugin-discovered skills through `/skills` or by mentioning `$skill-name`. Codex may also activate a skill implicitly when the task matches its description.
 
-**Skill namespace:** When an explicit namespace is required, use `srepowers:` (for example `srepowers:test-driven-operation`).
+**Skill namespace:** Skills live in four plugins — prefix with the owning plugin, not a bare `srepowers:`. Use `<plugin>:<skill>`:
+- `srepowers-core:` — workflow spine, mandatory gates, incident response (e.g. `srepowers-core:test-driven-operation`)
+- `srepowers-domain:` — language/architecture/security expertise (e.g. `srepowers-domain:kubernetes-specialist`)
+- `srepowers-infra:` — infrastructure administration (e.g. `srepowers-infra:pve-admin`)
+- `srepowers-private:` — Puppet/Ansible/Hiera operations (e.g. `srepowers-private:puppet-deploy`)
 
 # Using SRE Skills
 

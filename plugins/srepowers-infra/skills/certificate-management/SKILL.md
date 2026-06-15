@@ -259,13 +259,13 @@ openssl x509 -in server.crt -noout -fingerprint -sha256
 ## Integration
 
 **Called by:**
-- `srepowers:kubernetes-specialist` — for cert-manager operations
-- `srepowers:systematic-troubleshooting` — for TLS-related incidents
-- `srepowers:puppet-deploy` — when certificates are managed via Puppet (`fsx_ca` module)
+- `srepowers-domain:kubernetes-specialist` — for cert-manager operations
+- `srepowers-core:systematic-troubleshooting` — for TLS-related incidents
+- `srepowers-private:puppet-deploy` — when certificates are managed via Puppet (`fsx_ca` module)
 
 **Pairs with:**
-- `srepowers:safety-validator` — certificate operations on production services
-- `srepowers:network-engineer` — for TLS-related network debugging
+- `srepowers-core:safety-validator` — certificate operations on production services
+- `srepowers-domain:network-engineer` — for TLS-related network debugging
 
 ## SRE Principles
 

@@ -325,8 +325,8 @@ The discrepancy between exit code 2 (success) and parallel-ssh's `[FAILURE]` lab
 ## Integration
 
 **Pairs with:**
-- `srepowers:puppet-release` — the release skill promotes code through repos; this skill applies it
-- `srepowers:puppet-merge-request` — creates the MRs that make code available for deployment
-- `srepowers:test-driven-operation` — verification discipline for pre/post checks
-- `srepowers:verification-before-completion` — final evidence check before claiming success
-- `srepowers:dispatching-parallel-agents-sre` — lightweight parallel-ssh pattern for fleet operations
+- `srepowers-private:puppet-release` — the release skill promotes code through repos; this skill applies it
+- `srepowers-private:puppet-merge-request` — creates the MRs that make code available for deployment
+- `srepowers-core:test-driven-operation` — verification discipline for pre/post checks
+- `srepowers-core:verification-before-completion` — final evidence check before claiming success
+- `srepowers-core:dispatching-parallel-agents-sre` — lightweight parallel-ssh pattern for fleet operations

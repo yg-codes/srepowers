@@ -195,12 +195,12 @@ ssh dns-server 'tail -50 /var/log/syslog | grep named'
 ## Integration
 
 **Called by:**
-- `srepowers:systematic-troubleshooting` — for DNS-related incidents
-- `srepowers:test-driven-operation` — for verification commands
+- `srepowers-core:systematic-troubleshooting` — for DNS-related incidents
+- `srepowers-core:test-driven-operation` — for verification commands
 
 **Pairs with:**
-- `srepowers:network-engineer` — for broader network debugging
-- `srepowers:puppet-deploy` — when DNS changes are managed via Puppet (`fsx_dns` module)
+- `srepowers-domain:network-engineer` — for broader network debugging
+- `srepowers-private:puppet-deploy` — when DNS changes are managed via Puppet (`fsx_dns` module)
 
 ## SRE Principles
 

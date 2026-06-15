@@ -17,7 +17,7 @@ if ! rg -q "TSV|fields" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:pcap-analysis" "$REPO_ROOT/plugins/srepowers-core/commands/pcap-analysis.md"; then
+if ! rg -q "srepowers-core:pcap-analysis" "$REPO_ROOT/plugins/srepowers-core/commands/pcap-analysis.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

@@ -149,5 +149,5 @@ After the design review loop passes, ask the user to review the written design b
 Wait for the user's response. If they request changes, make them and re-run the design review loop. Only proceed once the user approves.
 
 **Planning:**
-- Invoke **srepowers:writing-operation-plans** to create detailed execution plan
+- Invoke **srepowers-core:writing-operation-plans** to create detailed execution plan
 - Do NOT invoke any other skill. writing-operation-plans is the next step.

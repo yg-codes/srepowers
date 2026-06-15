@@ -17,7 +17,7 @@ if ! rg -q "bridge|trunk|tcpdump|Proxmox" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:pve-vlan-trunk-troubleshooting" "$REPO_ROOT/plugins/srepowers-infra/commands/pve-vlan-trunk-troubleshooting.md"; then
+if ! rg -q "srepowers-infra:pve-vlan-trunk-troubleshooting" "$REPO_ROOT/plugins/srepowers-infra/commands/pve-vlan-trunk-troubleshooting.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

@@ -17,7 +17,7 @@ if ! rg -q "DRY|dependency|run.all|state.backend" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:terragrunt-expert" "$REPO_ROOT/plugins/srepowers-domain/commands/terragrunt-expert.md"; then
+if ! rg -q "srepowers-domain:terragrunt-expert" "$REPO_ROOT/plugins/srepowers-domain/commands/terragrunt-expert.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

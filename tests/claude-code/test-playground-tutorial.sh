@@ -17,7 +17,7 @@ if ! rg -q "safely|harmless|no.*risk|without.*risk" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:playground-tutorial" "$REPO_ROOT/plugins/srepowers-core/commands/playground-tutorial.md"; then
+if ! rg -q "srepowers-core:playground-tutorial" "$REPO_ROOT/plugins/srepowers-core/commands/playground-tutorial.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

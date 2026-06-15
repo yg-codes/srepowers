@@ -355,6 +355,6 @@ done
 
 ## See also
 
-- `srepowers:puppet-code-analyzer` — code quality analysis for Puppet manifests
-- `srepowers:hiera-debugging` — trace Hiera data resolution (srepowers-private)
-- `srepowers:puppet-deploy` — fleet noop/apply execution (srepowers-private)
+- `srepowers-infra:puppet-code-analyzer` — code quality analysis for Puppet manifests
+- `srepowers-private:hiera-debugging` — trace Hiera data resolution (srepowers-private)
+- `srepowers-private:puppet-deploy` — fleet noop/apply execution (srepowers-private)

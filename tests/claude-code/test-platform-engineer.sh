@@ -17,7 +17,7 @@ if ! rg -q "self.service|service.catalog" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:platform-engineer" "$REPO_ROOT/plugins/srepowers-domain/commands/platform-engineer.md"; then
+if ! rg -q "srepowers-domain:platform-engineer" "$REPO_ROOT/plugins/srepowers-domain/commands/platform-engineer.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

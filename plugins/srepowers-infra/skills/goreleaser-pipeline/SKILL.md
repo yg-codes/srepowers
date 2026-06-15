@@ -330,11 +330,11 @@ ldflags:
 ## Integration
 
 **Called by:**
-- `srepowers:golang-pro` — for Go project release operations
-- `srepowers:gitlab-cicd` — for pipeline configuration
+- `srepowers-domain:golang-pro` — for Go project release operations
+- `srepowers-infra:gitlab-cicd` — for pipeline configuration
 
 **Pairs with:**
-- `srepowers:gitlab-ecr-pipeline` — when also pushing Docker images alongside binaries
+- `srepowers-infra:gitlab-ecr-pipeline` — when also pushing Docker images alongside binaries
 
 **Site-specific overlays** (private skills — invoke this skill first, then the overlay for platform-specific details):
 - `github-goreleaser-pipeline` — GitHub Actions workflow (auto `GITHUB_TOKEN`, `gh` verification, permissions model)

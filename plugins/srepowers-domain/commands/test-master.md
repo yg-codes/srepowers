@@ -2,4 +2,4 @@
 description: "Use when writing tests, creating test strategies, or building automation frameworks. Invoke for unit tests, integration tests, E2E, coverage analysis, performance testing, security testing."
 ---
 
-Invoke the srepowers:test-master skill and follow it exactly as presented to you
+Invoke the srepowers-domain:test-master skill and follow it exactly as presented to you

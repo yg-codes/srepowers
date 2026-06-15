@@ -37,7 +37,7 @@ status: "pending"               # pending | in_progress | completed | rolled_bac
 
 # [Operation Name] Execution Plan
 
-> **For Claude:** REQUIRED SUB-SKILL: Use srepowers:subagent-driven-operation to implement this plan task-by-task.
+> **For Claude:** REQUIRED SUB-SKILL: Use srepowers-core:subagent-driven-operation to implement this plan task-by-task.
 
 **Goal:** [One sentence describing what this achieves]
 **Risk Level:** [Low/Medium/High] — [rationale]
@@ -272,10 +272,10 @@ After saving the plan:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use srepowers:subagent-driven-operation
+- **REQUIRED SUB-SKILL:** Use srepowers-core:subagent-driven-operation
 - Stay in this session
 - Fresh subagent per task + two-stage review
 
 **If Separate session chosen:**
 - Guide user to open new session in git worktree
-- **REQUIRED SUB-SKILL:** New session uses srepowers:executing-operation-plans
+- **REQUIRED SUB-SKILL:** New session uses srepowers-core:executing-operation-plans

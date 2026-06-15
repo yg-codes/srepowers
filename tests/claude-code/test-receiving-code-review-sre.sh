@@ -17,7 +17,7 @@ if ! rg -q "verify|technical|rigor|blind" "$SKILL"; then
   exit 1
 fi
 
-if ! rg -q "srepowers:receiving-code-review-sre" "$REPO_ROOT/plugins/srepowers-core/commands/receiving-code-review-sre.md"; then
+if ! rg -q "srepowers-core:receiving-code-review-sre" "$REPO_ROOT/plugins/srepowers-core/commands/receiving-code-review-sre.md"; then
   echo "[FAIL] command wrapper missing or references wrong skill"
   exit 1
 fi

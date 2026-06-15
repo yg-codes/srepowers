@@ -275,13 +275,13 @@ diff <(zfs list -t snapshot -o name pool/data | tail -10) \
 ## Integration
 
 **Called by:**
-- `srepowers:pve-admin` — for Proxmox VM/CT backup configuration
-- `srepowers:systematic-troubleshooting` — for backup-related incidents
-- `srepowers:sre-runbook` — for creating DR runbooks
+- `srepowers-infra:pve-admin` — for Proxmox VM/CT backup configuration
+- `srepowers-core:systematic-troubleshooting` — for backup-related incidents
+- `srepowers-core:sre-runbook` — for creating DR runbooks
 
 **Pairs with:**
-- `srepowers:safety-validator` — before destructive operations (zfs destroy, snapshot pruning)
-- `srepowers:evidence-first-reporting` — when reporting backup health status
+- `srepowers-core:safety-validator` — before destructive operations (zfs destroy, snapshot pruning)
+- `srepowers-core:evidence-first-reporting` — when reporting backup health status
 
 ## SRE Principles
 

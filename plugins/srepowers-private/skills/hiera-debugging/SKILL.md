@@ -197,13 +197,13 @@ ssh <puppet-master> \
 ## Integration
 
 **Called by:**
-- `srepowers:puppet-deploy` — during the Hiera validation step
-- `srepowers:puppet-code-analyzer` — when validating Hiera data quality
-- `srepowers:systematic-troubleshooting` — when investigating Puppet failures
+- `srepowers-private:puppet-deploy` — during the Hiera validation step
+- `srepowers-infra:puppet-code-analyzer` — when validating Hiera data quality
+- `srepowers-core:systematic-troubleshooting` — when investigating Puppet failures
 
 **Pairs with:**
-- `srepowers:puppet-merge-request` — for promoting Hiera data changes
-- `srepowers:test-driven-operation` — for verification commands
+- `srepowers-private:puppet-merge-request` — for promoting Hiera data changes
+- `srepowers-core:test-driven-operation` — for verification commands
 
 ## SRE Principles
 

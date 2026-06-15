@@ -33,7 +33,7 @@ git branch --show-current
 kubectl config get-contexts -o name
 ```
 
-**REQUIRED:** Use srepowers:using-git-worktrees-sre to create an isolated worktree for this operation. Do not execute on the main branch without explicit user consent.
+**REQUIRED:** Use srepowers-core:using-git-worktrees-sre to create an isolated worktree for this operation. Do not execute on the main branch without explicit user consent.
 
 ### Step 1: Load and Review Plan
 

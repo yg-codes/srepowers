@@ -237,13 +237,13 @@ env=prod
 ## Integration
 
 **Called by:**
-- `srepowers:test-driven-operation` — for verification commands
-- `srepowers:safety-validator` — before running playbooks with `--diff` against production
+- `srepowers-core:test-driven-operation` — for verification commands
+- `srepowers-core:safety-validator` — before running playbooks with `--diff` against production
 
 **Pairs with:**
-- `srepowers:puppet-deploy` — when Ansible supplements Puppet for specific tasks
-- `srepowers:pve-admin` — when managing Proxmox hosts via Ansible
-- `srepowers:systematic-troubleshooting` — when diagnosing playbook failures
+- `srepowers-private:puppet-deploy` — when Ansible supplements Puppet for specific tasks
+- `srepowers-infra:pve-admin` — when managing Proxmox hosts via Ansible
+- `srepowers-core:systematic-troubleshooting` — when diagnosing playbook failures
 
 ## SRE Principles
 
