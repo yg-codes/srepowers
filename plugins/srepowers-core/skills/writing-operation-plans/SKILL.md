@@ -60,6 +60,16 @@ status: "pending"               # pending | in_progress | completed | rolled_bac
 | [Acceptance criterion 1] | Task N | pending |
 | [Acceptance criterion 2] | Task N, Task M | pending |
 
+## Execution Order
+
+<!-- ASCII diagram of how tasks sequence: what runs in parallel, what is gated,
+     where the STOP-for-approval points and irreversible steps fall. See the
+     "Execution Order Diagram" section of the skill for what to depict. -->
+```
+[ASCII flow: parallel groups in boxes, sequential steps with ▼, STOP gates as ◆,
+ environment/irreversible boundaries as ║ ║ hard-gate boxes]
+```
+
 ## Tasks
 
 ## Execution Status
@@ -75,6 +85,7 @@ status: "pending"               # pending | in_progress | completed | rolled_bac
 Every plan must make these sections obvious and complete:
 
 - **Pre-checks** — prerequisites, current-state capture, and target confirmation
+- **Execution Order** — an ASCII diagram showing how the tasks sequence: parallel groups, gates, and boundaries (see "Execution Order Diagram" below)
 - **Execution** — exact step sequence with one action per task
 - **Verification** — exact RED and GREEN commands with expected outputs
 - **Rollback** — exact undo path per task and for the operation overall
@@ -100,6 +111,56 @@ Every plan must make these sections obvious and complete:
 - Every acceptance criterion MUST map to at least one task
 - If a criterion cannot be mapped, add a task for it or explicitly flag it as out-of-scope
 - Status column updated during execution: `pending` → `done` | `skipped` | `failed`
+
+## Execution Order Diagram
+
+After Requirements Traceability and before the Tasks, include an **ASCII diagram of the execution order**. The task list reads as a flat sequence; the diagram makes the actual *control flow* visible at a glance — what runs in parallel, what is sequential, where the operator must stop, and which steps cross an environment or irreversibility boundary. A reader should grasp the shape of the operation without reading every task.
+
+**Depict these (only those that apply):**
+
+| Element | Render as | Meaning |
+|---------|-----------|---------|
+| Parallel group | tasks boxed together | order among them is free (e.g. independent file edits on one branch) |
+| Sequential step | `▼` between nodes | B cannot start until A completes |
+| STOP-for-approval gate | `◆` | operator approval required before proceeding (e.g. before a prod noop/apply) |
+| Environment / irreversibility boundary | double-line box `║ ║` | a hard gate — enter only when the stated precondition holds (e.g. prod entered only after UAT validated and the merge reaches prod) |
+| Phase label | a header line inside/above a group | groups tasks by stage (module → SIT → UAT → PROD) |
+
+**Skip the diagram** for a strictly linear plan of a few tasks with no parallelism, no gates, and no boundary crossings — a flat numbered list already shows the order. Add it whenever the plan has parallel work, approval gates, multiple environments, or an irreversible step.
+
+**Keep it in sync:** every node in the diagram must correspond to a real task; update the diagram when tasks are added, removed, or renumbered. End with a short legend defining the symbols used.
+
+**Example** (module fix → staged multi-environment rollout):
+
+```
+                ┌──────────── MODULE (no host action, one branch) ──────────┐
+                │  Task 1  fix A      Task 2  fix B                          │
+                │  Task 3  fix C      Task 4  fix D     (order among 1-4 free)│
+                └───────────────────────────┬──────────────────────────────┘
+                                            ▼
+                                Task 5  lint → MR → merge → tag/release
+                                            ▼  ◆ approval
+                                Task 6  validate on SIT
+                                            ▼
+        ┌──────────────────────── UAT PHASE (primary) ───────────────────────┐
+        │  Task 0  capture state (pre-change safety gate) ── before Task 8    │
+        │  Task 7  config/code change (no host action yet)                    │
+        │              ▼  ◆ approval (noop) → diff gate → ◆ approval (apply)   │
+        │  Task 8  noop → diff → apply                                        │
+        │              ▼                                                      │
+        │  Task 9  verify clean + post-checks                                 │
+        └──────────────────────────┬──────────────────────────────────────── ┘
+                                   ▼   merge sit → uat → prod
+        ╔══════════════════════════╪═══════════ HARD GATE (PROD) ═════════════╗
+        ║                          ▼                                          ║
+        ║  Task 10  capture + safety backup        ◆ approval                  ║
+        ║  Task 11  apply (noop → diff → apply)     ◆ approval                  ║
+        ║  Task 12  verify                                                     ║
+        ╚══════════════════════════════════════════════════════════════════════╝
+
+Legend:  ▼ sequential   ◆ STOP for explicit approval   ║ ║ hard gate (enter only
+         when the precondition holds)   [box] = parallel / same-phase group
+```
 
 ## Task Structure
 
