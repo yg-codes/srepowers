@@ -1,6 +1,6 @@
 {
   "name": "srepowers-infra",
-  "version": "5.3.2",
+  "version": "5.4.0",
   "description": "Portable infrastructure administration — Proxmox VE, Puppet code analysis, PuppetDB queries, DNS, TLS/PKI, backup, change management, and GitLab CI/CD pipelines",
   "author": {
     "name": "yg-codes",

@@ -5,13 +5,13 @@
     "email": "yg-codes@users.noreply.github.com"
   },
   "metadata": {
-    "version": "5.3.2",
+    "version": "5.4.0",
     "description": "SRE infrastructure skills marketplace — workflow, domain expertise, and infrastructure administration plugins"
   },
   "plugins": [
     {
       "name": "srepowers-core",
-      "version": "5.3.2",
+      "version": "5.4.0",
       "description": "SRE workflow spine, mandatory gates, and incident response — verification-first operations with TDO and SDO",
       "source": "./plugins/srepowers-core",
       "author": {
@@ -23,7 +23,7 @@
     },
     {
       "name": "srepowers-domain",
-      "version": "5.3.2",
+      "version": "5.4.0",
       "description": "Software engineering domain expertise — Go, Python, Rust, Kubernetes, Terraform, containers, networking, security, testing, and more",
       "source": "./plugins/srepowers-domain",
       "author": {
@@ -35,7 +35,7 @@
     },
     {
       "name": "srepowers-infra",
-      "version": "5.3.2",
+      "version": "5.4.0",
       "description": "Portable infrastructure administration — Proxmox VE, Puppet code analysis, DNS, TLS/PKI, backup, change management, and GitLab CI/CD pipelines",
       "source": "./plugins/srepowers-infra",
       "author": {
@@ -47,7 +47,7 @@
     },
     {
       "name": "srepowers-private",
-      "version": "5.3.2",
+      "version": "5.4.0",
       "description": "Site-specific operational workflows (sanitized templates) — Puppet deploy/release/MR lifecycle, Hiera debugging, and Ansible operations",
       "source": "./plugins/srepowers-private",
       "author": {
