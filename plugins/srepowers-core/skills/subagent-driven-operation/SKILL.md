@@ -15,6 +15,10 @@ Execute infrastructure operation plan by dispatching fresh subagent per task, wi
 
 **Announce at start:** "I'm using the subagent-driven-operation skill to execute this infrastructure operation plan."
 
+**Narration:** between tool calls, narrate at most one short line — the ledger and the tool results carry the record.
+
+**Continuous execution:** Do not pause to check in between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: a `BLOCKED`/`R4` status you cannot resolve, an explicit production/approval gate the plan declares, ambiguity that genuinely prevents progress, or all tasks complete. "Should I continue?" prompts waste the operator's time — you were asked to execute the plan, so execute it (respecting any STOP gate the plan marks).
+
 ## When to Use
 
 ```dot
@@ -40,6 +44,15 @@ digraph when_to_use {
 - Fresh subagent per task (no context pollution)
 - Two-stage review after each task: spec compliance first, then artifact quality
 - Faster iteration (no human-in-loop between tasks)
+
+## Pre-Flight Plan Review
+
+Before dispatching Task 1, scan the plan once for conflicts:
+
+- tasks that contradict each other or the plan's Global Constraints
+- anything the plan explicitly mandates that the review rubric would treat as a defect (a verification that checks nothing, a task with no rollback)
+
+Present everything you find to the human as **one batched question** — each finding beside the plan text that mandates it, asking which governs — before execution begins, not one interrupt per discovery mid-plan. If the scan is clean, proceed without comment. The two-stage review loop remains the net for conflicts that only emerge during execution.
 
 ## Plan Parsing
 
@@ -103,6 +116,7 @@ digraph process {
         "Operator subagent asks questions?" [shape=diamond];
         "Answer questions, provide context" [shape=box];
         "Operator subagent executes operations, verifies, commits, self-reviews" [shape=box];
+        "Generate review package (./scripts/review-package BASE HEAD)" [shape=box];
         "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [shape=box];
         "Spec reviewer confirms operations match spec?" [shape=diamond];
         "Operator subagent fixes spec gaps" [shape=box];
@@ -112,21 +126,22 @@ digraph process {
         "Mark task complete in TodoWrite" [shape=box];
     }
 
-    "Read plan, extract all tasks with full text, note context, create TodoWrite" [shape=box];
+    "Read plan once, note context and global constraints, create TodoWrite + ledger" [shape=box];
     "Check Execution Status for resume point" [shape=box];
     "Select execution pattern (inline/segmented/full)" [shape=box];
     "More tasks remain?" [shape=diamond];
     "Dispatch final artifact reviewer for entire operation" [shape=box];
     "Decide: merge to control repo or create MR" [shape=box style=filled fillcolor=lightgreen];
 
-    "Read plan, extract all tasks with full text, note context, create TodoWrite" -> "Check Execution Status for resume point";
+    "Read plan once, note context and global constraints, create TodoWrite + ledger" -> "Check Execution Status for resume point";
     "Check Execution Status for resume point" -> "Select execution pattern (inline/segmented/full)";
     "Select execution pattern (inline/segmented/full)" -> "Dispatch operator subagent (./operator-prompt.md)";
     "Dispatch operator subagent (./operator-prompt.md)" -> "Operator subagent asks questions?";
     "Operator subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
     "Answer questions, provide context" -> "Dispatch operator subagent (./operator-prompt.md)";
     "Operator subagent asks questions?" -> "Operator subagent executes operations, verifies, commits, self-reviews" [label="no"];
-    "Operator subagent executes operations, verifies, commits, self-reviews" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)";
+    "Operator subagent executes operations, verifies, commits, self-reviews" -> "Generate review package (./scripts/review-package BASE HEAD)";
+    "Generate review package (./scripts/review-package BASE HEAD)" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)";
     "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" -> "Spec reviewer confirms operations match spec?";
     "Spec reviewer confirms operations match spec?" -> "Operator subagent fixes spec gaps" [label="no"];
     "Operator subagent fixes spec gaps" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [label="re-review"];
@@ -155,11 +170,15 @@ Use the least powerful model that can handle each role to conserve cost and incr
 
 **Signals:** Touches 1-2 manifests with complete spec → haiku. Multi-resource coordination → sonnet. Cross-cluster design or security review → opus.
 
+**Always specify the model explicitly when dispatching a subagent.** An omitted model inherits your session's model — often the most capable and most expensive — which silently defeats this table.
+
+**Turn count beats token price.** Wall-clock and context cost scale with how many turns a subagent takes, and the cheapest models routinely take 2-3× the turns on multi-step work — costing more overall. Use a mid-tier model as the floor for reviewers and for operators working from prose. When the task's plan text contains the complete commands/manifests to apply, execution is transcription plus verification — use the cheapest tier. The final whole-operation review gets the most capable tier, not the session default.
+
 ## Handling Operator Status
 
 Operator subagents report one of four statuses. Handle each appropriately:
 
-**DONE:** Proceed to spec compliance review.
+**DONE:** Generate the review package — `scripts/review-package BASE HEAD` (from this skill's directory; it prints the file path it wrote). BASE is the commit you recorded **before** dispatching the operator — never `HEAD~1`, which silently drops all but the last commit of a multi-commit task. Then dispatch the spec compliance reviewer with the printed path.
 
 **DONE_WITH_CONCERNS:** The operator completed the work but flagged doubts. Read the concerns before proceeding. If concerns are about safety or correctness (e.g., "unexpected pod restarts during rollout"), investigate before review. If they're observations (e.g., "this namespace has many resources"), note them and proceed.
 
@@ -214,11 +233,49 @@ After each task completes (including review), update the plan file's `## Executi
 
 **On resume:** When loading a plan that has `status: "in_progress"`, read the Execution Status section, skip completed tasks, and announce: "Resuming operation from Task [N]. Tasks 1-[N-1] previously completed."
 
+## Handling Reviewer ⚠️ Items
+
+A reviewer may report "⚠️ Cannot verify from diff" items — requirements that live in unchanged code or span tasks. These do not block the rest of the review, but you must resolve each one yourself before marking the task complete: you hold the plan and cross-task context the reviewer lacks. If you confirm an item is a real gap, treat it as a failed spec review — send it back to the operator and re-review.
+
+## Constructing Reviewer Prompts
+
+Per-task reviews are task-scoped gates. The broad review happens once, at the final whole-operation review. When you fill a reviewer template:
+
+- Do not add open-ended directives like "check everything" or "re-run all verifications if useful" without a concrete, task-specific reason.
+- Do not ask a reviewer to re-run verifications the operator already ran on the same artifacts — the operator's report carries that evidence.
+- **Do not pre-judge findings for the reviewer.** Never instruct a reviewer to ignore or not flag a specific issue, and never pre-rate a finding's severity. If the prompt you are writing contains "do not flag," "don't treat X as a defect," "at most Minor," or "the plan chose" — stop: you are pre-judging, usually to spare yourself a review loop. Let the reviewer raise it and adjudicate it in the loop.
+- The **global-constraints block is the reviewer's attention lens.** Copy the binding requirements verbatim from the plan's Global Constraints section or the spec: exact values, exact formats, and the stated relationships between components ("same labels as X", "matches namespace Y"). The reviewer template already carries the process rules — the constraints block is for what THIS operation's spec demands.
+- **Hand the reviewer its diff as a file:** run `scripts/review-package BASE HEAD` and pass the printed path. The diff never enters your own context, and the reviewer sees the commit list, stat summary, and full diff in one Read. Use the recorded BASE — never `HEAD~1`.
+- A dispatch prompt describes one task, not the session's history. Do not paste accumulated prior-task summaries into later dispatches — a fresh subagent needs its task brief, the interfaces it touches, and the global constraints. Nothing else.
+- A finding labeled plan-mandated — or any finding that conflicts with what the plan's text requires — is the human's decision: present the finding and the plan text, ask which governs. Do not dismiss the finding because the plan mandates it, and do not dispatch a fix that contradicts the plan without asking.
+- The final whole-operation review gets a package too: run `scripts/review-package MERGE_BASE HEAD` (MERGE_BASE = the commit the branch started from, e.g. `git merge-base main HEAD`) and include the printed path. If the final review returns findings, dispatch **ONE** fix subagent with the complete findings list — not one fixer per finding (per-finding fixers each rebuild context and re-run checks).
+
+## File Handoffs
+
+Everything you paste into a dispatch prompt — and everything a subagent prints back — stays resident in your context for the rest of the session and is re-read on every later turn. Hand artifacts over as files:
+
+- **Task brief:** before dispatching an operator, run `scripts/task-brief PLAN_FILE N` — it extracts the task's full text to a uniquely named file and prints the path. Compose the dispatch so the brief stays the single source of requirements: (1) one line on where this task fits; (2) the brief path, introduced as "read this first — your requirements, exact values verbatim"; (3) interfaces/decisions from earlier tasks the brief cannot know; (4) your resolution of any ambiguity; (5) the report-file path and report contract. Exact values (names, namespaces, commands) appear only in the brief.
+- **Report file:** name the operator's report file after the brief (`…/task-N-brief.md` → `…/task-N-report.md`) and put it in the dispatch. The operator writes the full report there and returns only status, commits, a one-line verification summary, and concerns.
+- **Reviewer inputs:** each reviewer gets the brief file, the report file, and the review-package path — plus the global constraints that bind the task.
+- **Without bash (e.g. some Codex setups):** the script is the fast path, not the requirement. Produce the same artifacts by hand — write the brief and report files from the plan, and create the review package with `git log --oneline`, `git diff --stat`, and `git diff -U10 BASE..HEAD` redirected to one uniquely named file under `.srepowers/sdd/`. Functionality, not the script, is what matters.
+
+## Durable Progress
+
+Conversation memory does not survive compaction. A controller that loses its place can re-dispatch entire completed task sequences — the most expensive failure mode. Track progress in a ledger file, not only in TodoWrite and the plan's Execution Status.
+
+- At skill start, check for a ledger: `cat "$(git rev-parse --show-toplevel)/.srepowers/sdd/progress.md"`. Tasks listed there as complete are DONE — do not re-dispatch them; resume at the first task not marked complete.
+- When a task's two-stage review comes back clean, append one line to the ledger in the same message as your other bookkeeping: `Task N: complete (commits <base7>..<head7>, review clean)`.
+- The ledger is your recovery map: the commits it names exist in git even when your context no longer remembers creating them. After compaction, trust the ledger and `git log` over your own recollection.
+- `git clean -fdx` will destroy the ledger (it's git-ignored scratch under `.srepowers/`); if that happens, recover from `git log`.
+
 ## Prompt Templates
 
 - `./operator-prompt.md` - Dispatch operator subagent
 - `./spec-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
 - `./artifact-quality-reviewer-prompt.md` - Dispatch artifact quality reviewer subagent
+- `./scripts/task-brief` - Extract a task's full text to a brief file
+- `./scripts/review-package` - Write commit list + stat + diff to a review-package file
+- `./scripts/sdd-workspace` - Resolve the `.srepowers/sdd/` artifact directory
 
 ## Why Review Order Matters
 
@@ -269,7 +326,11 @@ After each task completes (including review), update the plan file's `## Executi
 - Skip reviews (spec compliance OR artifact quality)
 - Proceed with unfixed issues
 - Dispatch multiple operator subagents in parallel (conflicts)
-- Make subagent read plan file (provide full text instead)
+- Make a subagent read the whole plan file (hand it its task brief — `scripts/task-brief` — instead)
+- Dispatch a reviewer without a review-package file (generate it first — `scripts/review-package BASE HEAD` — and name the printed path)
+- Use `HEAD~1` as the review-package BASE (it truncates multi-commit tasks — use the BASE you recorded before dispatching)
+- Tell a reviewer what not to flag, or pre-rate a finding's severity in the dispatch ("treat it as Minor at most")
+- Re-dispatch a task the progress ledger already marks complete — check the ledger (and `git log`) after any compaction or resume
 - Ignore subagent questions (answer before letting them proceed)
 - Start artifact quality review before spec compliance is ✅
 
