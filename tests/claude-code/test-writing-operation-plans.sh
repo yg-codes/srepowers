@@ -61,4 +61,23 @@ fi
 
 echo ""
 
+# Test 5: Global Constraints and Interfaces blocks
+echo "Test 5: Global Constraints and Interfaces..."
+
+output=$(run_claude "In writing-operation-plans, does the plan format include a Global Constraints block and per-task Interfaces (Consumes/Produces)? Why do they matter for subagent execution?" 30)
+
+if assert_contains "$output" "Global Constraints\|global constraint" "Mentions Global Constraints"; then
+    : # pass
+else
+    exit 1
+fi
+
+if assert_contains "$output" "Interfaces\|Consumes\|Produces" "Mentions Interfaces block"; then
+    : # pass
+else
+    exit 1
+fi
+
+echo ""
+
 echo "=== All writing-operation-plans skill tests passed ==="
