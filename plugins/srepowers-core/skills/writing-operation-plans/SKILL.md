@@ -46,6 +46,17 @@ status: "pending"               # pending | in_progress | completed | rolled_bac
 
 ---
 
+## Global Constraints
+
+[Operation-wide requirements every task implicitly inherits — environment
+prefix, version floors, naming/label conventions, namespace rules, tool-flag
+standards (e.g. `--environment` not `--env`), branch/merge order — one line
+each, with exact values copied verbatim from the spec or ticket. Each task's
+requirements implicitly include this section; the executor and every reviewer
+treat it as binding.]
+
+---
+
 ## Prerequisites
 
 - Tools required (kubectl version, API access, etc.)
@@ -176,6 +187,9 @@ Legend:  ▼ sequential   ◆ STOP for explicit approval   ║ ║ hard gate (en
 **Expected (GREEN):** `[exact success output]`
 **Rollback:** `[exact rollback command]`
 **Side Effects Check:** `[command to verify adjacent systems]`
+**Interfaces:**
+- Consumes: [what this task uses from earlier tasks — exact resource names, output values, file paths produced upstream]
+- Produces: [what later tasks rely on — exact names/values a downstream task must reuse verbatim]
 
 **Step 1: RED - Define verification or baseline**
 
@@ -235,6 +249,9 @@ Each task MUST include these fields in its header for machine-parseable extracti
 | **Expected (GREEN)** | **Yes** | What the verification command outputs after the change |
 | **Rollback** | **Yes** | Exact command to undo this task |
 | **Side Effects Check** | **Yes** | Command to verify adjacent systems unaffected |
+| **Interfaces** | When tasks share state | Consumes/Produces — exact names and values crossing task boundaries |
+
+Because subagent-driven-operation hands each operator only its own task brief, the **Interfaces** block is the contract across task boundaries: it is how an isolated subagent learns the exact resource names and values that neighboring tasks produce or expect. Omit it only when tasks are fully independent.
 
 ## Key Principles
 
