@@ -117,18 +117,18 @@ fi
 
 echo ""
 
-# Test 7: Verify full task text is provided
-echo "Test 7: Task context provision..."
+# Test 7: Verify file-handoff model (task brief + report/review-package files)
+echo "Test 7: File-handoff model..."
 
-output=$(run_claude "In subagent-driven-operation, how does the controller provide task information to the operator subagent? Does it make them read a file or provide it directly?" 30)
+output=$(run_claude "In subagent-driven-operation, how does the controller give a subagent its task — does it paste the full task text into the prompt, or hand over a file the subagent reads? What script produces it?" 30)
 
-if assert_contains "$output" "provide.*directly\|full.*text\|paste\|include.*prompt" "Provides text directly"; then
+if assert_contains "$output" "brief\|task-brief\|file" "Hands over a brief file"; then
     : # pass
 else
     exit 1
 fi
 
-if assert_not_contains "$output" "read.*file\|open.*file" "Doesn't make subagent read file"; then
+if assert_contains "$output" "report file\|report\|review.package\|review-package" "Artifacts move as files"; then
     : # pass
 else
     exit 1

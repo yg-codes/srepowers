@@ -240,7 +240,7 @@ codex plugin marketplace upgrade srepowers-marketplace
 |------|---------|
 | `brainstorming-operations` | Design the operation before acting |
 | `writing-operation-plans` | Create step-by-step execution plans |
-| `subagent-driven-operation` | Run plan tasks with reviewed subagent execution |
+| `subagent-driven-operation` | Run plan tasks with reviewed subagent execution — file handoffs (task briefs, review packages, reports) and a durable progress ledger keep the controller's context lean across long operations |
 | `executing-operation-plans` | Run long plans with checkpoints |
 | `test-driven-operation` | Verification-first infrastructure changes |
 | `finishing-operation-branch` | Clean completion workflow |
