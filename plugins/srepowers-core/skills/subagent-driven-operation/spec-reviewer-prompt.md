@@ -12,11 +12,23 @@ Task tool (general-purpose):
 
     ## What Was Requested
 
-    [FULL TEXT of task requirements]
+    Read the brief file `[.srepowers/sdd/task-N-brief.md]` — these are the task's
+    requirements with exact values.
 
     ## What Operator Claims They Executed
 
-    [From operator's report]
+    Read the operator's report file `[.srepowers/sdd/task-N-report.md]`.
+
+    ## Review Package
+
+    Read `[.srepowers/sdd/review-<base>..<head>.diff]` — it contains the commit
+    list, file-change stat, and the full diff with context in one file.
+
+    ## Global Constraints (your attention lens)
+
+    [Copy the plan's binding requirements verbatim — exact values, formats, and
+    stated relationships between components. This is what THIS operation's spec
+    demands; check the work against it.]
 
     ## Contract
 
@@ -24,9 +36,10 @@ Task tool (general-purpose):
     - Spec compliance for the assigned task or segment only
 
     Input artifacts:
-    - Task text
-    - Operator report
-    - Changed files and verification commands
+    - Brief file (requirements)
+    - Operator report file
+    - Review package file (commits + stat + diff)
+    - Verification commands
 
     Allowed tools/commands:
     - Read artifacts

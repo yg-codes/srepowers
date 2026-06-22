@@ -14,16 +14,18 @@ Task tool (general-purpose):
 
     ## What Was Executed
 
-    [From operator's report - paste what they did]
+    Read the operator's report file `[.srepowers/sdd/task-N-report.md]`.
 
     ## Plan/Requirements
 
-    Operation Task N from [plan-file]
+    Read the brief file `[.srepowers/sdd/task-N-brief.md]` (Operation Task N).
 
-    ## Git Changes
+    ## Review Package
 
-    BASE_SHA: [commit before task]
-    HEAD_SHA: [current commit]
+    Read `[.srepowers/sdd/review-<base>..<head>.diff]` — it contains the commit
+    list, file-change stat, and the full diff with context. Use the recorded
+    per-task BASE (never `HEAD~1`, which drops all but the last commit of a
+    multi-commit task).
 
     ## Contract
 
@@ -31,13 +33,12 @@ Task tool (general-purpose):
     - Artifact quality for the reviewed task or segment only
 
     Input artifacts:
-    - Operator report
-    - Relevant plan section
-    - Git diff between BASE_SHA and HEAD_SHA
+    - Operator report file
+    - Brief file (relevant requirements)
+    - Review package file (commits + stat + diff)
 
     Allowed tools/commands:
-    - `git diff BASE_SHA HEAD_SHA`
-    - Read changed files
+    - Read the review package and changed files
     - Run syntax or validation commands directly related to artifact quality
 
     Output boundary:
@@ -46,8 +47,8 @@ Task tool (general-purpose):
 
     ## Your Job
 
-    Review the infrastructure artifacts between BASE_SHA and HEAD_SHA.
-    Run `git diff BASE_SHA HEAD_SHA` to see all changes.
+    Review the infrastructure artifacts in the review package (the full diff is
+    already in that file — read it rather than re-deriving with git).
 
     Focus areas:
     - YAML/JSON validity and syntax

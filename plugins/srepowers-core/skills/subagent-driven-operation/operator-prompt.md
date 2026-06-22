@@ -2,19 +2,38 @@
 
 Use this template when dispatching an operator subagent for infrastructure operations.
 
+**File handoffs (not pasted text):** Hand the operator its requirements as a
+**brief file**, not pasted plan text. Run this skill's
+`scripts/task-brief PLAN_FILE N` (it prints the brief path), and have the
+operator write its full report to a **report file** named after the brief
+(`…/task-N-brief.md` → `…/task-N-report.md`). Bulk text moving as files keeps
+it out of your controller context. Without bash (e.g. some Codex setups),
+write the brief file by hand from the plan's Task N section.
+
 ```
 Task tool (general-purpose):
   description: "Execute Operation Task N: [task name]"
   prompt: |
     You are executing Operation Task N: [task name]
 
-    ## Task Description
+    ## Your Requirements (read this first)
 
-    [FULL TEXT of task from plan - paste it here, don't make subagent read file]
+    Read `[.srepowers/sdd/task-N-brief.md]` — it is your requirements, with the
+    exact values (names, namespaces, commands) to use verbatim. It is the single
+    source of truth for what this task must accomplish.
 
     ## Context
 
-    [Scene-setting: where this fits, infrastructure context, dependencies]
+    [Scene-setting: where this fits, infrastructure context, dependencies.
+    Include interfaces/decisions from earlier tasks the brief cannot know —
+    exact resource names or output values produced by prior tasks — and your
+    resolution of any ambiguity you noticed in the brief.]
+
+    ## Report File
+
+    Write your full report (operations executed, evidence, files, commits,
+    self-review findings, concerns) to `[.srepowers/sdd/task-N-report.md]`.
+    Return only: status, commits, a one-line verification summary, and concerns.
 
     ## Before You Begin
 
@@ -35,10 +54,11 @@ Task tool (general-purpose):
     - [One task or one task segment only]
 
     Input artifacts:
-    - [Task text]
+    - [Brief file path — your requirements]
     - [Relevant files or paths]
     - [Verification commands]
     - [Rollback commands]
+    - [Report file path — where you write your full report]
 
     Allowed tools/commands:
     - [List only what this operator should use]
@@ -134,7 +154,7 @@ Task tool (general-purpose):
 
     ## Report Format
 
-    When done, report:
+    Write the FULL report to your report file:
     - Status: DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED
     - Scope completed: [exact task or segment]
     - Operations executed
@@ -143,4 +163,7 @@ Task tool (general-purpose):
     - Commits made (if applicable)
     - Self-review findings (if any)
     - Open issues or concerns
+
+    Return to the controller only: status, commits (short SHAs), a one-line
+    verification summary, and concerns. The report file carries the detail.
 ```
