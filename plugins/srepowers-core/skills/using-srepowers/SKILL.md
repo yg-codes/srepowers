@@ -110,6 +110,38 @@ Fast path rules:
 - Still use `evidence-first-reporting` when reporting findings or status
 - Keep output compact
 
+### State-Transition Gate (read-only → mutating) — MANDATORY
+
+Classification is point-in-time. The fast path above is only valid while the
+task *stays* read-only. **The instant any action would write to a non-local
+host, the task has left the read-only path — re-route immediately, regardless
+of how the task was classified upstream.**
+
+A write-to-remote action is a mutation even when its intent is "just verify
+this command works" or "just create a throwaway probe file." Treat any
+command matching a write-to-remote pattern as an automatic `safety-validator`
+trigger and exit the fast path:
+
+- `ssh ... cp|mv|tee|cat >|touch|mkdir|rm` against a non-local host
+- `scp`, `rsync` to a non-local host
+- `podman|docker exec ... cp|tee|>` or any redirect inside a container exec
+- `parallel-ssh|parallel-scp` carrying any of the above
+
+When this fires:
+
+1. **Stop.** Do not run the command.
+2. **Re-state blast radius and approval scope.** If the host is under a
+   READONLY approval (UAT twin, shared box, anyone else's system), the write
+   is out of scope — propose it, do not execute it.
+3. **Invoke `safety-validator`** on the proposed command before proceeding.
+4. If a write is genuinely needed, get explicit approval for *that* write
+   first, then re-enter the standard workflow (not the fast path).
+
+This gate exists because classification drift is the documented failure mode:
+a task starts read-only, the model silently switches to "prove the command
+works" (a mutation), and runs it without re-routing. Make the re-route
+mechanical, not discretionary.
+
 ## Standard Workflow
 
 Use this when the task is not eligible for the fast path:
