@@ -17,4 +17,14 @@ if ! rg -q "kubectl --context <context> delete deployment|kubectl --context <con
   exit 1
 fi
 
-echo "[PASS] safety-validator keeps risk model and context-safe examples"
+if ! rg -q "Remote / SSH Writes" "$SKILL"; then
+  echo "[FAIL] remote/ssh write rule category missing"
+  exit 1
+fi
+
+if ! rg -q "READONLY-host rule" "$SKILL"; then
+  echo "[FAIL] READONLY-host hard-block rule missing"
+  exit 1
+fi
+
+echo "[PASS] safety-validator keeps risk model, context-safe examples, and remote-write protection"

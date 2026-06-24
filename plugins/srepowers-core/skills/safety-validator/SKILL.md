@@ -240,7 +240,54 @@ rules:
     message: "Modifying system configuration"
 ```
 
-### Proxmox VE / ZFS Commands
+### Remote / SSH Writes (read-only-host protection)
+
+A write against a non-local host is a mutation regardless of intent. This
+category catches commands that write to a remote host even when the *overall
+task* was classified as read-only — the most common cause of READONLY-host
+violations ("I just wanted to verify the command works"). If the target host
+is under a READONLY approval (UAT twin, shared box, someone else's system),
+**block the write regardless of risk level** and require explicit approval
+for that specific write.
+
+```yaml
+rules:
+  - pattern: "ssh\\s+[^|]*\\b(cp|mv|tee|touch|mkdir|rm)\\b"
+    risk: high
+    message: "Write over SSH to a remote host — mutation, not read-only. If host is under READONLY approval, block."
+
+  - pattern: "ssh\\s+[^|]*>\\s*\\S"
+    risk: high
+    message: "Redirect over SSH writes to a remote host — mutation. Check READONLY approval scope."
+
+  - pattern: "\\bscp\\b"
+    risk: medium
+    message: "Copies a file to a remote host. Verify destination is in approval scope; stage to /tmp and verify, not blind overwrite."
+
+  - pattern: "\\brsync\\b.*::|\\brsync\\b.*@"
+    risk: medium
+    message: "Transfers files to a remote target. Confirm approval scope and use -n / --dry-run first."
+
+  - pattern: "(podman|docker)\\s+exec\\s+.*\\b(cp|mv|tee|touch|mkdir|rm)\\b"
+    risk: high
+    message: "Write inside a container (often a remote/shared service). Mutation — verify the exec user (-u) has scope to write, and that the host allows it."
+
+  - pattern: "(podman|docker)\\s+exec\\s+.*>"
+    risk: high
+    message: "Redirect inside container exec writes to the container fs. Mutation, not read-only."
+
+  - pattern: "parallel-(ssh|scp|rsync)"
+    risk: high
+    message: "Fan-out write to many hosts — high blast radius. Confirm every target host is in approval scope before running."
+```
+
+**READONLY-host rule (hard block):** if the target host of any of the above
+was approved for **read-only** access only, the write is out of scope. Do not
+execute it even as a "probe" or "test file." To verify a command's
+correctness on a READONLY host, reason about it (perms, user context, paths)
+or run it against a truly local/ephemeral target — never the shared host.
+
+
 
 ```yaml
 rules:
