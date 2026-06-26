@@ -60,6 +60,7 @@ while [[ $# -gt 0 ]]; do
 		echo "  Core workflow:"
 		echo "    test-test-driven-operation.sh           TDO skill loading and requirements"
 		echo "    test-subagent-driven-operation.sh       SDO skill loading and requirements"
+		echo "    test-sdd-workspace.sh                   SDD workspace path and worktree isolation"
 		echo "    test-brainstorming-operations.sh        Brainstorming skill workflow"
 		echo "    test-writing-operation-plans.sh         Planning skill TDO discipline"
 		echo "    test-executing-operation-plans.sh       Batch execution with checkpoints"
@@ -112,6 +113,7 @@ done
 tests=(
 	"test-test-driven-operation.sh"
 	"test-subagent-driven-operation.sh"
+	"test-sdd-workspace.sh"
 	"test-brainstorming-operations.sh"
 	"test-writing-operation-plans.sh"
 	"test-executing-operation-plans.sh"

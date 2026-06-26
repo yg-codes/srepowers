@@ -18,6 +18,8 @@ SREPowers uses Superpowers as a methodology reference, not as a strict downstrea
 
 It intentionally diverges for infrastructure operations: routing is risk-based, production/destructive actions require safety gates, incident response has its own workflow, and TDO means verification-first rather than always failing-first. Baseline capture, blast radius, rollback, evidence, and change-control context are first-class requirements.
 
+The `subagent-driven-operation` skill ships its SDD file-handoff scripts (`task-brief`, `review-package`, `sdd-workspace`) under a srepowers-namespaced `.srepowers/sdd/` workspace in the working tree — never under `.git/`, which Claude Code treats as a protected path. `tests/claude-code/test-sdd-workspace.sh` locks in that the workspace is self-ignoring, that the handoff scripts write into it, and that a linked git worktree resolves its own distinct workspace.
+
 ## Minimum Sufficient Workflow
 
 SREPowers now routes tasks through the minimum sufficient workflow instead of forcing the heaviest process every time.
