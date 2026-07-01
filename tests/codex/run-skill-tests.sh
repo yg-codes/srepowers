@@ -49,6 +49,17 @@ plugins = (
 )
 
 marketplace = json.loads(Path(".agents/plugins/marketplace.json").read_text())
+
+# v5.6.0 invariant (superpowers v6.1.0 parity): the Codex marketplace manifest
+# must be installable — it needs a name, an interface.displayName, and a list
+# of plugin entries, each pointing at a packaged plugin under ./plugins/.
+if not isinstance(marketplace.get("plugins"), list):
+    raise SystemExit(".agents/plugins/marketplace.json plugins must be a list")
+if not marketplace.get("name"):
+    raise SystemExit(".agents/plugins/marketplace.json missing name")
+if not marketplace.get("interface", {}).get("displayName"):
+    raise SystemExit(".agents/plugins/marketplace.json missing interface.displayName")
+
 entries = {entry["name"]: entry for entry in marketplace["plugins"]}
 root_manifest = json.loads(Path(".codex-plugin/plugin.json").read_text())
 versions = {root_manifest["version"]}
@@ -82,6 +93,12 @@ for plugin in plugins:
         raise SystemExit(f"{codex_manifest} name mismatch")
     if manifest.get("skills") != "./skills/":
         raise SystemExit(f"{codex_manifest} skills path must be ./skills/")
+    # v5.6.0 invariant (superpowers v6.1.0 parity): packaged Codex plugins ship
+    # no SessionStart hook. The bootstrap hook lives at repo-root .codex/hooks.json
+    # for repo-dev convenience only — it must not appear in a packaged plugin
+    # manifest, where it would fire on every install.
+    if manifest.get("hooks") is not None:
+        raise SystemExit(f"{codex_manifest} must not declare a hooks field")
 
     skills = sorted(path.parent.name for path in skills_dir.glob("*/SKILL.md"))
     commands = sorted(path.stem for path in commands_dir.glob("*.md"))
@@ -105,6 +122,9 @@ for plugin in plugins:
         raise SystemExit(f"{plugin} marketplace source.path mismatch")
     if entry.get("category") != "Engineering":
         raise SystemExit(f"{plugin} marketplace category must be Engineering")
+    policy = entry.get("policy")
+    if policy != {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}:
+        raise SystemExit(f"{plugin} marketplace policy must be installation=AVAILABLE, authentication=ON_INSTALL")
 
 if len(versions) != 1:
     raise SystemExit(f"Codex marketplace and plugin versions differ: {sorted(versions)}")

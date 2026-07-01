@@ -12,7 +12,7 @@
     {
       "name": "srepowers-core",
       "description": "SRE workflow spine, mandatory gates, and incident response",
-      "version": "5.5.0",
+      "version": "5.6.0",
       "source": {
         "source": "local",
         "path": "./plugins/srepowers-core"
@@ -30,7 +30,7 @@
     {
       "name": "srepowers-domain",
       "description": "Software engineering domain expertise for infrastructure engineers",
-      "version": "5.5.0",
+      "version": "5.6.0",
       "source": {
         "source": "local",
         "path": "./plugins/srepowers-domain"
@@ -48,7 +48,7 @@
     {
       "name": "srepowers-infra",
       "description": "Portable Proxmox, Puppet analysis, DNS, TLS, backup, and GitLab CI/CD administration",
-      "version": "5.5.0",
+      "version": "5.6.0",
       "source": {
         "source": "local",
         "path": "./plugins/srepowers-infra"
@@ -66,7 +66,7 @@
     {
       "name": "srepowers-private",
       "description": "Site-specific Puppet, Hiera, and Ansible operational workflow skills (sanitized templates)",
-      "version": "5.5.0",
+      "version": "5.6.0",
       "source": {
         "source": "local",
         "path": "./plugins/srepowers-private"
