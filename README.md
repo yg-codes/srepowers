@@ -20,6 +20,8 @@ It intentionally diverges for infrastructure operations: routing is risk-based, 
 
 The `subagent-driven-operation` skill ships its SDD file-handoff scripts (`task-brief`, `review-package`, `sdd-workspace`) under a srepowers-namespaced `.srepowers/sdd/` workspace in the working tree — never under `.git/`, which Claude Code treats as a protected path. `tests/claude-code/test-sdd-workspace.sh` locks in that the workspace is self-ignoring, that the handoff scripts write into it, and that a linked git worktree resolves its own distinct workspace.
 
+The Codex `SessionStart` bootstrap hook matches `startup|clear|compact` — not `resume` — so resuming a Codex session does not re-fire the bootstrap, while context compaction still re-injects it (superpowers v6.1.0 parity, upstream `879ae59`). Each packaged Codex plugin manifest declares `"hooks": {}` to suppress Codex's auto-discovery of `hooks/hooks.json`: without that declaration, Codex falls back to registering `plugins/srepowers-core/hooks/hooks.json` (the Claude Code hook) on every install (superpowers v6.1.1 parity, upstream `7d8d3d4`). `tests/codex/run-skill-tests.sh` asserts both invariants.
+
 ## Minimum Sufficient Workflow
 
 SREPowers now routes tasks through the minimum sufficient workflow instead of forcing the heaviest process every time.

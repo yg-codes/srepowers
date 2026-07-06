@@ -1,7 +1,7 @@
 {
   "name": "srepowers",
   "description": "SRE infrastructure skills marketplace with 3 plugins: core (workflow + gates + incident), domain (Go, Python, Rust, K8s, Terraform, security, etc.), infra (Proxmox, Puppet, GitLab CI/CD)",
-  "version": "5.6.0",
+  "version": "5.6.1",
   "author": {
     "name": "yg-codes",
     "email": "yg-codes@users.noreply.github.com"
