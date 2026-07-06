@@ -1,6 +1,6 @@
 {
   "name": "srepowers-domain",
-  "version": "5.6.0",
+  "version": "5.6.1",
   "description": "Software engineering domain expertise — Go, Python, Rust, Kubernetes, Terraform, containers, networking, security, testing, and more",
   "author": {
     "name": "yg-codes",

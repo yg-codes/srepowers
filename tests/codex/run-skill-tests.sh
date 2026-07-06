@@ -50,7 +50,7 @@ plugins = (
 
 marketplace = json.loads(Path(".agents/plugins/marketplace.json").read_text())
 
-# v5.6.0 invariant (superpowers v6.1.0 parity): the Codex marketplace manifest
+# v5.6.1 invariant (superpowers v6.1.0 parity): the Codex marketplace manifest
 # must be installable — it needs a name, an interface.displayName, and a list
 # of plugin entries, each pointing at a packaged plugin under ./plugins/.
 if not isinstance(marketplace.get("plugins"), list):
@@ -93,12 +93,19 @@ for plugin in plugins:
         raise SystemExit(f"{codex_manifest} name mismatch")
     if manifest.get("skills") != "./skills/":
         raise SystemExit(f"{codex_manifest} skills path must be ./skills/")
-    # v5.6.0 invariant (superpowers v6.1.0 parity): packaged Codex plugins ship
-    # no SessionStart hook. The bootstrap hook lives at repo-root .codex/hooks.json
-    # for repo-dev convenience only — it must not appear in a packaged plugin
-    # manifest, where it would fire on every install.
-    if manifest.get("hooks") is not None:
-        raise SystemExit(f"{codex_manifest} must not declare a hooks field")
+    # v5.6.1 invariant (superpowers v6.1.1 parity, upstream commits 7d8d3d4 /
+    # 640ce6c): Codex auto-discovers a plugin's hooks/hooks.json whenever the
+    # Codex manifest has no `hooks` field — load_plugin_hooks falls back to a
+    # hardcoded DEFAULT_HOOKS_CONFIG_FILE = "hooks/hooks.json" and registers it.
+    # srepowers-core ships plugins/srepowers-core/hooks/hooks.json (the Claude
+    # Code SessionStart hook), so the fallback would re-register that hook and
+    # its install-time trust prompt on every Codex install. Declare an empty
+    # inline hooks object ({}) to suppress the auto-discovery. An absent field,
+    # an empty array ([]), and an empty inline list all collapse back to the
+    # fallback, so the value must be exactly {}. The repo-root .codex/hooks.json
+    # bootstrap hook is unaffected (it is repo-dev convenience only).
+    if manifest.get("hooks") != {}:
+        raise SystemExit(f"{codex_manifest} must declare \"hooks\": {{}} to suppress hooks/hooks.json auto-discovery")
 
     skills = sorted(path.parent.name for path in skills_dir.glob("*/SKILL.md"))
     commands = sorted(path.stem for path in commands_dir.glob("*.md"))

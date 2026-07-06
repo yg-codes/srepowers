@@ -1,6 +1,6 @@
 {
   "name": "srepowers-infra",
-  "version": "5.6.0",
+  "version": "5.6.1",
   "description": "Portable infrastructure administration — Proxmox VE, Puppet code analysis, DNS, TLS/PKI, backup, change management, and GitLab CI/CD pipelines",
   "author": {
     "name": "yg-codes",
@@ -15,6 +15,7 @@
     "infrastructure", "vlan", "dns", "tls", "backup", "goreleaser"
   ],
   "skills": "./skills/",
+  "hooks": {},
   "interface": {
     "displayName": "SREPowers Infra",
     "shortDescription": "Proxmox, Puppet analysis, DNS, TLS, backup, and GitLab CI/CD skills",
