@@ -536,6 +536,7 @@ See reference files in this directory:
 - **`distributed-tracing.md`** - Following requests across services
 - **`root-cause-tracing.md`** - Backward call chain tracing to find original trigger
 - **`defense-in-depth.md`** - Prevent recurrence by validating at every layer
+- **`condition-based-waiting.md`** - Poll for eventual-consistency convergence (rollout Ready, health 200, DNS propagated, Puppet settled) instead of fixed sleeps
 
 ## Real-World Impact
 

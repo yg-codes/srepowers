@@ -21,6 +21,16 @@ NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
 
 If you haven't run the verification command in this message, you cannot claim it passes.
 
+## Why This Matters
+
+Unverified completion claims are how single changes become incidents:
+- "It's deployed" when the rollout never became Ready — traffic hits a broken version
+- Undefined config shipped — the service crash-loops on next restart
+- Missing requirements shipped — the change is incomplete and reopens as a follow-up incident
+- Time wasted on false completion → the operation gets handed back → rework under worse conditions
+- Trust broken — once a stakeholder hears "it's fixed" and finds it isn't, every future status claim is doubted
+- Violates the core value: honesty. A false "healthy" during an incident is worse than saying "still investigating."
+
 ## The Gate Function
 
 ```
@@ -152,3 +162,11 @@ Requirements Coverage:
 6. All requirements must be `done` or explicitly `skipped` (with documented reason) before proceeding to `finishing-operation-branch`
 
 **Issue tracker integration:** When the plan has a `ticket` in frontmatter, cross-reference acceptance criteria against the coverage summary. If a tracker MCP (ClickUp, Jira, etc.) is available, fetch the ticket and verify criteria are met. Update the ticket to reflect completion when all criteria pass.
+
+## The Bottom Line
+
+**No shortcuts for verification.**
+
+Run the command. Read the output — exit code, status, actual values. THEN claim the result.
+
+This is non-negotiable, especially under incident pressure.
