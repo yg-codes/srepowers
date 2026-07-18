@@ -120,8 +120,7 @@ This guide covers both Claude Code compatibility and Codex-native use. Use `test
 # 3. For each task:
 #    - Dispatches operator subagent
 #    - Executes operations with TDO
-#    - Runs spec compliance review
-#    - Runs artifact quality review
+#    - Runs one task review returning spec + quality verdicts
 #    - Loops until approved
 ```
 
@@ -824,7 +823,7 @@ claude -p "/test-master"
 
 2. **Hooks don't fire:**
    - Check `hooks/hooks.json` exists
-   - Verify `session-start.sh` is executable
+   - Verify `hooks/session-start` and `hooks/run-hook.cmd` are executable
    - Check Claude Code version supports hooks
 
 3. **Tests fail:**
