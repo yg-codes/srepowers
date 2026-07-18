@@ -352,7 +352,7 @@ After saving the plan:
 **If Subagent-Driven chosen:**
 - **REQUIRED SUB-SKILL:** Use srepowers-core:subagent-driven-operation
 - Stay in this session
-- Fresh subagent per task + two-stage review
+- Fresh subagent per task + one task reviewer returning spec and quality verdicts
 
 **If Separate session chosen:**
 - Guide user to open new session in git worktree

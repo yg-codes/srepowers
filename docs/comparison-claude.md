@@ -60,7 +60,7 @@ SREPowers is notably broader in scope, with significant investment in domain-spe
 
 **Core Infrastructure Operations (6):**
 - `test-driven-operation` — verification-first infrastructure changes
-- `subagent-driven-operation` — execute operations with two-stage review
+- `subagent-driven-operation` — execute operations with per-task spec + quality review
 - `brainstorming-operations` — design infrastructure changes with risk assessment
 - `writing-operation-plans` — create bite-sized execution plans
 - `verification-before-completion` — evidence-driven success claims
