@@ -18,3 +18,14 @@ jobs:
 
       - name: Validate Codex packaging mirrors
         run: bash tests/codex/run-skill-tests.sh
+
+      - name: Test SessionStart hook output
+        run: bash tests/hooks/test-session-start.sh
+
+      - name: Test the shell linter
+        run: bash tests/shell-lint/test-lint-shell.sh
+
+      # --all so CI lints the full tracked baseline, not just the PR's
+      # changed files: a fresh checkout has no useful diff base.
+      - name: Lint shell scripts
+        run: bash scripts/lint-shell.sh --all --strict
