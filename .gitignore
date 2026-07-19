@@ -14,6 +14,10 @@ AGENTS.md
 # Serena MCP
 .serena/
 
+# SREPowers scratch — SDD briefs/reports/review packages, progress ledger,
+# and brainstorm visual-companion session files
+.srepowers/
+
 # OS
 .DS_Store
 .DS_Store?

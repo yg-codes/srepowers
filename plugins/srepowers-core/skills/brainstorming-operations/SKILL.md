@@ -19,6 +19,10 @@ Start by understanding the current infrastructure state, then ask questions one 
 Do NOT execute any operation, run any kubectl/terraform commands, or make any infrastructure changes until you have presented a design and the user has approved it. This applies to EVERY operation regardless of perceived simplicity.
 </HARD-GATE>
 
+## Anti-Pattern: "This Is Too Simple To Need A Design"
+
+Every operation goes through this process. A single config tweak, a one-line Hiera change, "just restart the service", a routine cert renewal — all of them. "Simple" operations are where unexamined assumptions cause the most damage: the config tweak that restarts a pod without a PodDisruptionBudget, the "just restart" that clears a queue you needed, the cert renewal that breaks a pinned client. The design can be short (a few sentences for a genuinely low-risk operation), but you MUST present it — including the rollback and verification — and get approval.
+
 ## Process Flow
 
 ```dot
@@ -50,6 +54,19 @@ digraph brainstorming {
 ```
 
 **The terminal state is invoking writing-operation-plans.** Do NOT invoke test-driven-operation, subagent-driven-operation, or any other execution skill. The ONLY skill you invoke after brainstorming is writing-operation-plans.
+
+## Checklist
+
+You MUST create a task for each of these items and complete them in order:
+
+1. **Explore infrastructure context** — current state (kubectl/terraform/configs), recent changes, known issues
+2. **Ask clarifying questions** — one at a time; understand purpose, scope, constraints, risk level
+3. **Propose 2-3 approaches** — with trade-offs (downtime, rollback complexity, verification) and your recommendation
+4. **Present design** — in sections scaled to complexity, get user approval after each section
+5. **Write design doc** — save to `docs/plans/YYYY-MM-DD-<operation-name>-design.md` and commit
+6. **Design review loop** — dispatch design-document-reviewer; fix and re-dispatch until Approved
+7. **User reviews written design** — ask the user to review the design file before proceeding
+8. **Transition to planning** — invoke writing-operation-plans skill to create the execution plan
 
 ## The Process
 
@@ -121,6 +138,54 @@ digraph brainstorming {
 | **Verification-first** | Design verification strategies before operation steps |
 | **Rollback-aware** | Every operation should have a rollback plan |
 | **Dry-run strategy** | Identify which commands support `--dry-run` |
+
+## Visual Companion (optional)
+
+A browser-based companion for showing topology diagrams, failure-domain maps,
+dashboard layouts, and side-by-side architecture options during brainstorming.
+It is a tool, not a mode — accepting it means it is *available*, not that every
+question goes through the browser.
+
+**Opt-in and dependency-scoped:** the companion needs Node.js. The core
+brainstorming workflow has no runtime dependency and must stay that way — never
+make the companion a prerequisite for designing an operation.
+
+**Offering it (just-in-time):** do NOT offer it upfront. Wait until a question
+would genuinely be clearer shown than told — a real topology, layout, or
+comparison question, not merely an infrastructure *topic*. The first time that
+happens, offer it as its own message:
+
+> "This next part might be easier if I show you — I can put together diagrams
+> and side-by-side comparisons in a browser tab as we go. It's still new and can
+> be token-intensive. Want me to? I'll open it for you."
+
+**The offer MUST be its own message.** No clarifying question, summary, or other
+content alongside it. Wait for the response. If they accept, start the server
+with `--open`. If they decline, continue text-only and don't offer again unless
+they raise it.
+
+**Per-question decision:** even after acceptance, decide for each question. The
+test: **would the operator understand this better by seeing it than reading it?**
+
+- **Browser:** network topology, failure-domain and blast-radius maps, cluster
+  or zone layout comparisons, before/after architecture diagrams, dashboard
+  mockups
+- **Terminal:** requirements questions, rollback strategy, verification-command
+  choices, A/B/C/D text options, scope and maintenance-window decisions
+
+A question about a topology *topic* is not automatically a visual question.
+"What counts as a failure domain here?" is conceptual — use the terminal. "Which
+of these two subnet layouts is better?" is visual — use the browser.
+
+If they agree, read the detailed guide before proceeding:
+[visual-companion.md](visual-companion.md).
+
+**Security model (do not weaken):** the server issues a per-session key,
+delivered in the URL and stored as a tab-scoped cookie; every HTTP and WebSocket
+request must present it. It refuses symlinks, dotfiles, and path escapes, and
+writes key-bearing files owner-only. Session files live under
+`.srepowers/brainstorm/` (git-ignored) when `--project-dir` is passed, and in
+`/tmp` otherwise.
 
 ## Red Flags
 

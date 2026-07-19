@@ -29,6 +29,7 @@ SRE workflow spine, mandatory gates, and incident response.
 ### Safety and Review
 | Skill | Use When |
 |-------|----------|
+| `srepowers-core:requesting-review-sre` | Dispatching a reviewer before merging an infra change |
 | `srepowers-core:receiving-code-review-sre` | Processing code review feedback on infra changes |
 | `srepowers-core:code-reviewer` | PR reviews, code quality audits |
 | `srepowers-core:environment-health-check` | Verifying SREPowers environment is configured |

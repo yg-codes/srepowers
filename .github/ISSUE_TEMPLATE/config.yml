@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & Help
+    url: https://github.com/yg-codes/srepowers/discussions
+    about: For usage questions, troubleshooting help, and general discussion, please open a Discussion instead of an issue.
+  - name: Upstream (superpowers)
+    url: https://github.com/obra/superpowers/issues
+    about: SREPowers is an SRE-focused fork of superpowers. If the behavior also reproduces upstream, file it there so both projects benefit.

@@ -245,7 +245,7 @@ if ! command -v pvecm &>/dev/null || ! pvecm status &>/dev/null; then
 	fi
 
 	# Check hostname resolution
-	if getent hosts $(hostname) &>/dev/null; then
+	if getent hosts "$(hostname)" &>/dev/null; then
 		check_status 0 "Hostname resolves: $(hostname)"
 	else
 		check_status 1 "Hostname does not resolve: $(hostname)"

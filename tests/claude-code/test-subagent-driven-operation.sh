@@ -28,12 +28,18 @@ fi
 
 echo ""
 
-# Test 2: Verify workflow order
-echo "Test 2: Workflow ordering..."
+# Test 2: Verify verdict order within the single task review
+echo "Test 2: Verdict ordering..."
 
-output=$(run_claude "In the subagent-driven-operation skill, what comes first: spec compliance review or artifact quality review? Be specific about the order." 30)
+output=$(run_claude "In the subagent-driven-operation skill, how many reviewer subagents run per task, and in what order does the reviewer report its verdicts?" 30)
 
-if assert_order "$output" "spec.*compliance" "artifact.*quality" "Spec compliance before artifact quality"; then
+if assert_contains "$output" "one reviewer\|single reviewer\|one task reviewer\|task-reviewer\|task reviewer" "One reviewer per task"; then
+    : # pass
+else
+    exit 1
+fi
+
+if assert_order "$output" "spec.*compliance" "quality" "Spec compliance verdict reported before quality"; then
     : # pass
 else
     exit 1
@@ -79,10 +85,10 @@ fi
 
 echo ""
 
-# Test 5: Verify spec compliance reviewer is skeptical
-echo "Test 5: Spec compliance reviewer mindset..."
+# Test 5: Verify the task reviewer is skeptical
+echo "Test 5: Task reviewer mindset..."
 
-output=$(run_claude "What is the spec compliance reviewer's attitude toward the operator's report in subagent-driven-operation?" 30)
+output=$(run_claude "What is the task reviewer's attitude toward the operator's report in subagent-driven-operation?" 30)
 
 if assert_contains "$output" "not trust\|don't trust\|skeptical\|verify.*independently\|suspiciously" "Reviewer is skeptical"; then
     : # pass
@@ -149,10 +155,10 @@ fi
 
 echo ""
 
-# Test 9: Verify two-stage review
-echo "Test 9: Two-stage review..."
+# Test 9: Verify the two verdicts returned by the single task reviewer
+echo "Test 9: Two verdicts, one reviewer..."
 
-output=$(run_claude "What are the two stages of review in subagent-driven-operation? What does each check?" 30)
+output=$(run_claude "What verdicts does the task reviewer return in subagent-driven-operation? What does each check?" 30)
 
 if assert_contains "$output" "spec.*compliance" "Mentions spec compliance"; then
     : # pass
@@ -161,6 +167,25 @@ else
 fi
 
 if assert_contains "$output" "artifact.*quality\|quality" "Mentions artifact quality"; then
+    : # pass
+else
+    exit 1
+fi
+
+echo ""
+
+# Test 9b: Verify the cannot-verify-from-diff verdict
+echo "Test 9b: Cannot-verify-from-diff handling..."
+
+output=$(run_claude "In subagent-driven-operation, what should the task reviewer do about a requirement it cannot verify from the diff alone, and who resolves it?" 30)
+
+if assert_contains "$output" "cannot verify\|can't verify\|Cannot verify\|⚠️" "Reports a cannot-verify item"; then
+    : # pass
+else
+    exit 1
+fi
+
+if assert_contains "$output" "controller\|yourself\|resolve" "Controller resolves it"; then
     : # pass
 else
     exit 1

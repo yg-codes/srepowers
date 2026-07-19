@@ -7,9 +7,9 @@ description: Use when executing infrastructure operation plans with independent 
 
 ## Overview
 
-Execute infrastructure operation plan by dispatching fresh subagent per task, with two-stage review after each: spec compliance review first, then artifact quality review.
+Execute infrastructure operation plan by dispatching fresh subagent per task, with one task reviewer after each that returns two verdicts in a single diff read: spec compliance and artifact quality.
 
-**Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
+**Core principle:** Fresh subagent per task + one reviewer returning two verdicts = high quality, fast iteration
 
 **Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work. The same applies to the reviewer subagents: give each one precisely crafted review context, never your session history.
 
@@ -42,7 +42,7 @@ digraph when_to_use {
 **vs. Executing Plans (parallel session):**
 - Same session (no context switch)
 - Fresh subagent per task (no context pollution)
-- Two-stage review after each task: spec compliance first, then artifact quality
+- One task reviewer after each task, returning spec-compliance and quality verdicts together
 - Faster iteration (no human-in-loop between tasks)
 
 ## Pre-Flight Plan Review
@@ -52,7 +52,7 @@ Before dispatching Task 1, scan the plan once for conflicts:
 - tasks that contradict each other or the plan's Global Constraints
 - anything the plan explicitly mandates that the review rubric would treat as a defect (a verification that checks nothing, a task with no rollback)
 
-Present everything you find to the human as **one batched question** — each finding beside the plan text that mandates it, asking which governs — before execution begins, not one interrupt per discovery mid-plan. If the scan is clean, proceed without comment. The two-stage review loop remains the net for conflicts that only emerge during execution.
+Present everything you find to the human as **one batched question** — each finding beside the plan text that mandates it, asking which governs — before execution begins, not one interrupt per discovery mid-plan. If the scan is clean, proceed without comment. The task review loop remains the net for conflicts that only emerge during execution.
 
 ## Plan Parsing
 
@@ -101,8 +101,8 @@ Role boundaries:
 | Role | Exact scope | Must not conclude |
 |------|-------------|-------------------|
 | **Operator** | Execute assigned task or segment, verify, self-review | Overall operation is complete |
-| **Spec reviewer** | Confirm implemented work matches requirements | Artifact quality or production readiness beyond spec fit |
-| **Artifact reviewer** | Assess syntax, maintainability, and safety of artifacts | That the spec was satisfied if spec review has not already passed |
+| **Task reviewer** | One diff read, two verdicts: does the work match the spec, and are the artifacts well-built and safe | That the whole operation is production-ready — that is the final whole-operation review's job |
+| **Final reviewer** | Broad whole-operation review of the entire branch on the most capable model | — |
 
 ## The Process
 
@@ -117,12 +117,10 @@ digraph process {
         "Answer questions, provide context" [shape=box];
         "Operator subagent executes operations, verifies, commits, self-reviews" [shape=box];
         "Generate review package (./scripts/review-package BASE HEAD)" [shape=box];
-        "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [shape=box];
-        "Spec reviewer confirms operations match spec?" [shape=diamond];
-        "Operator subagent fixes spec gaps" [shape=box];
-        "Dispatch artifact quality reviewer subagent (./artifact-quality-reviewer-prompt.md)" [shape=box];
-        "Artifact quality reviewer approves?" [shape=diamond];
-        "Operator subagent fixes quality issues" [shape=box];
+        "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" [shape=box];
+        "Task reviewer reports spec ✅ and quality approved?" [shape=diamond];
+        "Resolve any ⚠️ cannot-verify items yourself" [shape=box];
+        "Dispatch operator subagent to fix Critical/Important findings" [shape=box];
         "Mark task complete in TodoWrite" [shape=box];
     }
 
@@ -141,15 +139,13 @@ digraph process {
     "Answer questions, provide context" -> "Dispatch operator subagent (./operator-prompt.md)";
     "Operator subagent asks questions?" -> "Operator subagent executes operations, verifies, commits, self-reviews" [label="no"];
     "Operator subagent executes operations, verifies, commits, self-reviews" -> "Generate review package (./scripts/review-package BASE HEAD)";
-    "Generate review package (./scripts/review-package BASE HEAD)" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)";
-    "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" -> "Spec reviewer confirms operations match spec?";
-    "Spec reviewer confirms operations match spec?" -> "Operator subagent fixes spec gaps" [label="no"];
-    "Operator subagent fixes spec gaps" -> "Dispatch spec reviewer subagent (./spec-reviewer-prompt.md)" [label="re-review"];
-    "Spec reviewer confirms operations match spec?" -> "Dispatch artifact quality reviewer subagent (./artifact-quality-reviewer-prompt.md)" [label="yes"];
-    "Dispatch artifact quality reviewer subagent (./artifact-quality-reviewer-prompt.md)" -> "Artifact quality reviewer approves?";
-    "Artifact quality reviewer approves?" -> "Operator subagent fixes quality issues" [label="no"];
-    "Operator subagent fixes quality issues" -> "Dispatch artifact quality reviewer subagent (./artifact-quality-reviewer-prompt.md)" [label="re-review"];
-    "Artifact quality reviewer approves?" -> "Mark task complete in TodoWrite" [label="yes"];
+    "Generate review package (./scripts/review-package BASE HEAD)" -> "Dispatch task reviewer subagent (./task-reviewer-prompt.md)";
+    "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" -> "Task reviewer reports spec ✅ and quality approved?";
+    "Task reviewer reports spec ✅ and quality approved?" -> "Dispatch operator subagent to fix Critical/Important findings" [label="no"];
+    "Dispatch operator subagent to fix Critical/Important findings" -> "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" [label="re-review"];
+    "Task reviewer reports spec ✅ and quality approved?" -> "Resolve any ⚠️ cannot-verify items yourself" [label="yes"];
+    "Resolve any ⚠️ cannot-verify items yourself" -> "Dispatch operator subagent to fix Critical/Important findings" [label="real gap found"];
+    "Resolve any ⚠️ cannot-verify items yourself" -> "Mark task complete in TodoWrite" [label="clear"];
     "Mark task complete in TodoWrite" -> "Update Execution Status in plan file";
     "Update Execution Status in plan file" -> "More tasks remain?";
     "More tasks remain?" -> "Dispatch operator subagent (./operator-prompt.md)" [label="yes"];
@@ -178,7 +174,7 @@ Use the least powerful model that can handle each role to conserve cost and incr
 
 Operator subagents report one of four statuses. Handle each appropriately:
 
-**DONE:** Generate the review package — `scripts/review-package BASE HEAD` (from this skill's directory; it prints the file path it wrote). BASE is the commit you recorded **before** dispatching the operator — never `HEAD~1`, which silently drops all but the last commit of a multi-commit task. Then dispatch the spec compliance reviewer with the printed path.
+**DONE:** Generate the review package — `scripts/review-package BASE HEAD` (from this skill's directory; it prints the file path it wrote). BASE is the commit you recorded **before** dispatching the operator — never `HEAD~1`, which silently drops all but the last commit of a multi-commit task. Then dispatch the task reviewer with the printed path.
 
 **DONE_WITH_CONCERNS:** The operator completed the work but flagged doubts. Read the concerns before proceeding. If concerns are about safety or correctness (e.g., "unexpected pod restarts during rollout"), investigate before review. If they're observations (e.g., "this namespace has many resources"), note them and proceed.
 
@@ -248,7 +244,7 @@ Per-task reviews are task-scoped gates. The broad review happens once, at the fi
 - **Hand the reviewer its diff as a file:** run `scripts/review-package BASE HEAD` and pass the printed path. The diff never enters your own context, and the reviewer sees the commit list, stat summary, and full diff in one Read. Use the recorded BASE — never `HEAD~1`.
 - A dispatch prompt describes one task, not the session's history. Do not paste accumulated prior-task summaries into later dispatches — a fresh subagent needs its task brief, the interfaces it touches, and the global constraints. Nothing else.
 - A finding labeled plan-mandated — or any finding that conflicts with what the plan's text requires — is the human's decision: present the finding and the plan text, ask which governs. Do not dismiss the finding because the plan mandates it, and do not dispatch a fix that contradicts the plan without asking.
-- The final whole-operation review gets a package too: run `scripts/review-package MERGE_BASE HEAD` (MERGE_BASE = the commit the branch started from, e.g. `git merge-base main HEAD`) and include the printed path. If the final review returns findings, dispatch **ONE** fix subagent with the complete findings list — not one fixer per finding (per-finding fixers each rebuild context and re-run checks).
+- The final whole-operation review uses a different template from the per-task ones: fill `srepowers-core:requesting-review-sre`'s `code-reviewer.md`, which judges production readiness across the whole branch. It gets a package too: run `scripts/review-package MERGE_BASE HEAD` (MERGE_BASE = the commit the branch started from, e.g. `git merge-base main HEAD`) and include the printed path. If the final review returns findings, dispatch **ONE** fix subagent with the complete findings list — not one fixer per finding (per-finding fixers each rebuild context and re-run checks).
 
 ## File Handoffs
 
@@ -264,34 +260,46 @@ Everything you paste into a dispatch prompt — and everything a subagent prints
 Conversation memory does not survive compaction. A controller that loses its place can re-dispatch entire completed task sequences — the most expensive failure mode. Track progress in a ledger file, not only in TodoWrite and the plan's Execution Status.
 
 - At skill start, check for a ledger: `cat "$(git rev-parse --show-toplevel)/.srepowers/sdd/progress.md"`. Tasks listed there as complete are DONE — do not re-dispatch them; resume at the first task not marked complete.
-- When a task's two-stage review comes back clean, append one line to the ledger in the same message as your other bookkeeping: `Task N: complete (commits <base7>..<head7>, review clean)`.
+- When a task's review comes back clean (both verdicts, no unresolved ⚠️ items), append one line to the ledger in the same message as your other bookkeeping: `Task N: complete (commits <base7>..<head7>, review clean)`.
 - The ledger is your recovery map: the commits it names exist in git even when your context no longer remembers creating them. After compaction, trust the ledger and `git log` over your own recollection.
 - `git clean -fdx` will destroy the ledger (it's git-ignored scratch under `.srepowers/`); if that happens, recover from `git log`.
 
 ## Prompt Templates
 
 - `./operator-prompt.md` - Dispatch operator subagent
-- `./spec-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
-- `./artifact-quality-reviewer-prompt.md` - Dispatch artifact quality reviewer subagent
+- `./task-reviewer-prompt.md` - Dispatch task reviewer subagent (spec compliance + artifact quality in one diff read)
 - `./scripts/task-brief` - Extract a task's full text to a brief file
 - `./scripts/review-package` - Write commit list + stat + diff to a review-package file
 - `./scripts/sdd-workspace` - Resolve the `.srepowers/sdd/` artifact directory
 
-## Why Review Order Matters
+## Why One Reviewer, Two Verdicts
 
-**Spec compliance review MUST pass before artifact quality review begins.**
+The reviewer reads the review package **once** and returns both verdicts:
+spec compliance first, then artifact quality.
 
-| Review | What It Checks | Why First/Second |
-|--------|----------------|------------------|
-| **Spec compliance** | Correct thing was built | Prevents "beautiful but wrong" implementations |
-| **Artifact quality** | Correct thing is well-built | Only runs on spec-compliant implementation |
+| Verdict | What It Checks | Why It Comes First/Second |
+|---------|----------------|---------------------------|
+| **Spec compliance** | Correct thing was executed | Prevents "beautiful but wrong" — reported first so a spec ❌ frames every quality finding |
+| **Artifact quality** | Correct thing is well-built and safe | Judged in the same read; a fix dispatch clears both together |
 
 **Example:**
 - Task: "Create Keycloak client with redirect URIs"
 - Operator creates: Perfect YAML, proper labels... but missing `adminUrl` (required by spec)
-- If artifact quality review ran first → Would approve (beautiful YAML)
-- Then spec compliance → Would fail (missing field)
-- **Correct order**: Spec compliance catches missing field immediately
+- The reviewer reports `Spec ❌: missing adminUrl` alongside its quality notes,
+  so one fix dispatch addresses the gap and any polish in the same round
+
+**Why not two sequential reviewers:** a second reviewer re-reads the same diff
+to answer a question the first one was already looking at, doubling turns and
+cost while splitting one fix loop into two.
+
+## Handling Reviewer ⚠️ Items
+
+The task reviewer may report "⚠️ Cannot verify from diff" items — requirements
+that live in unchanged config, live cluster/host state, or span tasks. These do
+not block the rest of the review, but you must resolve each one yourself before
+marking the task complete: you hold the plan and cross-task context the reviewer
+lacks. If you confirm an item is a real gap, treat it as a failed spec review —
+send it back to the operator and re-review.
 
 ## Infrastructure Operation Examples
 
@@ -323,7 +331,7 @@ Conversation memory does not survive compaction. A controller that loses its pla
 
 **Never:**
 - Start operations on production control repo without explicit consent
-- Skip reviews (spec compliance OR artifact quality)
+- Skip the task review, or accept a review that returned only one of the two verdicts
 - Proceed with unfixed issues
 - Dispatch multiple operator subagents in parallel (conflicts)
 - Make a subagent read the whole plan file (hand it its task brief — `scripts/task-brief` — instead)
@@ -332,7 +340,7 @@ Conversation memory does not survive compaction. A controller that loses its pla
 - Tell a reviewer what not to flag, or pre-rate a finding's severity in the dispatch ("treat it as Minor at most")
 - Re-dispatch a task the progress ledger already marks complete — check the ledger (and `git log`) after any compaction or resume
 - Ignore subagent questions (answer before letting them proceed)
-- Start artifact quality review before spec compliance is ✅
+- Mark a task complete with unresolved ⚠️ cannot-verify items — resolve each yourself first
 
 **Environment Context for Subagents:**
 - Subagents run in isolated contexts and don't inherit environment variables from parent session

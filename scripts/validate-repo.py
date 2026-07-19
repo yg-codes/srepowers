@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 from pathlib import Path
@@ -33,30 +34,72 @@ def validate_json_files() -> None:
         load_json(path)
 
 
-def plugin_versions() -> list[str]:
+def manifest_paths() -> list[Path]:
+    """Every JSON manifest that carries a version string."""
     paths = [
         ROOT / ".claude-plugin" / "marketplace.json",
         ROOT / ".codex-plugin" / "plugin.json",
         ROOT / ".agents" / "plugins" / "marketplace.json",
     ]
-    paths.extend(ROOT.glob("plugins/*/.claude-plugin/plugin.json"))
-    paths.extend(ROOT.glob("plugins/*/.codex-plugin/plugin.json"))
+    paths.extend(sorted(ROOT.glob("plugins/*/.claude-plugin/plugin.json")))
+    paths.extend(sorted(ROOT.glob("plugins/*/.codex-plugin/plugin.json")))
+    return paths
 
+
+def version_sites(path: Path) -> list[tuple[str, str]]:
+    """Return (json-pointer-ish field, value) pairs for one manifest.
+
+    Versions live in three shapes: a top-level `version`, a
+    `metadata.version` (marketplace root), and per-entry `plugins.N.version`.
+    Discovering them structurally keeps this list from drifting out of sync
+    with the packaging layout the way a hardcoded file list would.
+    """
+    data = load_json(path)
+    if not isinstance(data, dict):
+        fail(f"{path.relative_to(ROOT)} must contain a JSON object")
+
+    sites: list[tuple[str, str]] = []
+    if "version" in data:
+        sites.append(("version", str(data["version"])))
+    metadata = data.get("metadata")
+    if isinstance(metadata, dict) and "version" in metadata:
+        sites.append(("metadata.version", str(metadata["version"])))
+    for index, entry in enumerate(data.get("plugins", [])):
+        if isinstance(entry, dict) and "version" in entry:
+            sites.append((f"plugins.{index}.version", str(entry["version"])))
+    return sites
+
+
+def plugin_versions() -> list[str]:
     versions: list[str] = []
-    for path in paths:
-        data = load_json(path)
-        if not isinstance(data, dict):
-            fail(f"{path.relative_to(ROOT)} must contain a JSON object")
-
-        if "version" in data:
-            versions.append(str(data["version"]))
-        metadata = data.get("metadata")
-        if isinstance(metadata, dict) and "version" in metadata:
-            versions.append(str(metadata["version"]))
-        for entry in data.get("plugins", []):
-            if isinstance(entry, dict) and "version" in entry:
-                versions.append(str(entry["version"]))
+    for path in manifest_paths():
+        versions.extend(value for _, value in version_sites(path))
     return versions
+
+
+def set_version(new_version: str) -> None:
+    """Rewrite every `"version": "..."` line in the version-bearing manifests.
+
+    Substitutes at the text level rather than round-tripping through
+    json.dumps: these manifests are hand-formatted (grouped keyword arrays,
+    inline capability lists) and contain non-ASCII punctuation, both of which
+    a dump-and-rewrite would silently destroy.
+    """
+    if not re.fullmatch(r"\d+\.\d+\.\d+", new_version):
+        fail(f"version must be MAJOR.MINOR.PATCH, got: {new_version}")
+
+    pattern = re.compile(r'("version"\s*:\s*")\d+\.\d+\.\d+(")')
+    updated = 0
+    sites = 0
+    for path in manifest_paths():
+        original = path.read_text()
+        replaced, count = pattern.subn(rf"\g<1>{new_version}\g<2>", original)
+        if count:
+            path.write_text(replaced)
+            updated += 1
+            sites += count
+
+    print(f"[OK] set version {new_version} at {sites} sites across {updated} manifests")
 
 
 def validate_versions() -> None:
@@ -132,7 +175,34 @@ def validate_claude_tests() -> None:
         fail(f"Claude tests reference obsolete root paths: {', '.join(obsolete)}")
 
 
+def show_versions() -> None:
+    for path in manifest_paths():
+        for field, value in version_sites(path):
+            print(f"{path.relative_to(ROOT)}\t{field}\t{value}")
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--bump",
+        metavar="VERSION",
+        help="set every version-bearing manifest to VERSION, then validate",
+    )
+    group.add_argument(
+        "--show-versions",
+        action="store_true",
+        help="list every version site and its current value",
+    )
+    args = parser.parse_args()
+
+    if args.show_versions:
+        show_versions()
+        return
+
+    if args.bump:
+        set_version(args.bump)
+
     validate_json_files()
     validate_versions()
     validate_skills()
