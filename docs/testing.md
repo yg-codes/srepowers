@@ -4,6 +4,11 @@ SREPowers has two kinds of tests: **offline** checks that validate packaging,
 shell hygiene, and hook output, and **model-dependent** checks that dispatch
 real sessions to verify skills actually trigger and are followed.
 
+They read different things. The offline checks read **this checkout**. The
+model-dependent suite reads the **installed plugin** — a separate clone the
+`claude` CLI resolves from your Claude config directory. That distinction
+matters whenever you have unmerged work; see `tests/claude-code/` below.
+
 CI runs everything except the model-dependent suite.
 
 ## Layout
@@ -15,7 +20,8 @@ scripts/lint-shell.sh            shellcheck + shfmt + syntax across shell files
 tests/hooks/                     SessionStart hook output shapes (offline)
 tests/shell-lint/                tests for the linter itself (offline)
 tests/codex/                     Codex manifest and hook invariants (offline)
-tests/claude-code/               per-skill behavior suite (needs the `claude` CLI)
+tests/claude-code/               per-skill behavior suite (needs the `claude` CLI;
+                                 grades the INSTALLED plugin, not this checkout)
 tests/verify-skills.md           manual verification walkthrough
 ```
 
@@ -27,7 +33,8 @@ bash scripts/lint-shell.sh --all --strict
 bash tests/hooks/test-session-start.sh
 bash tests/shell-lint/test-lint-shell.sh
 bash tests/codex/run-skill-tests.sh
-bash tests/claude-code/run-skill-tests.sh   # slow, needs `claude` on PATH
+bash tests/claude-code/run-skill-tests.sh   # slow, needs `claude` on PATH;
+                                            # grades the installed plugin — see below
 ```
 
 The first five run offline in seconds. The last dispatches real model calls.
@@ -109,6 +116,25 @@ bash tests/claude-code/test-subagent-driven-operation.sh
 
 Because they depend on model output, treat a single failure as a signal to
 investigate rather than proof of a regression — re-run before concluding.
+
+**These tests grade the *installed* plugin, not this checkout.** The `claude`
+CLI resolves skills from the marketplace copy under
+`$CLAUDE_CONFIG_DIR/plugins/marketplaces/srepowers-marketplace`, which is a
+separate clone of this repo. Unmerged local work is invisible to them, and a
+stale marketplace makes them grade old content — silently, since a stale skill
+still answers plausibly.
+
+Before trusting a result, confirm the installed copy matches what you are
+testing:
+
+```bash
+git -C "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/marketplaces/srepowers-marketplace" \
+  log --oneline -1
+```
+
+If that SHA is not the commit you want graded, refresh the marketplace
+(`/plugin` → Update marketplace) and re-run. Only `scripts/validate-repo.py`
+and the offline suites read this checkout directly.
 
 ## Testing a Skill You Wrote
 
