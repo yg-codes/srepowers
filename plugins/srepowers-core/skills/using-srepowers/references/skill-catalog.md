@@ -174,7 +174,7 @@ vocabulary the other swe skills assume are in place.
 
 | Skill | Use When |
 |-------|----------|
-| `srepowers-swe:triage` | Sort a *backlog* of incoming issues/PRs (not incident triage) |
+| `srepowers-swe:backlog-triage` | Sort a *backlog* of incoming issues/PRs (not incident triage) |
 | `srepowers-swe:wayfinder` | Chart a shared map of decision tickets for a foggy, multi-session effort |
 | `srepowers-swe:improve-codebase-architecture` | Survey deepening opportunities as a visual HTML report |
 | `srepowers-swe:codebase-design` | Design a module's shape — deep modules, seams (internal, not system architecture) |

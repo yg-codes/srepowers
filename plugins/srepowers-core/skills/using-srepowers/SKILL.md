@@ -147,8 +147,9 @@ infrastructure). Its idea → ship flow:
    spec; `srepowers-swe:to-tickets` splits it into tracer-bullet tickets on the
    project's configured issue tracker. Build each with
    `srepowers-core:test-driven-operation`.
-4. **On-ramps that generate work.** `srepowers-swe:triage` (sort a *backlog* of
-   incoming issues/PRs — not incident triage) and `srepowers-swe:wayfinder`
+4. **On-ramps that generate work.** `srepowers-swe:backlog-triage` (sort a
+   *backlog* of incoming issues/PRs — not incident triage) and
+   `srepowers-swe:wayfinder`
    (chart a shared map of decision tickets for a foggy, multi-session effort).
 5. **Codebase upkeep.** `srepowers-swe:improve-codebase-architecture` surveys
    deepening opportunities; `srepowers-swe:codebase-design` is the deep-module

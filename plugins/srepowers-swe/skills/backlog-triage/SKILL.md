@@ -1,9 +1,9 @@
 ---
-name: triage
+name: backlog-triage
 description: Use when sorting or prioritizing a backlog of tracker issues and external PRs — backlog/issue triage that categorises, verifies, grills, and writes agent-ready briefs. This is issue-BACKLOG triage (sorting a queue of tickets), NOT live incident triage; for outages and root-cause work use srepowers-core:systematic-troubleshooting instead.
 ---
 
-# Triage
+# Backlog Triage
 
 Move issues on the project issue tracker through a small state machine of triage roles.
 
@@ -47,7 +47,7 @@ State transitions: an unlabeled issue normally goes to `needs-triage` first; fro
 
 ## Invocation
 
-The maintainer invokes `/triage` and describes what they want in natural language. Interpret the request and act. Examples:
+The maintainer invokes `/backlog-triage` and describes what they want in natural language. Interpret the request and act. Examples:
 
 - "Show me anything that needs my attention"
 - "Let's look at #42" (issue or PR)

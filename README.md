@@ -163,7 +163,7 @@ codex plugin marketplace add yg-codes/srepowers
 - `srepowers-domain` — Go, Python, Rust, Kubernetes, Terraform, security, testing, and other domain skills
 - `srepowers-infra` — portable Proxmox, Puppet analysis, DNS, TLS, backup, and GitLab CI/CD skills
 - `srepowers-private` — sanitized site-specific Puppet/Hiera/Ansible workflow templates
-- `srepowers-swe` — general software-engineering flow (opt-in): spec→tickets, triage, wayfinding, domain modeling, codebase design, prototyping, teaching
+- `srepowers-swe` — general software-engineering flow (opt-in): spec→tickets, backlog triage, wayfinding, domain modeling, codebase design, prototyping, teaching
 
 Install all five for full SREPowers coverage.
 
@@ -339,7 +339,7 @@ codex plugin marketplace upgrade srepowers-marketplace
 |------|---------|
 | `to-spec` | Turn a conversation into a spec (PRD) |
 | `to-tickets` | Split a spec into tracer-bullet tickets |
-| `triage` | Backlog/issue triage (not incident triage) |
+| `backlog-triage` | Backlog/issue triage (not incident triage) |
 | `wayfinder` | Chart decision tickets for a foggy, multi-session effort |
 | `domain-modeling` | Sharpen domain vocabulary; record ADRs |
 | `codebase-design` | Deep-module design: interface, seam, depth |

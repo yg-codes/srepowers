@@ -15,6 +15,7 @@ PLUGINS = (
     "srepowers-domain",
     "srepowers-infra",
     "srepowers-private",
+    "srepowers-swe",
 )
 
 
