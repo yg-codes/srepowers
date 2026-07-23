@@ -22,7 +22,7 @@ Describe **what** the system should do, not **how** to implement it. The agent w
 
 - **Good:** "The skill-config type should accept an optional `schedule` field of type cron expression"
 - **Bad:** "Open the skill types module and add a schedule field on line 42"
-- **Good:** "When a user runs `/triage` with no arguments, they should see a summary of issues needing attention"
+- **Good:** "When a user runs `/backlog-triage` with no arguments, they should see a summary of issues needing attention"
 - **Bad:** "Add a switch statement in the main handler function"
 
 ### Complete acceptance criteria
