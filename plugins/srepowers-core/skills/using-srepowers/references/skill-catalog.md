@@ -152,3 +152,36 @@ deploy; debug Hiera at any point.
 | `srepowers-private:puppet-deploy` | Run noop/apply across hosts or fleets; classify exit codes |
 | `srepowers-private:hiera-debugging` | Trace why a Hiera key resolves to an unexpected value |
 | `srepowers-private:ansible-operations` | Ansible playbook development, inventory, vault, execution |
+
+## Plugin: srepowers-swe (11 skills)
+
+General software-engineering skill surface — the idea → ship flow for
+building software, opt-in and separate from the SRE spine. Configure the
+project first with `srepowers-swe:project-onboarding` so the tracker and label
+vocabulary the other swe skills assume are in place.
+
+**Idea → ship pipeline** — sharpen, specify, split, build:
+
+| Skill | Use When |
+|-------|----------|
+| `srepowers-swe:grilling` | Sharpen an idea or plan by interview, one question at a time ("grill me") |
+| `srepowers-swe:domain-modeling` | Pin down the domain vocabulary; record hard-to-reverse decisions as ADRs |
+| `srepowers-swe:to-spec` | Turn the current conversation into a spec (PRD) — synthesis, no interview |
+| `srepowers-swe:to-tickets` | Split a spec into tracer-bullet tickets on the issue tracker |
+| `srepowers-swe:prototype` | Throwaway code to answer a state-model or UI design question |
+
+**On-ramps and codebase upkeep:**
+
+| Skill | Use When |
+|-------|----------|
+| `srepowers-swe:triage` | Sort a *backlog* of incoming issues/PRs (not incident triage) |
+| `srepowers-swe:wayfinder` | Chart a shared map of decision tickets for a foggy, multi-session effort |
+| `srepowers-swe:improve-codebase-architecture` | Survey deepening opportunities as a visual HTML report |
+| `srepowers-swe:codebase-design` | Design a module's shape — deep modules, seams (internal, not system architecture) |
+
+**Learning and setup:**
+
+| Skill | Use When |
+|-------|----------|
+| `srepowers-swe:teach` | Learn a concept over multiple sessions using a stateful workspace |
+| `srepowers-swe:project-onboarding` | Configure the issue tracker + label vocabulary the swe skills depend on (run first) |
