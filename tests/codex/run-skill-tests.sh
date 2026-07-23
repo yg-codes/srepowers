@@ -46,6 +46,7 @@ plugins = (
     "srepowers-domain",
     "srepowers-infra",
     "srepowers-private",
+    "srepowers-swe",
 )
 
 marketplace = json.loads(Path(".agents/plugins/marketplace.json").read_text())

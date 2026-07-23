@@ -1,0 +1,29 @@
+{
+  "name": "srepowers-swe",
+  "version": "5.9.0",
+  "description": "General software-engineering skill surface — spec→tickets, backlog triage, domain modeling, codebase design, architecture improvement, prototyping, teaching, and adversarial review",
+  "author": {
+    "name": "yg-codes",
+    "email": "yg-codes@users.noreply.github.com",
+    "url": "https://github.com/yg-codes/srepowers"
+  },
+  "homepage": "https://github.com/yg-codes/srepowers",
+  "repository": "https://github.com/yg-codes/srepowers",
+  "license": "MIT",
+  "keywords": [
+    "software-engineering", "specification", "tickets", "triage",
+    "domain-modeling", "codebase-design", "architecture", "prototype",
+    "teaching", "onboarding", "requirements"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SREPowers SWE",
+    "shortDescription": "General software-engineering skill surface",
+    "longDescription": "General software-engineering skills covering the idea-to-delivery pipeline (spec, tickets, backlog triage), domain modeling, codebase design and architecture improvement, prototyping, teaching, and project onboarding. Opt-in complement to the SRE-focused core, domain, infra, and private plugins.",
+    "developerName": "yg-codes",
+    "category": "Engineering",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/yg-codes/srepowers",
+    "brandColor": "#00897B"
+  }
+}

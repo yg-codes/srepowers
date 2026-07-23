@@ -17,11 +17,12 @@ Do not stack extra workflow skills "just in case." Over-process is a failure mod
 
 **In Codex:** Use repo or plugin-discovered skills through `/skills` or by mentioning `$skill-name`. Codex may also activate a skill implicitly when the task matches its description.
 
-**Skill namespace:** Skills live in four plugins — prefix with the owning plugin, not a bare `srepowers:`. Use `<plugin>:<skill>`:
+**Skill namespace:** Skills live in five plugins — prefix with the owning plugin, not a bare `srepowers:`. Use `<plugin>:<skill>`:
 - `srepowers-core:` — workflow spine, mandatory gates, incident response (e.g. `srepowers-core:test-driven-operation`)
 - `srepowers-domain:` — language/architecture/security expertise (e.g. `srepowers-domain:kubernetes-specialist`)
 - `srepowers-infra:` — infrastructure administration (e.g. `srepowers-infra:pve-admin`)
 - `srepowers-private:` — Puppet/Ansible/Hiera operations (e.g. `srepowers-private:puppet-deploy`)
+- `srepowers-swe:` — general software-engineering flow (e.g. `srepowers-swe:to-spec`) — opt-in; see "Software-Engineering Flow" below
 
 # Using SRE Skills
 
@@ -129,6 +130,35 @@ Use this when the task is not eligible for the fast path:
 `brainstorming-operations` → `writing-operation-plans` → (`subagent-driven-operation` OR `executing-operation-plans`) → `verification-before-completion` → `finishing-operation-branch`
 
 **Key categories:** Safety & Review, Incident Response, SRE Practices, Platform & Infrastructure, Architecture & Cloud, Languages & Development, Security & Quality
+
+## Software-Engineering Flow (`srepowers-swe`, opt-in)
+
+The `srepowers-swe` plugin adds a general software-engineering surface for
+app/product work — separate from the SRE spine above. It is **opt-in**: only
+route here when the task is building or shaping software (not operating
+infrastructure). Its idea → ship flow:
+
+1. **Sharpen the idea.** `srepowers-swe:grilling` (interview one question at a
+   time) and `srepowers-swe:domain-modeling` (pin down the domain vocabulary,
+   record hard-to-reverse calls as ADRs) sharpen a fuzzy request.
+2. **Prototype if a question needs a runnable answer.** `srepowers-swe:prototype`
+   — throwaway code to feel out a state model or a UI before committing.
+3. **Specify, then split.** `srepowers-swe:to-spec` turns the thread into a
+   spec; `srepowers-swe:to-tickets` splits it into tracer-bullet tickets on the
+   project's configured issue tracker. Build each with
+   `srepowers-core:test-driven-operation`.
+4. **On-ramps that generate work.** `srepowers-swe:triage` (sort a *backlog* of
+   incoming issues/PRs — not incident triage) and `srepowers-swe:wayfinder`
+   (chart a shared map of decision tickets for a foggy, multi-session effort).
+5. **Codebase upkeep.** `srepowers-swe:improve-codebase-architecture` surveys
+   deepening opportunities; `srepowers-swe:codebase-design` is the deep-module
+   bench for the chosen one. For high-level system architecture use
+   `srepowers-domain:architecture-designer` instead.
+6. **Standalone.** `srepowers-swe:teach` (learn a concept over sessions),
+   `srepowers-swe:project-onboarding` (configure the tracker + label vocabulary
+   the swe skills assume — run first).
+
+The SRE mandatory gates still apply to any command a swe flow runs.
 
 ## Red Flags — You Are Rationalizing
 
