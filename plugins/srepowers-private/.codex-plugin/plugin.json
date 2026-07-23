@@ -1,6 +1,6 @@
 {
   "name": "srepowers-private",
-  "version": "5.7.0",
+  "version": "5.7.1",
   "description": "Site-specific operational workflows — Puppet deploy/release/MR lifecycle, Hiera debugging, and Ansible operations. Sanitized templates: replace placeholders with your environment's values.",
   "author": {
     "name": "yg-codes",

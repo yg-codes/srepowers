@@ -35,34 +35,14 @@ Every infrastructure task should be classified into one of three layers:
 2. **Workflow skills** — the smallest process needed for the task shape
 3. **Domain helpers** — platform-specific guidance only after the workflow is chosen
 
-```dot
-digraph skill_flow {
-    "User message received" [shape=doublecircle];
-    "Classify task shape" [shape=diamond];
-    "Fast path?" [shape=diamond];
-    "Incident / outage?" [shape=diamond];
-    "Planned multi-step change?" [shape=diamond];
-    "Invoke minimum sufficient workflow" [shape=box];
-    "Apply mandatory gates" [shape=box];
-    "Announce: Using [skill] to [purpose]" [shape=box];
-    "Follow skill exactly" [shape=box];
-    "Respond" [shape=doublecircle];
-
-    "User message received" -> "Classify task shape";
-    "Classify task shape" -> "Fast path?" [label="low-risk / read-only / local-only"];
-    "Classify task shape" -> "Incident / outage?" [label="incident"];
-    "Classify task shape" -> "Planned multi-step change?" [label="change"];
-    "Fast path?" -> "Invoke minimum sufficient workflow" [label="yes"];
-    "Fast path?" -> "Planned multi-step change?" [label="no"];
-    "Incident / outage?" -> "Invoke minimum sufficient workflow" [label="yes"];
-    "Incident / outage?" -> "Planned multi-step change?" [label="no"];
-    "Planned multi-step change?" -> "Invoke minimum sufficient workflow" [label="yes"];
-    "Planned multi-step change?" -> "Respond" [label="no SRE workflow needed"];
-    "Invoke minimum sufficient workflow" -> "Apply mandatory gates";
-    "Apply mandatory gates" -> "Announce: Using [skill] to [purpose]";
-    "Announce: Using [skill] to [purpose]" -> "Follow skill exactly";
-}
-```
+**Routing loop for every user message:** classify the task shape, then take the
+one route that matches — fast path (low-risk / read-only / local-only),
+incident (outage / unclear failure), or change (planned multi-step). If no shape
+matches, no SRE workflow is needed — just respond. Once routed, invoke the
+minimum sufficient workflow, apply the mandatory gates that match, announce
+"Using [skill] to [purpose]", and follow the skill exactly. The routing detail
+for each shape is in the Workflow Router, Fast Path, and Standard Workflow
+sections below.
 
 ## Available Skills
 
