@@ -1,8 +1,8 @@
 # SREPowers
 
-SRE infrastructure skills for Claude Code and Codex.
+SRE + software-engineering skills for Claude Code and Codex.
 
-SREPowers adapts software development workflows like brainstorming, planning, subagent execution, and verification-first discipline to infrastructure operations. It is the SRE companion to [superpowers](https://github.com/obra/superpowers): same workflow spine, different domain and risk model.
+SREPowers adapts software development workflows like brainstorming, planning, subagent execution, and verification-first discipline to infrastructure operations. It is the SRE companion to [superpowers](https://github.com/obra/superpowers): same workflow spine, different domain and risk model. Since v5.9.0 it also ships an **opt-in** `srepowers-swe` plugin — a general software-engineering flow (spec → tickets, domain modeling, codebase design, prototyping, teaching) that stays separate from the SRE spine.
 
 ## How It Works
 
