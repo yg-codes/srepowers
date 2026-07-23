@@ -6,7 +6,7 @@
   },
   "metadata": {
     "version": "5.9.0",
-    "description": "SRE infrastructure skills marketplace — workflow, domain expertise, and infrastructure administration plugins"
+    "description": "SRE + software-engineering agent skills marketplace — workflow, domain expertise, infrastructure administration, and software-engineering plugins"
   },
   "plugins": [
     {
