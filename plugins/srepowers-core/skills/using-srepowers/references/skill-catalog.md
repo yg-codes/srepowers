@@ -1,6 +1,6 @@
 # Available Skills
 
-## Plugin: srepowers-core (28 skills)
+## Plugin: srepowers-core (29 skills)
 
 SRE workflow spine, mandatory gates, and incident response.
 
@@ -106,7 +106,7 @@ Software engineering domain expertise.
 
 ---
 
-## Plugin: srepowers-infra (10 skills)
+## Plugin: srepowers-infra (11 skills)
 
 Portable infrastructure administration — no organization-specific values.
 

@@ -78,7 +78,7 @@ srepowers/
 │       ├── .codex-plugin/plugin.json
 │       ├── skills/
 │       └── commands/
-├── .agents/skills/                     ← Codex skill mirror (65 symlinks)
+├── .agents/skills/                     ← Codex skill mirror (67 symlinks)
 ├── .codex/skills/                      ← Codex repo-native symlinks
 ├── .codex/agents/                      ← Codex custom agents
 ├── .codex-plugin/                      ← Codex plugin manifest

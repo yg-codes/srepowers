@@ -7,7 +7,7 @@ environment: "mgmt"
 rollback_plan: "git restore the touched skill/test/script files (or git revert the branch commits); no external state is mutated. Per-task rollback is the inverse git restore of that task's files."
 stakeholders: "Repo owner (yg) only — personal GitHub mirror, no other consumers."
 tasks_count: 9
-status: "pending"
+status: "completed"
 ---
 
 # Backport superpowers v6.0.x SDD + Plan Improvements into srepowers Execution Plan
@@ -18,6 +18,10 @@ status: "pending"
 **Risk Level:** Low — see frontmatter rationale.
 **Rollback Plan:** `git restore`/`git revert` touched files; no external state mutated.
 **Stakeholder Notification:** Repo owner only.
+
+> **Status note (2026-07-23):** This plan was merged (PR #4). Marked
+> `completed`. The 29th core skill `requesting-review-sre` was out of scope
+> here and added subsequently.
 
 ---
 
