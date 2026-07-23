@@ -1,6 +1,6 @@
 # Available Skills
 
-## Plugin: srepowers-core (29 skills)
+## Plugin: srepowers-core (30 skills)
 
 SRE workflow spine, mandatory gates, and incident response.
 
@@ -14,6 +14,7 @@ SRE workflow spine, mandatory gates, and incident response.
 |-------|----------|
 | `srepowers-core:verification-before-completion` | Before claiming anything is done, fixed, healthy, or verified |
 | `srepowers-core:safety-validator` | Before risky, destructive, broad-scope, or production commands |
+| `srepowers-core:git-guardrails` | Mechanical PreToolUse hook blocking force-push, reset --hard, clean -f, branch -D, checkout/restore ., add -A/., --no-verify |
 | `srepowers-core:evidence-first-reporting` | When reporting findings, handoffs, status, or incident updates with mixed evidence and inference risk |
 
 ### Core Operation Workflow

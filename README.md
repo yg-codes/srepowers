@@ -57,7 +57,7 @@ SREPowers is distributed as a marketplace containing four plugins, each with its
 srepowers/
 ├── .claude-plugin/marketplace.json     ← lists all 4 plugins
 ├── plugins/
-│   ├── srepowers-core/                 ← 29 skills
+│   ├── srepowers-core/                 ← 30 skills
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── .codex-plugin/plugin.json
 │   │   ├── skills/
@@ -78,7 +78,7 @@ srepowers/
 │       ├── .codex-plugin/plugin.json
 │       ├── skills/
 │       └── commands/
-├── .agents/skills/                     ← Codex skill mirror (67 symlinks)
+├── .agents/skills/                     ← Codex skill mirror (68 symlinks)
 ├── .codex/skills/                      ← Codex repo-native symlinks
 ├── .codex/agents/                      ← Codex custom agents
 ├── .codex-plugin/                      ← Codex plugin manifest
@@ -88,7 +88,7 @@ srepowers/
 
 | Plugin | Skills | Focus |
 |--------|--------|-------|
-| `srepowers-core` | 29 | Workflow spine, mandatory gates, incident response, SRE practices |
+| `srepowers-core` | 30 | Workflow spine, mandatory gates, incident response, SRE practices |
 | `srepowers-domain` | 21 | Software engineering depth: Go, Python, Rust, K8s, Terraform, containers, networking, security, testing, databases |
 | `srepowers-infra` | 11 | Portable infrastructure administration: Proxmox VE, Puppet code analysis, PuppetDB queries, DNS, TLS/PKI, backup/recovery, change management, GitLab CI/CD (incl. ECR & GoReleaser) |
 | `srepowers-private` | 6 | Site-specific operational workflows (sanitized templates): Puppet deploy/release/MR lifecycle, Hiera debugging, Ansible — substitute placeholders with your environment's values |
