@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# PreToolUse guard for SREPowers in Claude Code and Codex.
+#
+# Mechanically blocks the destructive git commands enumerated in the SREPowers
+# safety guardrails BEFORE they run, regardless of whether the model chose to
+# invoke the advisory `srepowers-core:safety-validator` skill. This is the
+# enforcement layer; safety-validator is the advice layer.
+#
+# Design contract (see skills/git-guardrails/SKILL.md):
+#   - BLOCK the irreversible / history-rewriting / mass-staging operations
+#     below. Plain `git push`, `git push origin <branch>`, and `git push -u`
+#     are ALLOWED — SREPowers' own finishing-operation-branch workflow pushes
+#     branches, so a blanket push block would break the toolchain.
+#   - On a blocked command, exit 2 with a stderr message. Claude Code's
+#     PreToolUse protocol treats a non-zero exit with stderr as a deny and
+#     surfaces the message to the model.
+#   - On anything else, exit 0 (allow). Fail open on malformed/absent input so
+#     a parsing hiccup never wedges every Bash call.
+
+set -euo pipefail
+
+# The harness pipes the PreToolUse event as JSON on stdin. We only guard Bash
+# tool calls; the command string lives at .tool_input.command.
+input="$(cat 2>/dev/null || true)"
+[ -n "$input" ] || exit 0
+
+command_string=""
+if command -v jq >/dev/null 2>&1; then
+  command_string="$(printf '%s' "$input" | jq -r '.tool_input.command // empty' 2>/dev/null || true)"
+fi
+
+# jq missing or field absent → nothing to inspect. Fail open.
+[ -n "$command_string" ] || exit 0
+
+# Each entry is "extended-regex<TAB>human reason". Patterns are anchored on the
+# git subcommand so unrelated text that merely mentions these words is not
+# caught, except the two flag rules (--no-verify, --force forms) which are
+# dangerous wherever they appear on a git line. Order does not matter — first
+# match wins.
+rules=(
+  'git[[:space:]]+push[[:space:]].*(--force|--force-with-lease|-[[:alnum:]]*f)	force-push rewrites remote history (use a normal push)'
+  'git[[:space:]]+reset[[:space:]].*--hard	reset --hard discards uncommitted work irrecoverably'
+  'git[[:space:]]+clean[[:space:]].*-[[:alnum:]]*f	clean -f deletes untracked files irrecoverably'
+  'git[[:space:]]+branch[[:space:]].*-[[:alnum:]]*D	branch -D force-deletes a branch, losing unmerged commits'
+  'git[[:space:]]+checkout[[:space:]]+(--[[:space:]]+)?\.([[:space:]]|$)	checkout . discards all unstaged changes irrecoverably'
+  'git[[:space:]]+restore[[:space:]]+(--staged[[:space:]]+|--[[:space:]]+)*\.([[:space:]]|$)	restore . discards working-tree changes irrecoverably'
+  'git[[:space:]]+add([[:space:]]|.*[[:space:]])(-[[:alnum:]]*A([[:space:]]|$)|--all|\.([[:space:]]|$))	git add -A / add . stages indiscriminately (stage explicit files)'
+  'git[[:space:]].*--no-verify	--no-verify skips pre-commit hooks'
+)
+
+for rule in "${rules[@]}"; do
+  pattern="${rule%%$'\t'*}"
+  reason="${rule#*$'\t'}"
+  # Use a here-string, not `printf | grep -q`: under `set -o pipefail`, grep -q
+  # closes the pipe on first match and SIGPIPEs printf, which pipefail then
+  # reports as a pipeline failure — silently swallowing the match.
+  if grep -qE "$pattern" <<<"$command_string"; then
+    echo "BLOCKED by srepowers git-guardrails: ${reason}." >&2
+    echo "Command: ${command_string}" >&2
+    echo "If this is genuinely required, ask the user to run it directly (! prefix) or disable the guard." >&2
+    exit 2
+  fi
+done
+
+exit 0
