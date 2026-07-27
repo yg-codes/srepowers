@@ -116,7 +116,7 @@ digraph process {
         "Operator subagent asks questions?" [shape=diamond];
         "Answer questions, provide context" [shape=box];
         "Operator subagent executes operations, verifies, commits, self-reviews" [shape=box];
-        "Generate review package (./scripts/review-package BASE HEAD)" [shape=box];
+        "Generate review package (./scripts/review-package PLAN_FILE BASE HEAD)" [shape=box];
         "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" [shape=box];
         "Task reviewer reports spec ✅ and quality approved?" [shape=diamond];
         "Resolve any ⚠️ cannot-verify items yourself" [shape=box];
@@ -138,8 +138,8 @@ digraph process {
     "Operator subagent asks questions?" -> "Answer questions, provide context" [label="yes"];
     "Answer questions, provide context" -> "Dispatch operator subagent (./operator-prompt.md)";
     "Operator subagent asks questions?" -> "Operator subagent executes operations, verifies, commits, self-reviews" [label="no"];
-    "Operator subagent executes operations, verifies, commits, self-reviews" -> "Generate review package (./scripts/review-package BASE HEAD)";
-    "Generate review package (./scripts/review-package BASE HEAD)" -> "Dispatch task reviewer subagent (./task-reviewer-prompt.md)";
+    "Operator subagent executes operations, verifies, commits, self-reviews" -> "Generate review package (./scripts/review-package PLAN_FILE BASE HEAD)";
+    "Generate review package (./scripts/review-package PLAN_FILE BASE HEAD)" -> "Dispatch task reviewer subagent (./task-reviewer-prompt.md)";
     "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" -> "Task reviewer reports spec ✅ and quality approved?";
     "Task reviewer reports spec ✅ and quality approved?" -> "Dispatch operator subagent to fix Critical/Important findings" [label="no"];
     "Dispatch operator subagent to fix Critical/Important findings" -> "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" [label="re-review"];
@@ -174,7 +174,7 @@ Use the least powerful model that can handle each role to conserve cost and incr
 
 Operator subagents report one of four statuses. Handle each appropriately:
 
-**DONE:** Generate the review package — `scripts/review-package BASE HEAD` (from this skill's directory; it prints the file path it wrote). BASE is the commit you recorded **before** dispatching the operator — never `HEAD~1`, which silently drops all but the last commit of a multi-commit task. Then dispatch the task reviewer with the printed path.
+**DONE:** Generate the review package — `scripts/review-package PLAN_FILE BASE HEAD` (from this skill's directory; it prints the file path it wrote). BASE is the commit you recorded **before** dispatching the operator — never `HEAD~1`, which silently drops all but the last commit of a multi-commit task. Then dispatch the task reviewer with the printed path.
 
 **DONE_WITH_CONCERNS:** The operator completed the work but flagged doubts. Read the concerns before proceeding. If concerns are about safety or correctness (e.g., "unexpected pod restarts during rollout"), investigate before review. If they're observations (e.g., "this namespace has many resources"), note them and proceed.
 
@@ -187,6 +187,45 @@ Operator subagents report one of four statuses. Handle each appropriately:
 4. If the operation requires human approval (e.g., production changes), escalate to the human
 
 **Never** ignore an escalation or force the same model to retry without changes. If the operator said it's stuck, something needs to change.
+
+## The Fix Loop
+
+The loop triggers when the review reports spec ❌, any Critical or Important finding, or a ⚠️ item you confirmed as a real gap.
+
+Before the loop starts, two routes leave it immediately:
+
+- Record Minor findings in the ledger as you go (`Task <N>: minor (deferred): <one-liner>`), and point the final whole-operation review at that list so it can triage which must be fixed before merge. A roll-up nobody reads is a silent discard. Minor findings never enter the loop.
+- A finding labeled plan-mandated — or any finding that conflicts with what the plan's text requires — is the human's decision: present the finding and the plan text, ask which governs. Do not dismiss the finding because the plan mandates it, and do not dispatch a fix that contradicts the plan without asking.
+
+Everything else enters the loop. A fix round is one fix dispatch plus one scoped re-review. **Five rounds maximum per task.**
+
+**Rounds 1-3 — resume the original operator.** Send it the open findings verbatim. Its context is intact: it knows the task, the live system state it observed, and its own choices. If your harness cannot send another message to a live subagent, dispatch a fresh operator carrying the brief path, the report-file path, and the findings — the report file is the persistent memory either way.
+
+**Rounds 4-5 — dispatch a fresh operator on a more capable model** (per Model Selection), with the brief path, the report-file path, the open findings, and this framing: "A prior operator attempted this task [N] times; you own it now. Read the report file for what was tried." A loop that survives three resumes usually means the operator cannot see its own problem — fresh eyes and a capability bump in one move.
+
+**Every round, either way:** the operator fixes, re-runs the verification commands covering the amended resources, appends its fix report to the same report file, and returns the short contract. Before re-dispatching the reviewer, confirm the fix report contains the covering verification commands, the command run, and the output; dispatch the re-review once all three are present. Name the covering verifications in the fix message — a one-line fix does not need the whole suite.
+
+**The re-review is scoped.** Run `scripts/review-package PLAN_FILE FIX_BASE HEAD` where FIX_BASE is the head the previous review saw, and dispatch [re-review-prompt.md](re-review-prompt.md) with the findings list, the brief, the report file, and the printed diff path. The re-reviewer verdicts each finding ADDRESSED or NOT ADDRESSED and flags new breakage in the fix diff only. New Critical/Important breakage in the fix diff joins the open findings list. Out-of-scope observations go to the ledger as deferred minors — they never extend the loop.
+
+**After each round,** append to the ledger:
+`Task <N>: fix round <R>/5 (<X> addressed, <Y> open — <finding one-liners>; commits <a7>..<b7>)`
+
+Never fix findings yourself in the controller session — your context stays clean for coordination, and controller fixes skip review.
+
+**The breaker.** When round 5's re-review still leaves findings open, stop dispatching. Adjudicate each open finding yourself — you hold the plan and the cross-task context the reviewer lacks:
+
+- **The reviewer is wrong, or the point is contestable:** park it — `Task <N>: parked — <finding> — ruling: <why the change stands>`. The final review sees both sides.
+- **Real, but nothing downstream builds on it:** park it the same way, with a ruling that says it's real and deferred.
+- **Real and load-bearing** — a later task builds on it, or it reveals a plan defect: STOP. Append `Task <N>: BLOCKED — <reason>` and report to your human partner with the finding, the plan text it collides with, and the fix history. Parking a structural failure lets every dependent task build on it and hands the final review a problem it cannot fix either.
+
+Adjudicate only at the cap. Adjudicating earlier to end a loop is pre-judging with a different name. Every adjudication is a ledger entry — a silent discard is forbidden.
+
+**Completing the task.** When the review comes back clean — or every open finding is parked with a ruling at the cap — append the completion line to the ledger in the same message as your other bookkeeping:
+
+- `Task <N>: complete (commits <base7>..<head7>, review clean)`
+- `Task <N>: complete (commits <base7>..<head7>, <K> parked)` after a tripped breaker
+
+Never move to the next task while the review has open Critical/Important issues that are neither fixed nor parked-with-ruling at the cap.
 
 ## Deviation Handling
 
@@ -237,10 +276,10 @@ Per-task reviews are task-scoped gates. The broad review happens once, at the fi
 - Do not ask a reviewer to re-run verifications the operator already ran on the same artifacts — the operator's report carries that evidence.
 - **Do not pre-judge findings for the reviewer.** Never instruct a reviewer to ignore or not flag a specific issue, and never pre-rate a finding's severity. If the prompt you are writing contains "do not flag," "don't treat X as a defect," "at most Minor," or "the plan chose" — stop: you are pre-judging, usually to spare yourself a review loop. Let the reviewer raise it and adjudicate it in the loop.
 - The **global-constraints block is the reviewer's attention lens.** Copy the binding requirements verbatim from the plan's Global Constraints section or the spec: exact values, exact formats, and the stated relationships between components ("same labels as X", "matches namespace Y"). The reviewer template already carries the process rules — the constraints block is for what THIS operation's spec demands.
-- **Hand the reviewer its diff as a file:** run `scripts/review-package BASE HEAD` and pass the printed path. The diff never enters your own context, and the reviewer sees the commit list, stat summary, and full diff in one Read. Use the recorded BASE — never `HEAD~1`.
+- **Hand the reviewer its diff as a file:** run `scripts/review-package PLAN_FILE BASE HEAD` and pass the printed path. The diff never enters your own context, and the reviewer sees the commit list, stat summary, and full diff in one Read. Use the recorded BASE — never `HEAD~1`.
 - A dispatch prompt describes one task, not the session's history. Do not paste accumulated prior-task summaries into later dispatches — a fresh subagent needs its task brief, the interfaces it touches, and the global constraints. Nothing else.
 - A finding labeled plan-mandated — or any finding that conflicts with what the plan's text requires — is the human's decision: present the finding and the plan text, ask which governs. Do not dismiss the finding because the plan mandates it, and do not dispatch a fix that contradicts the plan without asking.
-- The final whole-operation review uses a different template from the per-task ones: fill `srepowers-core:requesting-review-sre`'s `code-reviewer.md`, which judges production readiness across the whole branch. It gets a package too: run `scripts/review-package MERGE_BASE HEAD` (MERGE_BASE = the commit the branch started from, e.g. `git merge-base main HEAD`) and include the printed path. If the final review returns findings, dispatch **ONE** fix subagent with the complete findings list — not one fixer per finding (per-finding fixers each rebuild context and re-run checks).
+- The final whole-operation review uses a different template from the per-task ones: fill `srepowers-core:requesting-review-sre`'s `code-reviewer.md`, which judges production readiness across the whole branch. It gets a package too: run `scripts/review-package PLAN_FILE MERGE_BASE HEAD` (MERGE_BASE = the commit the branch started from, e.g. `git merge-base main HEAD`) and include the printed path. If the final review returns findings, dispatch **ONE** fix subagent with the complete findings list — not one fixer per finding (per-finding fixers each rebuild context and re-run checks).
 
 ## File Handoffs
 
@@ -249,24 +288,27 @@ Everything you paste into a dispatch prompt — and everything a subagent prints
 - **Task brief:** before dispatching an operator, run `scripts/task-brief PLAN_FILE N` — it extracts the task's full text to a uniquely named file and prints the path. Compose the dispatch so the brief stays the single source of requirements: (1) one line on where this task fits; (2) the brief path, introduced as "read this first — your requirements, exact values verbatim"; (3) interfaces/decisions from earlier tasks the brief cannot know; (4) your resolution of any ambiguity; (5) the report-file path and report contract. Exact values (names, namespaces, commands) appear only in the brief.
 - **Report file:** name the operator's report file after the brief (`…/task-N-brief.md` → `…/task-N-report.md`) and put it in the dispatch. The operator writes the full report there and returns only status, commits, a one-line verification summary, and concerns.
 - **Reviewer inputs:** each reviewer gets the brief file, the report file, and the review-package path — plus the global constraints that bind the task.
-- **Without bash (e.g. some Codex setups):** the script is the fast path, not the requirement. Produce the same artifacts by hand — write the brief and report files from the plan, and create the review package with `git log --oneline`, `git diff --stat`, and `git diff -U10 BASE..HEAD` redirected to one uniquely named file under `.srepowers/sdd/`. Functionality, not the script, is what matters.
+- **Without bash (e.g. some Codex setups):** the script is the fast path, not the requirement. Produce the same artifacts by hand — write the brief and report files from the plan, and create the review package with `git log --oneline`, `git diff --stat`, and `git diff -U10 BASE..HEAD` redirected to one uniquely named file under `.srepowers/sdd/<plan-basename>/`. Functionality, not the script, is what matters.
 
 ## Durable Progress
 
 Conversation memory does not survive compaction. A controller that loses its place can re-dispatch entire completed task sequences — the most expensive failure mode. Track progress in a ledger file, not only in TodoWrite and the plan's Execution Status.
 
-- At skill start, check for a ledger: `cat "$(git rev-parse --show-toplevel)/.srepowers/sdd/progress.md"`. Tasks listed there as complete are DONE — do not re-dispatch them; resume at the first task not marked complete.
-- When a task's review comes back clean (both verdicts, no unresolved ⚠️ items), append one line to the ledger in the same message as your other bookkeeping: `Task N: complete (commits <base7>..<head7>, review clean)`.
+- **Each plan owns a workspace.** At skill start, run `scripts/sdd-workspace PLAN_FILE` — it prints the plan's git-ignored directory (`<repo-root>/.srepowers/sdd/<plan-basename>/`), home to every artifact for THIS plan: ledger, briefs, reports, review packages. Another plan's directory is never yours to read or write.
+- Check for this plan's ledger at `<workspace>/progress.md`. If its first line names your plan file, tasks with a `Task <N>: complete` line are DONE — do not re-dispatch them; resume at the first task without one. A task whose last line is a fix round is mid-loop: resume the loop at the next round. A ledger whose first line names a different plan file — or a stray ledger at the old flat path `.srepowers/sdd/progress.md` — is another plan's progress: leave it in place and start your own, fresh.
+- Create the ledger with its identity as the first line: `# SDO ledger — plan: <plan file path>`.
 - The ledger is your recovery map: the commits it names exist in git even when your context no longer remembers creating them. After compaction, trust the ledger and `git log` over your own recollection.
-- `git clean -fdx` will destroy the ledger (it's git-ignored scratch under `.srepowers/`); if that happens, recover from `git log`.
+- `git clean -fdx` will destroy the workspace (it's git-ignored scratch under `.srepowers/`); if that happens, recover from `git log`.
+- **Delete the workspace once the final review is clean.** Git history is the durable record; a workspace that outlives its plan is the stale-ledger hazard in waiting.
 
 ## Prompt Templates
 
 - `./operator-prompt.md` - Dispatch operator subagent
 - `./task-reviewer-prompt.md` - Dispatch task reviewer subagent (spec compliance + artifact quality in one diff read)
-- `./scripts/task-brief` - Extract a task's full text to a brief file
-- `./scripts/review-package` - Write commit list + stat + diff to a review-package file
-- `./scripts/sdd-workspace` - Resolve the `.srepowers/sdd/` artifact directory
+- `./re-review-prompt.md` - Dispatch a scoped re-review after a fix round
+- `./scripts/task-brief PLAN_FILE N` - Extract a task's full text to a brief file
+- `./scripts/review-package PLAN_FILE BASE HEAD` - Write commit list + stat + diff to a review-package file
+- `./scripts/sdd-workspace PLAN_FILE` - Resolve the plan's `.srepowers/sdd/<plan-basename>/` artifact directory
 
 ## Why One Reviewer, Two Verdicts
 
@@ -331,7 +373,7 @@ send it back to the operator and re-review.
 - Proceed with unfixed issues
 - Dispatch multiple operator subagents in parallel (conflicts)
 - Make a subagent read the whole plan file (hand it its task brief — `scripts/task-brief` — instead)
-- Dispatch a reviewer without a review-package file (generate it first — `scripts/review-package BASE HEAD` — and name the printed path)
+- Dispatch a reviewer without a review-package file (generate it first — `scripts/review-package PLAN_FILE BASE HEAD` — and name the printed path)
 - Use `HEAD~1` as the review-package BASE (it truncates multi-commit tasks — use the BASE you recorded before dispatching)
 - Tell a reviewer what not to flag, or pre-rate a finding's severity in the dispatch ("treat it as Minor at most")
 - Re-dispatch a task the progress ledger already marks complete — check the ledger (and `git log`) after any compaction or resume
