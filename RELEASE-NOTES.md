@@ -23,6 +23,16 @@ from the same upstream release are tracked separately.
   counts as 0. New deterministic suite:
   `tests/claude-code/test-find-polluter.sh` (5 assertions, all four failure
   modes reproduced RED first).
+- **`git-guardrails` blocked ordinary pushes.** The short-flag rules matched
+  `.*(-[[:alnum:]]*f)` with no trailing token boundary, so any hyphenated word
+  ending in the flag letter matched anywhere on the line: `git push -u origin
+  fix/superpowers-v620-bugfix-parity` was refused as a force-push because
+  `-bugf` matched. The `clean -f` and `branch -D` rules had the same shape
+  (`git clean -d my-stuff`, `git branch -d feat/backup-D`). Flag clusters are
+  now whitespace-delimited alphanumeric tokens, with the flag letter allowed
+  anywhere in the cluster so `-fd`, `-dfx`, `-fu`, and `-Dr` still block.
+  Found when the guard blocked this release's own push; the existing allow-case
+  tests used short branch names (`feat/x`) that happened to dodge it.
 - **`finishing-operation-branch` cleanup could never match.** Step 6 recomputed
   `WORKTREE_PATH=$(git rev-parse --show-toplevel)` *after* Option 1
   (`git checkout <target-env>`) and Option 5 (`git checkout <base-branch>`) had

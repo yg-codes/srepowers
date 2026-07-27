@@ -70,6 +70,12 @@ assert_exit "clean -fd"             2 "git clean -fd"
 assert_exit "clean -f"             2 "git clean -f"
 assert_exit "clean -xdf"            2 "git clean -xdf"
 assert_exit "branch -D"             2 "git branch -D feature"
+# Flag letter anywhere in the cluster, and with a path argument following —
+# the token-boundary fix must not require the letter to be last.
+assert_exit "clean -fd with path"   2 "git clean -fd src/"
+assert_exit "clean -dfx"            2 "git clean -dfx"
+assert_exit "push -fu"              2 "git push -fu origin main"
+assert_exit "branch -Dr"            2 "git branch -Dr origin/feature"
 assert_exit "checkout ."            2 "git checkout ."
 assert_exit "checkout -- ."         2 "git checkout -- ."
 assert_exit "restore ."             2 "git restore ."
@@ -97,6 +103,14 @@ assert_exit "clean dry-run"         0 "git clean -n"
 assert_exit "clean -d only"         0 "git clean -d"
 assert_exit "branch -d safe"        0 "git branch -d merged"
 assert_exit "branch -a"             0 "git branch -a"
+
+# Regression: the flag rules used `.*(-[[:alnum:]]*f)` with no token boundary,
+# so any hyphenated word ending in the flag letter matched anywhere on the
+# line — `-bugf` inside a branch name blocked an ordinary push.
+assert_exit "push branch ending f"  0 "git push -u origin fix/superpowers-v620-bugfix-parity"
+assert_exit "push branch -conf"     0 "git push origin feat/reload-conf"
+assert_exit "clean -d path word f"  0 "git clean -d my-stuff"
+assert_exit "branch -d word D"      0 "git branch -d feat/backup-D"
 assert_exit "status"                0 "git status"
 assert_exit "echo mentions reset"   0 "echo do not reset --hard"
 
