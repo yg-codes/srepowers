@@ -2,6 +2,53 @@
 
 Newest first.
 
+## 5.10.0 — plan-scoped SDD workspace and resume-based fix loop
+
+Completes [superpowers v6.2.0](https://github.com/obra/superpowers) parity for
+`subagent-driven-operation`. The v5.9.2 release took the bug fixes; this one
+takes the two design changes.
+
+### Changed
+
+- **The SDD workspace is plan-scoped.** `.srepowers/sdd/` had no plan identity
+  and no end-of-life, so a follow-up plan in the same working tree could read
+  the previous plan's ledger as its own progress — a controller that believes
+  tasks are already complete skips them silently. `sdd-workspace` now requires
+  the plan file and resolves `<repo-root>/.srepowers/sdd/<plan-basename>/`;
+  `task-brief` and `review-package` write into their plan's directory
+  (`review-package` gains the plan file as its first argument); the ledger
+  names its plan on its first line (`# SDO ledger — plan: <path>`); the
+  self-ignoring `.gitignore` moves to the `.srepowers/sdd/` parent so it covers
+  every plan; and the workspace is deleted once the final review is clean —
+  git history is the durable record.
+
+  **Breaking for direct script callers:** `sdd-workspace PLAN_FILE` and
+  `review-package PLAN_FILE BASE HEAD` both take the plan file now. A ledger at
+  the old flat path `.srepowers/sdd/progress.md` is explicitly treated as
+  another plan's progress: left in place, not adopted.
+
+- **The review-fix loop resumes the operator.** Fix rounds now resume the
+  original operator (rounds 1-3) rather than dispatching fresh each time — its
+  context already holds the task, the live system state it observed, and its
+  own choices. Rounds 4-5 dispatch a fresh operator on a more capable model.
+  A five-round circuit breaker caps the loop, after which the controller
+  adjudicates each open finding as parked-with-ruling or BLOCKED; adjudicating
+  before the cap is pre-judging. Minor findings and out-of-scope observations
+  are ledgered as deferred and never extend the loop.
+
+- **New scoped re-review template.** `re-review-prompt.md` checks the fixes
+  rather than re-reading the whole task: the re-reviewer verdicts each finding
+  ADDRESSED / NOT ADDRESSED and inspects only the fix diff for new breakage.
+  Adapted for infrastructure — the read-only constraint covers live
+  cluster/host state, not just the working tree.
+
+### Tests
+
+`tests/claude-code/test-sdd-workspace.sh` gains plan-scoping coverage: a second
+plan resolves a distinct workspace, the `.gitignore` sits at the `sdd/` parent,
+and a missing plan file or absent argument exits 2 instead of silently creating
+a workspace. 11 assertions, RED-verified before the change.
+
 ## 5.9.2 — superpowers v6.2.0 bug-fix parity
 
 Ports the two defect fixes from
