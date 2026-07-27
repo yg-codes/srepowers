@@ -47,6 +47,10 @@ First, detect the workspace shape — this governs which menu to show and how cl
 GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
 GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
 current_branch=$(git branch --show-current)   # empty = detached HEAD
+# Capture now, while still inside the workspace — Options 1 and 5 change
+# branches and directory before cleanup (Step 6) needs these values
+WORKTREE_PATH=$(git rev-parse --show-toplevel)
+MAIN_ROOT=$(git -C "$GIT_COMMON/.." rev-parse --show-toplevel)
 ```
 
 | State | Menu | Cleanup |
@@ -216,18 +220,13 @@ EOF
 
 **Only runs for Option 1 (merge & deploy) and Option 5 (discard).** Options 2 (MR) and 3 (promote) keep the worktree alive so you can iterate on review feedback or run the next promotion; Option 4 keeps it by definition.
 
-```bash
-GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
-GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
-WORKTREE_PATH=$(git rev-parse --show-toplevel)
-```
+Use the `GIT_DIR`, `GIT_COMMON`, `WORKTREE_PATH`, and `MAIN_ROOT` values captured in Step 2. Do **not** recompute them here — Options 1 and 5 have already changed branches and directory, so `git rev-parse --show-toplevel` would now resolve to the main repo root and the provenance check below could never match.
 
 **If `GIT_DIR == GIT_COMMON`:** Normal repo, no worktree to clean up. Done.
 
-**If the worktree path is under `.worktrees/`, `worktrees/`, or `~/.config/srepowers/worktrees/`:** SREPowers created this worktree — we own cleanup. Remove from the main repo root, never from inside the worktree:
+**If `WORKTREE_PATH` is under `.worktrees/`, `worktrees/`, or `~/.config/srepowers/worktrees/`:** SREPowers created this worktree — we own cleanup. Remove from the main repo root, never from inside the worktree:
 
 ```bash
-MAIN_ROOT=$(git -C "$(git rev-parse --git-common-dir)/.." rev-parse --show-toplevel)
 cd "$MAIN_ROOT"
 git worktree remove "$WORKTREE_PATH"
 git worktree prune  # Self-healing: clear any stale registrations

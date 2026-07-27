@@ -22,9 +22,18 @@ echo "🔍 Searching for the check that creates: $POLLUTION_CHECK"
 echo "Check glob: $CHECK_GLOB"
 echo ""
 
-# Get list of check scripts
-CHECK_FILES=$(find . -path "$CHECK_GLOB" | sort)
-TOTAL=$(echo "$CHECK_FILES" | wc -l | tr -d ' ')
+# Get list of check scripts (find . emits ./-prefixed paths, so accept the
+# glob written with or without a leading ./)
+CHECK_GLOB="${CHECK_GLOB#./}"
+# find -path can't match '**/' against zero directory levels, so a glob like
+# checks/**/*.sh would skip checks/top.sh; also try the glob with '**/'
+# collapsed to cover scripts directly under the base directory.
+CHECK_FILES=$(find . \( -path "./$CHECK_GLOB" -o -path "./${CHECK_GLOB//\*\*\//}" \) | sort -u)
+if [ -z "$CHECK_FILES" ]; then
+  TOTAL=0
+else
+  TOTAL=$(printf '%s\n' "$CHECK_FILES" | wc -l | tr -d ' ')
+fi
 
 echo "Found $TOTAL check scripts"
 echo ""
