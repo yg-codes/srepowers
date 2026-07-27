@@ -2,6 +2,54 @@
 
 Newest first.
 
+## 5.9.2 — superpowers v6.2.0 bug-fix parity
+
+Ports the two defect fixes from
+[superpowers v6.2.0](https://github.com/obra/superpowers) that apply to
+SREPowers, plus a duplicate-section cleanup found while cross-checking. No
+behavior redesign — the SDD plan-scoped workspace and resume-based fix loop
+from the same upstream release are tracked separately.
+
+### Fixed
+
+- **`find-polluter.sh` found nothing and reported "Found 1".** Two defects in
+  one line ([upstream #2008](https://github.com/obra/superpowers/issues/2008),
+  [#2011](https://github.com/obra/superpowers/issues/2011)): `find .` emits
+  `./`-prefixed paths, so the skill's own documented glob `'checks/**/*.sh'`
+  matched zero files; and `wc -l` on empty input returns 1, so a zero-match run
+  announced "Found 1 check scripts" before reporting the suite clean. The glob
+  now accepts an optional leading `./`, is also matched with `**/` collapsed so
+  scripts directly under the base directory aren't skipped, and an empty result
+  counts as 0. New deterministic suite:
+  `tests/claude-code/test-find-polluter.sh` (5 assertions, all four failure
+  modes reproduced RED first).
+- **`git-guardrails` blocked ordinary pushes.** The short-flag rules matched
+  `.*(-[[:alnum:]]*f)` with no trailing token boundary, so any hyphenated word
+  ending in the flag letter matched anywhere on the line: `git push -u origin
+  fix/superpowers-v620-bugfix-parity` was refused as a force-push because
+  `-bugf` matched. The `clean -f` and `branch -D` rules had the same shape
+  (`git clean -d my-stuff`, `git branch -d feat/backup-D`). Flag clusters are
+  now whitespace-delimited alphanumeric tokens, with the flag letter allowed
+  anywhere in the cluster so `-fd`, `-dfx`, `-fu`, and `-Dr` still block.
+  Found when the guard blocked this release's own push; the existing allow-case
+  tests used short branch names (`feat/x`) that happened to dodge it.
+- **`finishing-operation-branch` cleanup could never match.** Step 6 recomputed
+  `WORKTREE_PATH=$(git rev-parse --show-toplevel)` *after* Option 1
+  (`git checkout <target-env>`) and Option 5 (`git checkout <base-branch>`) had
+  already moved off the operation branch, so the provenance check compared the
+  main repo root against itself, cleanup silently no-oped, and the worktree
+  stayed attached. `WORKTREE_PATH` and `MAIN_ROOT` are now captured in Step 2
+  while still inside the workspace, and Step 6 consumes them instead of
+  recomputing. Mirrors upstream `0b47219`.
+
+### Changed
+
+- **Removed a duplicate section in `subagent-driven-operation`.** "Handling
+  Reviewer ⚠️ Items" appeared twice — a generic copy left over from the v5.4.0
+  SDD backport and the SRE-specific version that supersedes it. The generic one
+  is gone; the version naming unchanged config, live cluster/host state, and
+  cross-task requirements remains.
+
 ## 5.7.0 — superpowers v6.1.1 parity
 
 Brings SREPowers to functional parity with

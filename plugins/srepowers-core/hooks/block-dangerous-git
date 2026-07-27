@@ -34,14 +34,19 @@ fi
 
 # Each entry is "extended-regex<TAB>human reason". Patterns are anchored on the
 # git subcommand so unrelated text that merely mentions these words is not
-# caught, except the two flag rules (--no-verify, --force forms) which are
-# dangerous wherever they appear on a git line. Order does not matter — first
-# match wins.
+# caught; --no-verify is dangerous wherever it appears on a git line.
+#
+# Short-flag rules (-f, -D) require the cluster to be a whitespace-delimited
+# token: `([[:space:]]|.*[[:space:]])FLAG([[:space:]]|$)`. Without the trailing
+# boundary, `.*-[[:alnum:]]*f` matched any hyphenated word ending in the flag
+# letter anywhere on the line — `git push -u origin fix/my-bugfix` was blocked
+# as a force-push because `-bugf` matched. Order does not matter — first match
+# wins.
 rules=(
-  'git[[:space:]]+push[[:space:]].*(--force|--force-with-lease|-[[:alnum:]]*f)	force-push rewrites remote history (use a normal push)'
+  'git[[:space:]]+push([[:space:]]|.*[[:space:]])(--force|--force-with-lease|-[[:alnum:]]*f[[:alnum:]]*)([[:space:]]|$)	force-push rewrites remote history (use a normal push)'
   'git[[:space:]]+reset[[:space:]].*--hard	reset --hard discards uncommitted work irrecoverably'
-  'git[[:space:]]+clean[[:space:]].*-[[:alnum:]]*f	clean -f deletes untracked files irrecoverably'
-  'git[[:space:]]+branch[[:space:]].*-[[:alnum:]]*D	branch -D force-deletes a branch, losing unmerged commits'
+  'git[[:space:]]+clean([[:space:]]|.*[[:space:]])-[[:alnum:]]*f[[:alnum:]]*([[:space:]]|$)	clean -f deletes untracked files irrecoverably'
+  'git[[:space:]]+branch([[:space:]]|.*[[:space:]])-[[:alnum:]]*D[[:alnum:]]*([[:space:]]|$)	branch -D force-deletes a branch, losing unmerged commits'
   'git[[:space:]]+checkout[[:space:]]+(--[[:space:]]+)?\.([[:space:]]|$)	checkout . discards all unstaged changes irrecoverably'
   'git[[:space:]]+restore[[:space:]]+(--staged[[:space:]]+|--[[:space:]]+)*\.([[:space:]]|$)	restore . discards working-tree changes irrecoverably'
   'git[[:space:]]+add([[:space:]]|.*[[:space:]])(-[[:alnum:]]*A([[:space:]]|$)|--all|\.([[:space:]]|$))	git add -A / add . stages indiscriminately (stage explicit files)'
