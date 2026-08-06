@@ -78,7 +78,7 @@ srepowers/
 │   │   ├── .codex-plugin/plugin.json
 │   │   ├── skills/
 │   │   └── commands/
-│   └── srepowers-swe/                  ← 11 skills (general software engineering)
+│   └── srepowers-swe/                  ← 12 skills (general software engineering)
 │       ├── .claude-plugin/plugin.json
 │       ├── .codex-plugin/plugin.json
 │       ├── skills/
@@ -97,7 +97,7 @@ srepowers/
 | `srepowers-domain` | 21 | Software engineering depth: Go, Python, Rust, K8s, Terraform, containers, networking, security, testing, databases |
 | `srepowers-infra` | 11 | Portable infrastructure administration: Proxmox VE, Puppet code analysis, PuppetDB queries, DNS, TLS/PKI, backup/recovery, change management, GitLab CI/CD (incl. ECR & GoReleaser) |
 | `srepowers-private` | 6 | Site-specific operational workflows (sanitized templates): Puppet deploy/release/MR lifecycle, Hiera debugging, Ansible — substitute placeholders with your environment's values |
-| `srepowers-swe` | 11 | General software-engineering flow (opt-in): spec→tickets, backlog triage, wayfinding, domain modeling, codebase design, architecture improvement, prototyping, teaching, project onboarding |
+| `srepowers-swe` | 12 | General software-engineering flow (opt-in): spec→tickets, backlog triage, wayfinding, domain modeling, codebase design, architecture improvement, prototyping, teaching, project onboarding |
 
 Marketplace install pulls all five at once. Each plugin can also be installed individually if you only need a subset.
 
