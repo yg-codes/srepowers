@@ -1,6 +1,6 @@
 # Available Skills
 
-## Plugin: srepowers-core (31 skills)
+## Plugin: srepowers-core (32 skills)
 
 SRE workflow spine, mandatory gates, and incident response.
 
@@ -62,6 +62,7 @@ SRE workflow spine, mandatory gates, and incident response.
 | `srepowers-core:progressive-delivery` | Canary, blue-green deployments |
 | `srepowers-core:devops-engineer` | CI/CD, containers, IaC |
 | `srepowers-core:wizard` | Console-only human procedures (vendor portals, cert rotation, CI secrets, cutovers) |
+| `srepowers-core:wait-what` | Re-pitch a message that did not land — plain technical English |
 
 ---
 
