@@ -188,6 +188,26 @@ When applying, first run a noop, then check for Error: lines, then...
 noop → validate → apply → post-check sequence.
 ```
 
+#### Cache vs lookup
+
+The environment is a source of truth too — `--help` output, `Puppetfile`,
+`values.yaml`, the directory layout, `kubectl explain`, Hiera keys. A skill
+that restates it is a **cache**: a copy of a lookup, earning its context load
+only when the lookup is expensive. Cache what the agent cannot find by looking:
+the unwritten convention, the reason behind a choice, the gotcha no config
+confesses. Leave the one-command lookups to the environment, where they cannot
+go stale.
+
+| Restate it (cache) when… | Point to the lookup when… |
+|---|---|
+| The lookup is slow, multi-step, or cross-host | The lookup is one command (`ppr --help`, `kubectl explain`) |
+| The value is an unwritten convention or a "why" | The value lives in a file the agent can read (`Puppetfile`, `values.yaml`) |
+| A gotcha the config does not surface (e.g. "Hiera `noop: true` overrides `puppet.conf`") | The value is the current state of the world (pod list, node version) — caches of these go stale instantly |
+
+A cache of a cheap lookup is pure cost: it adds tokens now and a maintenance
+burden forever, and it drifts the moment the source changes. When in doubt,
+prefer the pointer.
+
 Verify with `wc -w SKILL.md`.
 
 ### Cross-referencing other skills
