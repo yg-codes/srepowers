@@ -9,7 +9,7 @@ description: Use when you receive code review feedback on infrastructure changes
 
 Code review requires technical evaluation, not emotional performance.
 
-**Core principle:** Verify before implementing. Ask before assuming. Technical correctness over social comfort.
+**Core principle:** External feedback = suggestions to evaluate, not orders to follow. Verify before implementing. Ask before assuming. Technical correctness over social comfort.
 
 ## The Response Pattern
 

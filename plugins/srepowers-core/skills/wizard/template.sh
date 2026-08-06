@@ -12,6 +12,9 @@ set -euo pipefail
 # Wizard library — delightful, consistent UX. Identical across every wizard.
 # ──────────────────────────────────────────────────────────────────────────
 
+# RED is part of the palette offered to stage authors for error output; it is
+# intentionally defined even though the library itself never uses it.
+# shellcheck disable=SC2034
 if [[ -t 1 ]] && command -v tput >/dev/null 2>&1 && [[ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]]; then
   BOLD=$(tput bold); DIM=$(tput dim); RESET=$(tput sgr0)
   BLUE=$(tput setaf 4); GREEN=$(tput setaf 2); YELLOW=$(tput setaf 3); RED=$(tput setaf 1)
@@ -132,14 +135,21 @@ ask_secret() {
 }
 
 # write_env KEY VALUE — upsert KEY=VALUE into ENV_FILE (creates it; replaces
-# any existing line). Idempotent.
+# any existing line). Idempotent. Writes in place rather than renaming a temp
+# file over the target, so the file's mode, owner, and symlink target survive.
 write_env() {
   local key="$1" value="$2" tmp
+  if [[ "$value" == *$'\n'* ]]; then
+    warn "refusing to write multi-line value for $key — store it in a file and reference the path"
+    SKIPPED+=("$key (multi-line value)")
+    return
+  fi
   touch "$ENV_FILE"
   tmp=$(mktemp)
+  trap 'rm -f "$tmp"' RETURN
   grep -vE "^${key}=" "$ENV_FILE" > "$tmp" || true
   printf '%s=%s\n' "$key" "$value" >> "$tmp"
-  mv "$tmp" "$ENV_FILE"
+  cat "$tmp" > "$ENV_FILE"
   WRITTEN_ENV+=("$key")
   printf '  %s✓ wrote%s %s → %s\n' "$GREEN" "$RESET" "$key" "$ENV_FILE"
 }

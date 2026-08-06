@@ -5,7 +5,7 @@ description: Generate an interactive bash wizard that walks a human through step
 
 # Wizard
 
-A **wizard** is a bash script that walks a human, step by step, through a manual procedure that's tedious to do by hand and tedious to re-explain to an AI every time. It opens each URL, says exactly what to click and copy, captures the values, writes them where they belong (`.env`, GitHub/GitLab secrets), confirms at every stage, and shows how much is left. It might configure a third-party service, walk a vendor support portal, run a one-off migration, or drive a change cutover through an approval console.
+A **wizard** is a bash script that walks a human, step by step, through a manual procedure that's tedious to do by hand and tedious to re-explain to an AI every time. It opens each URL, says exactly what to click and copy, captures the values, writes them where they belong (`.env`, GitHub Actions secrets), confirms at every stage, and shows how much is left. It might configure a third-party service, walk a vendor support portal, run a one-off migration, or drive a change cutover through an approval console.
 
 The delightful UX is already solved by [template.sh](template.sh) — progress with time-remaining, confirmation gates, cross-platform URL opening (including WSL), hidden secret entry, idempotent `.env` upserts, `gh secret`/`gh variable` writes, and a closing summary. **Your job is only to scope the procedure and author its stages.** The library above the `STAGES` marker is identical in every wizard; that consistency is the point — never hand-edit it.
 
@@ -18,7 +18,9 @@ A wizard is ephemeral by default — built for one run, saved to a scratch or `s
 Work out every manual step the human must take and every value that gets captured along the way. Read the repo and runbooks first — don't ask cold:
 
 - For setup/secret provisioning: `.env`, `.env.example`, `.env.*`, `README`, `docker-compose*`, Helm `values.yaml`, and CI config (`.github/workflows/*`, `.gitlab-ci.yml`) — every `secrets.*` / `vars.*` / `$CI_*` reference is a value the wizard must produce.
-- For a migration, cutover, or rotation: the current state, the target state, and the irreversible actions between them (and the rollback path — see `srepowers-core:change-management`).
+
+  The library's `set_secret`/`set_var` write **GitHub Actions** secrets and variables via `gh`. For any other target (GitLab CI variables, Vault, a cloud secret store), capture the value with `ask_secret` and `write_env` it, then add a `SKIPPED` entry naming the exact command the human must run — it surfaces in the closing summary. Don't add a helper to the library.
+- For a migration, cutover, or rotation: the current state, the target state, and the irreversible actions between them (and the rollback path — see `srepowers-infra:change-management`).
 
 Then show the user the ordered list of stages and the values each produces, and confirm — they may add, drop, or reorder.
 
