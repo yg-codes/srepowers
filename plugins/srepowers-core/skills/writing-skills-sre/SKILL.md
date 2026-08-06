@@ -261,10 +261,6 @@ loopholes under pressure — especially incident pressure.
 **Scope:** this toolkit is for discipline failures. For wrong-shaped output, use
 the forms in Match the Form to the Failure instead.
 
-**Psychology note:** see [persuasion-principles.md](persuasion-principles.md)
-for the research foundation (Cialdini, 2021; Meincke et al., 2025) on authority,
-commitment, scarcity, social proof, and unity.
-
 ### Close every loophole explicitly
 
 Don't just state the rule — forbid the specific workarounds.
@@ -490,24 +486,11 @@ How future agents find your skill:
 
 Optimize for this flow — put searchable terms early and often.
 
-## The Bottom Line
-
-**Creating skills IS test-driven operation for process documentation.**
-
-Same Iron Law: no skill without a failing test first.
-Same cycle: RED (baseline) → GREEN (write skill) → REFACTOR (close loopholes).
-Same benefit: the skill holds up at 3am, under pressure, in production.
-
-If you demand verification before completion from your operations, demand it
-from the documents that govern them.
-
 ## Further Reading
 
 - [testing-skills-with-subagents.md](testing-skills-with-subagents.md) — full
   pressure-testing methodology
 - [anthropic-best-practices.md](anthropic-best-practices.md) — upstream skill
   authoring guidance
-- [persuasion-principles.md](persuasion-principles.md) — why bulletproofing
-  wording works
 - [graphviz-conventions.dot](graphviz-conventions.dot) — flowchart conventions
 - [render-graphs.js](render-graphs.js) — render `.dot` files for review

@@ -162,11 +162,3 @@ Requirements Coverage:
 6. All requirements must be `done` or explicitly `skipped` (with documented reason) before proceeding to `finishing-operation-branch`
 
 **Issue tracker integration:** When the plan has a `ticket` in frontmatter, cross-reference acceptance criteria against the coverage summary. If a tracker MCP (ClickUp, Jira, etc.) is available, fetch the ticket and verify criteria are met. Update the ticket to reflect completion when all criteria pass.
-
-## The Bottom Line
-
-**No shortcuts for verification.**
-
-Run the command. Read the output — exit code, status, actual values. THEN claim the result.
-
-This is non-negotiable, especially under incident pressure.

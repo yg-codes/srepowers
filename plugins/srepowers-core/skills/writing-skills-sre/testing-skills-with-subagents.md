@@ -133,9 +133,3 @@ Tests pass once ≠ bulletproof.
 | **Verify GREEN** | Re-test scenarios | Agent follows rule under pressure |
 | **REFACTOR** | Close loopholes | Add counters for new rationalizations |
 | **Stay GREEN** | Re-verify | Agent still complies after refactoring |
-
-## The Bottom Line
-
-If you wouldn't operate production infrastructure without verification, don't write skills without testing them under operational pressure.
-
-RED-GREEN-REFACTOR for infrastructure documentation works exactly like RED-GREEN-REFACTOR for infrastructure operations.
