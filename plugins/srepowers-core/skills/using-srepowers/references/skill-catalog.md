@@ -1,6 +1,6 @@
 # Available Skills
 
-## Plugin: srepowers-core (30 skills)
+## Plugin: srepowers-core (32 skills)
 
 SRE workflow spine, mandatory gates, and incident response.
 
@@ -61,6 +61,8 @@ SRE workflow spine, mandatory gates, and incident response.
 | `srepowers-core:observability-engineer` | Setting up observability stacks |
 | `srepowers-core:progressive-delivery` | Canary, blue-green deployments |
 | `srepowers-core:devops-engineer` | CI/CD, containers, IaC |
+| `srepowers-core:wizard` | Console-only human procedures (vendor portals, cert rotation, CI secrets, cutovers) |
+| `srepowers-core:wait-what` | Re-pitch a message that did not land — plain technical English |
 
 ---
 
@@ -153,7 +155,7 @@ deploy; debug Hiera at any point.
 | `srepowers-private:hiera-debugging` | Trace why a Hiera key resolves to an unexpected value |
 | `srepowers-private:ansible-operations` | Ansible playbook development, inventory, vault, execution |
 
-## Plugin: srepowers-swe (11 skills)
+## Plugin: srepowers-swe (12 skills)
 
 General software-engineering skill surface — the idea → ship flow for
 building software, opt-in and separate from the SRE spine. Configure the
@@ -166,6 +168,7 @@ vocabulary the other swe skills assume are in place.
 |-------|----------|
 | `srepowers-swe:grilling` | Sharpen an idea or plan by interview, one question at a time ("grill me") |
 | `srepowers-swe:domain-modeling` | Pin down the domain vocabulary; record hard-to-reverse decisions as ADRs |
+| `srepowers-swe:to-questionnaire` | Gather info you lack from someone who has it (vendor, service owner, approver) before specifying |
 | `srepowers-swe:to-spec` | Turn the current conversation into a spec (PRD) — synthesis, no interview |
 | `srepowers-swe:to-tickets` | Split a spec into tracer-bullet tickets on the issue tracker |
 | `srepowers-swe:prototype` | Throwaway code to answer a state-model or UI design question |

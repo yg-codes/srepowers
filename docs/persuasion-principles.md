@@ -2,9 +2,10 @@
 
 ## Overview
 
-LLMs respond to the same persuasion principles as humans. Understanding this psychology helps you design more effective infrastructure operation skills - not to manipulate, but to ensure critical practices are followed even under pressure.
+LLMs respond to the same persuasion principles as humans. Understanding this psychology helps you design more effective infrastructure operation skills - not to manipulate, but to ensure critical practices are followed even under operational pressure.
 
 **Research foundation:** Meincke et al. (2025) tested 7 persuasion principles with N=28,000 AI conversations. Persuasion techniques more than doubled compliance rates (33% → 72%, p < .001).
+
 
 ## The Seven Principles
 
@@ -24,13 +25,13 @@ LLMs respond to the same persuasion principles as humans. Understanding this psy
 
 **Infrastructure examples:**
 ```markdown
-✅ Write verification before operation. Delete operation if you executed first. No exceptions.
-❌ Consider writing verification before operations when feasible.
+✅ Write the verification check before the operation. Delete the operation if you ran it first. No exceptions.
+❌ Consider writing a verification check before operations when feasible.
 ```
 
 ```markdown
 ✅ NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
-❌ You should probably verify before claiming completion.
+❌ You should probably verify before claiming the apply succeeded.
 ```
 
 ### 2. Commitment
@@ -40,11 +41,11 @@ LLMs respond to the same persuasion principles as humans. Understanding this psy
 **How it works in skills:**
 - Require announcements: "Announce skill usage"
 - Force explicit choices: "Choose A, B, or C"
-- Use tracking: TodoWrite for checklists
+- Use tracking: todos for checklists
 
 **When to use:**
 - Ensuring skills are actually followed
-- Multi-step processes
+- Multi-step operations
 - Accountability mechanisms
 
 **Infrastructure examples:**
@@ -54,8 +55,8 @@ LLMs respond to the same persuasion principles as humans. Understanding this psy
 ```
 
 ```markdown
-✅ Choose A) Delete code and start over with TDO, B) Commit now and add tests later, C) Write tests now
-❌ What would you like to do about testing?
+✅ Choose A) Roll back and re-run with a noop first, B) Apply now and verify later, C) Run noop now
+❌ What would you like to do about the dry run?
 ```
 
 ### 3. Scarcity
@@ -74,12 +75,12 @@ LLMs respond to the same persuasion principles as humans. Understanding this psy
 
 **Infrastructure examples:**
 ```markdown
-✅ After completing an operation, IMMEDIATELY run verification before claiming success.
-❌ You can verify the operation when convenient.
+✅ After the apply completes, IMMEDIATELY run the health check before claiming success.
+❌ You can verify the apply when convenient.
 ```
 
 ```markdown
-✅ Before claiming any status, run verification command in this message.
+✅ Before claiming any status, run the verification command in this message.
 ❌ Run verification before claiming completion at some point.
 ```
 
@@ -99,8 +100,8 @@ LLMs respond to the same persuasion principles as humans. Understanding this psy
 
 **Infrastructure examples:**
 ```markdown
-✅ Verification before operation = confidence. Operation before verification = incidents. Every time.
-❌ Some people find verification before operations helpful.
+✅ Noop before apply = confidence. Apply before noop = incidents. Every time.
+❌ Some people find a dry run before applying helpful.
 ```
 
 ```markdown
@@ -158,7 +159,7 @@ LLMs respond to the same persuasion principles as humans. Understanding this psy
 
 **Infrastructure example of what NOT to do:**
 ```markdown
-❌ "Great job on that operation! Now let's verify it properly." (Undermines discipline)
+❌ "Great job on that deploy! Now let's verify it properly." (Undermines discipline)
 ```
 
 ## Principle Combinations by Skill Type
@@ -166,9 +167,9 @@ LLMs respond to the same persuasion principles as humans. Understanding this psy
 | Skill Type | Use | Avoid |
 |------------|-----|-------|
 | **Discipline-enforcing** (TDO, VBC) | Authority + Commitment + Social Proof | Liking, Reciprocity |
-| **Guidance/technique** (writing-plans) | Moderate Authority + Unity | Heavy authority |
-| **Collaborative** (brainstorming) | Unity + Commitment | Authority, Liking |
-| **Reference** (meta-skill) | Clarity only | All persuasion |
+| **Guidance/technique** (writing-operation-plans) | Moderate Authority + Unity | Heavy authority |
+| **Collaborative** (brainstorming-operations) | Unity + Commitment | Authority, Liking |
+| **Reference** (runbooks, meta-skill) | Clarity only | All persuasion |
 
 ## Why This Works: The Psychology
 
@@ -209,7 +210,7 @@ LLMs respond to the same persuasion principles as humans. Understanding this psy
 
 **Authority:** "DEFINE VERIFICATION BEFORE EVERY STATE-CHANGING INFRASTRUCTURE OPERATION"
 **Commitment:** Announce "I'm using TDO" at start
-**Social Proof:** "Verification before operation = confidence. Operation before verification = incidents. Every time."
+**Social Proof:** "Noop before apply = confidence. Apply before noop = incidents. Every time."
 **Scarcity:** "Verification must happen in this message, before any claim"
 
 ### For Verification Before Completion (VBC)
@@ -248,6 +249,7 @@ When designing an SRE skill, ask:
 
 ## Related Documentation
 
+- [Testing Infrastructure Skills With Subagents](../plugins/srepowers-core/skills/writing-skills-sre/testing-skills-with-subagents.md)
 - [Testing Anti-Patterns](testing-anti-patterns.md)
-- [Test-Driven Operation Skill](../skills/test-driven-operation/SKILL.md)
-- [Verification Before Completion Skill](../skills/verification-before-completion/SKILL.md)
+- Test-Driven Operation skill: `srepowers-core:test-driven-operation`
+- Verification Before Completion skill: `srepowers-core:verification-before-completion`

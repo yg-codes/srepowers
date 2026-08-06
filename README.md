@@ -57,7 +57,7 @@ SREPowers is distributed as a marketplace containing five plugins, each with its
 srepowers/
 ├── .claude-plugin/marketplace.json     ← lists all 5 plugins
 ├── plugins/
-│   ├── srepowers-core/                 ← 30 skills
+│   ├── srepowers-core/                 ← 32 skills
 │   │   ├── .claude-plugin/plugin.json
 │   │   ├── .codex-plugin/plugin.json
 │   │   ├── skills/
@@ -78,12 +78,12 @@ srepowers/
 │   │   ├── .codex-plugin/plugin.json
 │   │   ├── skills/
 │   │   └── commands/
-│   └── srepowers-swe/                  ← 11 skills (general software engineering)
+│   └── srepowers-swe/                  ← 12 skills (general software engineering)
 │       ├── .claude-plugin/plugin.json
 │       ├── .codex-plugin/plugin.json
 │       ├── skills/
 │       └── commands/
-├── .agents/skills/                     ← Codex skill mirror (79 symlinks)
+├── .agents/skills/                     ← Codex skill mirror (82 symlinks)
 ├── .codex/skills/                      ← Codex repo-native symlinks
 ├── .codex/agents/                      ← Codex custom agents
 ├── .codex-plugin/                      ← Codex plugin manifest
@@ -93,11 +93,11 @@ srepowers/
 
 | Plugin | Skills | Focus |
 |--------|--------|-------|
-| `srepowers-core` | 30 | Workflow spine, mandatory gates, incident response, SRE practices |
+| `srepowers-core` | 32 | Workflow spine, mandatory gates, incident response, SRE practices |
 | `srepowers-domain` | 21 | Software engineering depth: Go, Python, Rust, K8s, Terraform, containers, networking, security, testing, databases |
 | `srepowers-infra` | 11 | Portable infrastructure administration: Proxmox VE, Puppet code analysis, PuppetDB queries, DNS, TLS/PKI, backup/recovery, change management, GitLab CI/CD (incl. ECR & GoReleaser) |
 | `srepowers-private` | 6 | Site-specific operational workflows (sanitized templates): Puppet deploy/release/MR lifecycle, Hiera debugging, Ansible — substitute placeholders with your environment's values |
-| `srepowers-swe` | 11 | General software-engineering flow (opt-in): spec→tickets, backlog triage, wayfinding, domain modeling, codebase design, architecture improvement, prototyping, teaching, project onboarding |
+| `srepowers-swe` | 12 | General software-engineering flow (opt-in): spec→tickets, backlog triage, wayfinding, domain modeling, codebase design, architecture improvement, prototyping, teaching, project onboarding, decision-input questionnaires |
 
 Marketplace install pulls all five at once. Each plugin can also be installed individually if you only need a subset.
 
@@ -163,7 +163,7 @@ codex plugin marketplace add yg-codes/srepowers
 - `srepowers-domain` — Go, Python, Rust, Kubernetes, Terraform, security, testing, and other domain skills
 - `srepowers-infra` — portable Proxmox, Puppet analysis, DNS, TLS, backup, and GitLab CI/CD skills
 - `srepowers-private` — sanitized site-specific Puppet/Hiera/Ansible workflow templates
-- `srepowers-swe` — general software-engineering flow (opt-in): spec→tickets, backlog triage, wayfinding, domain modeling, codebase design, prototyping, teaching
+- `srepowers-swe` — general software-engineering flow (opt-in): spec→tickets, backlog triage, wayfinding, domain modeling, codebase design, prototyping, teaching, decision-input questionnaires
 
 Install all five for full SREPowers coverage.
 
@@ -284,6 +284,8 @@ codex plugin marketplace upgrade srepowers-marketplace
 | `receiving-code-review-sre` | Process code review feedback |
 | `devops-engineer` | CI/CD, containers, and IaC |
 | `writing-skills-sre` | Create and edit SRE skills |
+| `wizard` | Interactive bash wizard for human-only console steps |
+| `wait-what` | Re-pitch a message that did not land |
 | `using-srepowers` | Meta-skill: how to find and use skills |
 
 ### Domain Expertise (domain)
@@ -339,6 +341,7 @@ codex plugin marketplace upgrade srepowers-marketplace
 |------|---------|
 | `to-spec` | Turn a conversation into a spec (PRD) |
 | `to-tickets` | Split a spec into tracer-bullet tickets |
+| `to-questionnaire` | Gather info you lack from someone who has it |
 | `backlog-triage` | Backlog/issue triage (not incident triage) |
 | `wayfinder` | Chart decision tickets for a foggy, multi-session effort |
 | `domain-modeling` | Sharpen domain vocabulary; record ADRs |
