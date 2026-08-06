@@ -32,6 +32,14 @@ ENV_FILE="${ENV_FILE:-.env}"
 WRITTEN_ENV=()    # KEYs written to ENV_FILE this run
 WRITTEN_SECRET=() # secret NAMEs set this run
 SKIPPED=()        # things we couldn't do (e.g. gh missing)
+_WIZ_TMP=""       # current write_env temp file; cleared after each rename
+
+# Clean up a write_env temp file left by an interrupt (Ctrl-C) between mktemp
+# and mv. A RETURN trap cannot do this safely — bash RETURN traps are not
+# function-local unless functrace is on, so they leak to the next function
+# return and fire with the local out of scope. An EXIT trap has no such hazard.
+_wiz_cleanup() { [ -n "$_WIZ_TMP" ] && rm -f "$_WIZ_TMP" 2>/dev/null || true; }
+trap _wiz_cleanup EXIT
 
 # _clear — wipe the terminal so only the current step is on screen. No-op when
 # output isn't a terminal, so piped logs stay readable.
@@ -135,21 +143,33 @@ ask_secret() {
 }
 
 # write_env KEY VALUE — upsert KEY=VALUE into ENV_FILE (creates it; replaces
-# any existing line). Idempotent. Writes in place rather than renaming a temp
-# file over the target, so the file's mode, owner, and symlink target survive.
+# any existing line). Idempotent. Builds the new content in a temp file, copies
+# the target's mode onto it, then atomically renames onto the *resolved* target
+# (following a symlink) — so mode, owner, and symlink target survive, and a
+# crash mid-write leaves the prior .env intact rather than truncating it.
+# Rejects multi-line/CR values and non-identifier keys, since both corrupt the
+# KEY=VALUE format and are silently truncated on read-back.
 write_env() {
-  local key="$1" value="$2" tmp
-  if [[ "$value" == *$'\n'* ]]; then
+  local key="$1" value="$2" tmp target
+  if [[ ! "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+    warn "refusing to write invalid key '$key' — keys must be identifiers (letters, digits, underscore)"
+    SKIPPED+=("$key (invalid key)")
+    return
+  fi
+  if [[ "$value" == *[$'\n\r']* ]]; then
     warn "refusing to write multi-line value for $key — store it in a file and reference the path"
     SKIPPED+=("$key (multi-line value)")
     return
   fi
   touch "$ENV_FILE"
   tmp=$(mktemp)
-  trap 'rm -f "$tmp"' RETURN
+  _WIZ_TMP="$tmp"
   grep -vE "^${key}=" "$ENV_FILE" > "$tmp" || true
   printf '%s=%s\n' "$key" "$value" >> "$tmp"
-  cat "$tmp" > "$ENV_FILE"
+  target=$(readlink -f "$ENV_FILE")
+  chmod --reference="$ENV_FILE" "$tmp" 2>/dev/null || chmod 600 "$tmp"
+  mv "$tmp" "$target"
+  _WIZ_TMP=""
   WRITTEN_ENV+=("$key")
   printf '  %s✓ wrote%s %s → %s\n' "$GREEN" "$RESET" "$key" "$ENV_FILE"
 }

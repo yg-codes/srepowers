@@ -250,5 +250,6 @@ When designing an SRE skill, ask:
 ## Related Documentation
 
 - [Testing Infrastructure Skills With Subagents](../plugins/srepowers-core/skills/writing-skills-sre/testing-skills-with-subagents.md)
+- [Testing Anti-Patterns](testing-anti-patterns.md)
 - Test-Driven Operation skill: `srepowers-core:test-driven-operation`
 - Verification Before Completion skill: `srepowers-core:verification-before-completion`
