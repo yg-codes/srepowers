@@ -83,7 +83,7 @@ srepowers/
 │       ├── .codex-plugin/plugin.json
 │       ├── skills/
 │       └── commands/
-├── .agents/skills/                     ← Codex skill mirror (82 symlinks)
+├── .agents/skills/                     ← Codex skill mirror (83 symlinks)
 ├── .codex/skills/                      ← Codex repo-native symlinks
 ├── .codex/agents/                      ← Codex custom agents
 ├── .codex-plugin/                      ← Codex plugin manifest
@@ -93,7 +93,7 @@ srepowers/
 
 | Plugin | Skills | Focus |
 |--------|--------|-------|
-| `srepowers-core` | 32 | Workflow spine, mandatory gates, incident response, SRE practices |
+| `srepowers-core` | 33 | Workflow spine, mandatory gates, incident response, SRE practices |
 | `srepowers-domain` | 21 | Software engineering depth: Go, Python, Rust, K8s, Terraform, containers, networking, security, testing, databases |
 | `srepowers-infra` | 11 | Portable infrastructure administration: Proxmox VE, Puppet code analysis, PuppetDB queries, DNS, TLS/PKI, backup/recovery, change management, GitLab CI/CD (incl. ECR & GoReleaser) |
 | `srepowers-private` | 6 | Site-specific operational workflows (sanitized templates): Puppet deploy/release/MR lifecycle, Hiera debugging, Ansible — substitute placeholders with your environment's values |
@@ -286,6 +286,7 @@ codex plugin marketplace upgrade srepowers-marketplace
 | `writing-skills-sre` | Create and edit SRE skills |
 | `wizard` | Interactive bash wizard for human-only console steps |
 | `wait-what` | Re-pitch a message that did not land |
+| `ops-brief` | Action-first output mode ("adhd mode" for ops) — next command first, safety before brevity |
 | `using-srepowers` | Meta-skill: how to find and use skills |
 
 ### Domain Expertise (domain)

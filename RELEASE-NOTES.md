@@ -2,6 +2,34 @@
 
 Newest first.
 
+## 5.12.0 — ops-brief output mode
+
+### Added
+
+- `srepowers-core:ops-brief` — a persistent action-first output mode for
+  operations. Leads with the next command, numbers multi-step work, restates
+  progress every turn, reports exit codes instead of vibes, and drops preamble,
+  recaps, and closing pleasantries. Stays on for the session until "stop
+  ops-brief" or "normal mode".
+
+  Adapted from [i-have-adhd](https://github.com/ayghri/i-have-adhd) by Ayoub G.
+  (MIT). Two deliberate divergences from upstream for ops use:
+
+  - **Safety outranks brevity.** The overrides section sits *before* the rules,
+    not after. When the next step mutates, blast radius and rollback come first
+    and the command second — a mutating command is never the first thing on
+    screen.
+  - **Mandatory gates own their output whole.** When
+    `evidence-first-reporting`, `verification-before-completion`, or
+    `safety-validator` fires, its contract wins intact; ops-brief then applies
+    only inside those sections and never deletes one to save lines. Without
+    this, terse mode silently eats the `Unknowns` section that
+    `evidence-first-reporting` exists to force.
+
+  No SessionStart hook: `srepowers-core` already injects `using-srepowers` at
+  session start, and a second always-on injector would reshape output during
+  unrelated infra work. Invoke it when you want it.
+
 ## 5.10.0 — plan-scoped SDD workspace and resume-based fix loop
 
 Completes [superpowers v6.2.0](https://github.com/obra/superpowers) parity for
