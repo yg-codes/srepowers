@@ -2,6 +2,49 @@
 
 Newest first.
 
+## 5.12.1 — puppet-fact-query accuracy fixes
+
+Version-only bump for the other four plugins; the change is in
+`srepowers-infra`.
+
+### Fixed
+
+- `srepowers-infra:puppet-fact-query` — four defects, each found producing a
+  wrong answer during live fleet use, not by inspection.
+
+  - **The parser emitted raw JSON blobs as fact values.** Puppetboard returns
+    the value cell as a JSON-*encoded string*, `'["<href>", "<value>"]'`, so
+    the `isinstance(raw, list)` test never fired and the fallback printed the
+    whole blob. Measured **285/285 rows malformed**; every `--values` count was
+    therefore wrong. Added `parse_value()`, which decodes the string before
+    falling back to tag-stripping.
+  - **Summary output went to stdout**, contaminating any redirected data file —
+    downstream `sort`/`comm` ingested the `--- N hosts ---` footer and the value
+    counts as data rows. Summaries now go to stderr, and the record separator
+    is a **tab** rather than two spaces so `cut -f2` works.
+  - **Environment was derived from the hostname prefix.** The skill actively
+    instructed this. Nine hosts using a different naming scheme matched no
+    pattern, fell into a silent catch-all, and were dropped from a 168-host
+    upgrade worklist — three of them needed a full OS upgrade rather than the
+    z-stream bump their group received. Correct scope was 177. PuppetDB carries
+    an authoritative `facts_environment` on the `nodes` endpoint; the skill now
+    requires reading it, ships a join script, and demotes hostname derivation
+    to an explicitly-labelled fallback that **must** report unmatched hosts.
+  - **No guidance on result validity.** PuppetDB answers "what did agents last
+    report", not "what is true now" and not "what hosts exist" — and both gaps
+    are invisible in the output. Added a report-age bucketer, a comparison
+    against the master's configured `runinterval`, and an explicit statement of
+    what the query structurally cannot see (powered-off hosts, hosts with no
+    agent, hosts reporting to a different PuppetDB).
+
+### Added
+
+- `puppet-fact-query`: a `recordsTotal` truncation guard in the parser, and an
+  accuracy checklist to run before presenting any fleet-wide result.
+
+All three Python blocks in the skill are syntax-checked and were functionally
+tested against a live 285-node instance.
+
 ## 5.12.0 — ops-brief output mode
 
 ### Added

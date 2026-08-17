@@ -1,7 +1,7 @@
 {
   "name": "srepowers",
   "description": "SRE + software-engineering skills marketplace with 5 plugins: core (workflow + gates + incident), domain (Go, Python, Rust, K8s, Terraform, security, etc.), infra (Proxmox, Puppet, GitLab CI/CD), private (sanitized Puppet/Ansible templates), swe (spec→tickets, domain modeling, codebase design, prototyping, teaching)",
-  "version": "5.12.0",
+  "version": "5.12.1",
   "author": {
     "name": "yg-codes",
     "email": "yg-codes@users.noreply.github.com"
