@@ -5,15 +5,28 @@ description: Use when creating Puppet control repo merge requests for the sit �
 
 # Puppet Merge Request
 
-Create merge requests for Puppet control repo branches (`control/site-a`, `control/site-b`) targeting the `sit → uat → prod` pipeline on `gitlab.example.com`.
+Create merge requests for Puppet control repo branches targeting the `sit → uat → prod` pipeline on your self-hosted GitLab.
 
 **Core principle:** Validate branch name → Pre-check conflicts → Create MRs → Report results.
+
+## Parameters (never hardcode environment-specific values)
+
+This skill is generic. Resolve these at runtime — do not bake hostnames, repo
+names, usernames, or emails into commands:
+
+| Parameter | How to resolve |
+|---|---|
+| `GITLAB_HOST` | Your GitLab host, from `glab auth status` or `git remote get-url origin` |
+| `CONTROL_REPO` | The control repo you are in, from the remote URL |
+| `GIT_USER` | The MR author's username (`glab api /user`) |
+| `REVIEWERS` | Team reviewer usernames, from your local GitLab rules file |
+| `COMPANY_EMAIL` | Git author email required by the server hook, from `git config user.email` |
 
 **Announce at start:** "I'm using the puppet-merge-request skill to create merge requests for this Puppet control repo branch."
 
 ## Prerequisites
 
-- Working inside a Puppet control repo (`control/site-a` or `control/site-b`)
+- Working inside a Puppet control repo that has env branches — see Environment Derivation Reference; a facts-driven control repo (no env branches) is out of scope
 - On a topic branch with commits ready to merge
 - `glab` CLI authenticated to `gitlab.example.com`
 - Clean working tree (no uncommitted changes)
@@ -125,41 +138,54 @@ git diff --name-only origin/prod..HEAD
 Use `glab mr create` to create MRs targeting `sit`, `uat`, and `prod` in sequence.
 
 ```bash
+GIT_USER=$(glab api /user | jq -r .username)
 for target in sit uat prod; do
   glab mr create -y \
     --fill \
     --target-branch "$target" \
-    --assignee "yan.gao" \
-    --reviewer "yan.gao" \
+    --assignee "$GIT_USER" \
+    --reviewer "$GIT_USER" \
     --label "$target"
 done
 ```
 
 **Flags explained:**
 - `-y` — Accept defaults, don't open in browser
-- `--fill` — Auto-fill title and description from commit messages
+- `--fill` — Auto-fill title and description from commit messages; use for the
+  title, then overwrite the description per Step 5 (concise, structured)
 - `--target-branch` — The environment branch (sit, uat, or prod)
-- `--assignee` — Default assignee
-- `--reviewer` — Default reviewer (change as needed per team)
-- `--label` — Labels the MR with the target environment name
+- `--assignee` / `--reviewer` — Author self-assigns by default; reassign the
+  reviewer manually after self-check, per your local GitLab rules file
 
-**Reviewer alternatives** (uncomment based on team):
-```bash
-# --reviewer "guillaume.ludinard"
-# --reviewer "kelvin.maung"
-# --reviewer "weihua.du"
-```
+## Step 5: Write the MR Description
 
-## Step 5: Report Results
+Do **not** rely on `--fill` alone — commit messages make a thin or rambling
+description. Write the body explicitly, following your local GitLab rules file's
+MR-description policy (if you have one):
+
+- **≤ ~4,000 characters.** Focused, precise, informative — not a design essay.
+- Structure: **what changed** (small table), **why**, **verification**,
+  **rollback**, plus any **rider** the diff carries beyond the ticket
+  (e.g. work riding in a module tag bump).
+- Design rationale and background narrative go in the ticket doc
+  (`docs/<TICKET-ID>/`), not the MR.
+- **Re-verify factual claims against the current diff** before writing — pins,
+  per-branch state, "first time in env". Descriptions drafted at
+  branch-creation go stale after rebases.
+- Cross-env chains (sit/uat/prod) share **one body** with a short per-target
+  footer stating merge order and any target-specific note.
+- Full detail lives in the rule file; this step is the reminder to apply it.
+
+## Step 6: Report Results
 
 Present a summary table with all created MRs:
 
 ```
 | Target | MR | URL |
 |--------|-----|-----|
-| sit    | !NNN | https://gitlab.example.com/puppet/control/site-a/-/merge_requests/NNN |
-| uat    | !NNN | https://gitlab.example.com/puppet/control/site-a/-/merge_requests/NNN |
-| prod   | !NNN | https://gitlab.example.com/puppet/control/site-a/-/merge_requests/NNN |
+| sit    | !NNN | https://${GITLAB_HOST}/${CONTROL_REPO_PATH}/-/merge_requests/NNN |
+| uat    | !NNN | https://${GITLAB_HOST}/${CONTROL_REPO_PATH}/-/merge_requests/NNN |
+| prod   | !NNN | https://${GITLAB_HOST}/${CONTROL_REPO_PATH}/-/merge_requests/NNN |
 ```
 
 Remind the user of the merge order:
@@ -172,16 +198,19 @@ The Puppet environment is derived from the branch name via g10k as `{source}_{br
 
 | Control Repo | Source Prefix | Example Branch | Environment |
 |---|---|---|---|
-| `control/site-a` | `site_a_` | `cu_1234_example` | `site_a_cu_1234_example` |
-| `control/site-b` | `site_b_` | `cu_100_example` | `site_b_cu_100_example` |
-| `control/pve` | `pve_` | N/A | No env branches, uses facts |
+| `control/<source-a>` | `<source-a>_` | `cu_<ticket>_example` | `<source-a>_cu_<ticket>_example` |
+| `control/<source-b>` | `<source-b>_` | `cu_<ticket>_demo` | `<source-b>_cu_<ticket>_demo` |
+| facts-driven repo | `<source>_` | N/A | No env branches — uses Hiera facts |
+
+The `<source>` of each control repo (and therefore its environment prefix) is
+defined in the g10k config on the Puppet master — read it there, don't guess.
 
 ## Common Issues
 
 | Issue | Cause | Fix |
 |-------|-------|-----|
 | `Branches with non-'word' characters cannot be deployed` | Hyphens/slashes/dots in branch name | Rename branch with underscores only |
-| `a1b2c3 has a bad author email` | Git configured with personal email | `git config user.email "firstname.lastname@example.com"` |
+| `a1b2c3 has a bad author email` | Git configured with personal email | `git config user.email "you@company.example"` |
 | `Commit a1b2c3 is not in the official uat branch` | Trying to merge to prod before uat | Merge to uat first |
 | `You are pushing N commits` | Too many commits in one MR | Split into smaller MRs |
 | Conflict on `Puppetfile` | Module version bumps clash | Rebase onto target, resolve version conflicts |
@@ -202,6 +231,7 @@ The Puppet environment is derived from the branch name via g10k as `{source}_{br
 - Report which files (if any) conflict
 - Remind user of the required merge sequence
 - Verify clean working tree before starting
+- Write a concise structured description (Step 5) — never ship `--fill` output as-is
 
 ## Integration
 
