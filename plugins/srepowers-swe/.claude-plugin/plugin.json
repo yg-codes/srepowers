@@ -1,6 +1,6 @@
 {
   "name": "srepowers-swe",
-  "version": "5.14.0",
+  "version": "5.14.1",
   "description": "General software-engineering skill surface — spec→tickets, backlog triage, domain modeling, codebase design, architecture improvement, prototyping, teaching, and adversarial review",
   "author": {
     "name": "yg-codes",

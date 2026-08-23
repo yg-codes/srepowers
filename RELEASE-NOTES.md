@@ -2,6 +2,31 @@
 
 Newest first.
 
+## 5.14.1 — verification-guardrails: document the availability gap
+
+Docs only. No hook, skill, or wiring changes.
+
+### Fixed
+
+- **`verification-guardrails` now documents its most likely failure: the guard
+  simply not being there.** The skill listed five ways the hook degrades —
+  obfuscated commands, missing `jq`, Windows, an unfamiliar transcript shape,
+  authoring judgement — all of which assume a guard that is at least installed.
+  It said nothing about the case where `block-lying-gates` is absent entirely.
+
+  That case is real and it is silent. The guard travels with the plugin, so a
+  fresh machine, a marketplace clone predating 5.13.0, or a newly-switched
+  `CLAUDE_CONFIG_DIR` has no guard and no signal that it is missing — each
+  config dir carries its own marketplace clone at its own revision. Observed in
+  practice: a session running under a second config dir whose marketplace sat
+  at a pre-5.13.0 revision had zero `PreToolUse` guards registered, while the
+  original config dir's clone was current.
+
+  Adds a Limitations bullet with a verify snippet that distinguishes three
+  states — guarded (`1`, rc=0), unguarded (`0`, rc=1), path missing (rc=2) —
+  and qualifies "bundled and active on install" in **How it ships** so the
+  claim points at the caveat rather than reading as unconditional.
+
 ## 5.14.0 — upstream sync: superpowers v6.3.0
 
 Adopts the portable skill changes from [superpowers
