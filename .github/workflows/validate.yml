@@ -19,8 +19,18 @@ jobs:
       - name: Validate Codex packaging mirrors
         run: bash tests/codex/run-skill-tests.sh
 
-      - name: Test SessionStart hook output
-        run: bash tests/hooks/test-session-start.sh
+      # Glob rather than naming one script: test-block-dangerous-git.sh existed
+      # for four releases without ever running in CI because the step named
+      # test-session-start.sh explicitly.
+      - name: Test hooks (shell)
+        run: |
+          for t in tests/hooks/test-*.sh; do
+            echo "== $t"
+            bash "$t"
+          done
+
+      - name: Test hooks (python)
+        run: python3 tests/hooks/test-block-unsourced-claims.py
 
       - name: Test the shell linter
         run: bash tests/shell-lint/test-lint-shell.sh

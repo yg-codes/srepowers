@@ -105,7 +105,8 @@ When porting from superpowers:
 ```bash
 python3 scripts/validate-repo.py          # packaging, skills, mirrors, versions
 bash scripts/lint-shell.sh --strict       # shellcheck + shfmt + syntax
-bash tests/hooks/test-session-start.sh    # SessionStart hook output shapes
+for t in tests/hooks/test-*.sh; do bash "$t"; done   # hook behavior matrices
+python3 tests/hooks/test-block-unsourced-claims.py   # opt-in Stop hook
 bash tests/shell-lint/test-lint-shell.sh  # the linter itself
 bash tests/codex/run-skill-tests.sh       # Codex manifest/hook invariants
 bash tests/claude-code/run-skill-tests.sh # per-skill behavior suite (needs `claude`)

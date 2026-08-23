@@ -18,6 +18,10 @@
           {
             "type": "command",
             "command": "./plugins/srepowers-core/hooks/run-hook.cmd block-dangerous-git"
+          },
+          {
+            "type": "command",
+            "command": "./plugins/srepowers-core/hooks/run-hook.cmd block-lying-gates"
           }
         ]
       }

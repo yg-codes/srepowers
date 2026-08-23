@@ -64,9 +64,11 @@ user-settings file to edit and no scope prompt.
 - Script: `plugins/srepowers-core/hooks/block-dangerous-git` (extensionless,
   dispatched cross-platform via `run-hook.cmd`, same wrapper as the
   SessionStart hook).
-- Wiring: a `PreToolUse` matcher on `Bash` in
-  `plugins/srepowers-core/hooks/hooks.json` (Claude Code) and the repo-dev
-  `.codex/hooks.json`.
+- Wiring: a `PreToolUse` matcher on `Bash` in all three hook configs —
+  `plugins/srepowers-core/hooks/hooks.json` (Claude Code),
+  `plugins/srepowers-core/hooks.json` (Codex, after plugin install), and the
+  repo-dev `.codex/hooks.json`. It shares that matcher with
+  `srepowers-core:verification-guardrails`.
 - On a blocked command the hook exits `2` and writes a one-line reason to
   stderr; Claude Code's PreToolUse protocol surfaces that as a denial.
 - It **fails open**: malformed input, empty stdin, missing `jq`, or a non-git
