@@ -14,7 +14,7 @@ CI runs everything except the model-dependent suite.
 ## Layout
 
 ```
-scripts/validate-repo.py         packaging, skills, mirrors, version lockstep
+scripts/validate-repo.py         packaging, skills, catalog, mirrors, version lockstep
 scripts/lint-shell.sh            shellcheck + shfmt + syntax across shell files
 
 tests/hooks/                     hook behavior: SessionStart output shapes,
@@ -48,12 +48,15 @@ The first five run offline in seconds. The last dispatches real model calls.
 The packaging gate. It enforces the invariants that a partial change silently
 breaks:
 
-- All 18 version sites across 11 manifests carry an identical version
+- All 22 version sites across 13 manifests carry an identical version
 - Per plugin, `skills/` dir names == `commands/*.md` names
 - Each skill's frontmatter `name:` matches its directory name
 - `.agents/skills/` and `.codex/skills/` mirror the canonical skill set, with no
   broken symlinks
 - README per-plugin skill counts match on-disk counts
+- `skill-catalog.md` names every skill on disk and only those, and each
+  `## Plugin: <name> (N skills)` header matches the real count — `using-srepowers`
+  routes from that file, so a missing row makes a skill invisible to the router
 
 It also doubles as the version-bump tool:
 

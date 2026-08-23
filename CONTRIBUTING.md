@@ -33,13 +33,14 @@ green:
 
 | Invariant | Why |
 |---|---|
-| All 18 version sites across 11 manifests carry an identical version | A split version breaks marketplace installs |
+| All 22 version sites across 13 manifests carry an identical version | A split version breaks marketplace installs |
 | Per plugin, `skills/` dir names == `commands/*.md` names | Every skill needs an invocable command wrapper |
 | Each skill's frontmatter `name:` == its directory name | The router resolves skills by name |
 | `.agents/skills/` and `.codex/skills/` mirror the canonical set, no broken links | Codex discovers skills through the mirrors |
 | README per-plugin counts match on-disk counts | The README is the catalog users read |
+| `skill-catalog.md` rows and header counts match on-disk skills | `using-srepowers` routes from it — a missing row makes a skill invisible |
 
-**Adding one skill touches five places.** See below.
+**Adding one skill touches six places.** See below.
 
 ## Adding a Skill
 
@@ -49,11 +50,11 @@ plugins/<plugin>/commands/<name>.md          # the command wrapper
 .agents/skills/<name>       -> symlink       # ../../plugins/<plugin>/skills/<name>
 .codex/skills/<name>        -> symlink       # ../../plugins/<plugin>/skills/<name>
 README.md                                    # bump the plugin's skill count
+plugins/srepowers-core/skills/using-srepowers/references/skill-catalog.md
+                                             # add a row + bump the header count
 ```
 
-Also add the skill to
-`plugins/srepowers-core/skills/using-srepowers/references/skill-catalog.md`, and
-add a test under `tests/claude-code/test-<name>.sh`.
+Also add a test under `tests/claude-code/test-<name>.sh`.
 
 Pick the right plugin:
 
@@ -103,7 +104,7 @@ When porting from superpowers:
 ## Testing
 
 ```bash
-python3 scripts/validate-repo.py          # packaging, skills, mirrors, versions
+python3 scripts/validate-repo.py          # packaging, skills, catalog, mirrors, versions
 bash scripts/lint-shell.sh --strict       # shellcheck + shfmt + syntax
 for t in tests/hooks/test-*.sh; do bash "$t"; done   # hook behavior matrices
 python3 tests/hooks/test-block-unsourced-claims.py   # opt-in Stop hook
@@ -119,7 +120,7 @@ See [docs/testing.md](docs/testing.md) for the full layout.
 
 ## Versioning and Release
 
-Versions live in 18 sites across 11 manifests. Never edit them by hand:
+Versions live in 22 sites across 13 manifests. Never edit them by hand:
 
 ```bash
 python3 scripts/validate-repo.py --show-versions   # audit current state
