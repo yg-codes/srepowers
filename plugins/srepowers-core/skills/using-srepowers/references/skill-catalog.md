@@ -1,6 +1,6 @@
 # Available Skills
 
-## Plugin: srepowers-core (33 skills)
+## Plugin: srepowers-core (34 skills)
 
 SRE workflow spine, mandatory gates, and incident response.
 

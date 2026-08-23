@@ -150,6 +150,64 @@ def validate_skills() -> None:
             fail(f"README skill count missing or stale for {plugin} (expected {count})")
 
 
+def validate_catalog() -> None:
+    """The skill catalog must name every skill on disk, and only those.
+
+    `using-srepowers` loads this file to route work, so a missing row makes a
+    skill effectively invisible and a stale row advertises one that does not
+    exist. Nothing checked it until 5.13.1: a row naming a nonexistent skill
+    was inserted deliberately and the validator passed. Both header counts and
+    row membership drifted in practice — core read "33 skills" while carrying
+    34 — so both are asserted here.
+    """
+    catalog = (
+        ROOT / "plugins" / "srepowers-core" / "skills" / "using-srepowers"
+        / "references" / "skill-catalog.md"
+    )
+    if not catalog.exists():
+        fail("skill-catalog.md is missing")
+
+    text = catalog.read_text()
+    rel = catalog.relative_to(ROOT)
+
+    # Rows look like: | `srepowers-core:some-skill` | Use when … |
+    listed: dict[str, set[str]] = {plugin: set() for plugin in PLUGINS}
+    for plugin, skill in re.findall(
+        r"^\|\s*`(srepowers-[a-z]+):([a-z0-9-]+)`", text, re.MULTILINE
+    ):
+        if plugin not in listed:
+            fail(f"{rel} references unknown plugin: {plugin}")
+        if skill in listed[plugin]:
+            fail(f"{rel} lists {plugin}:{skill} more than once")
+        listed[plugin].add(skill)
+
+    for plugin in PLUGINS:
+        actual = {
+            path.parent.name
+            for path in (ROOT / "plugins" / plugin / "skills").glob("*/SKILL.md")
+        }
+        missing = sorted(actual - listed[plugin])
+        if missing:
+            fail(f"{rel} missing rows for {plugin}: {', '.join(missing)}")
+        extra = sorted(listed[plugin] - actual)
+        if extra:
+            fail(f"{rel} lists nonexistent {plugin} skills: {', '.join(extra)}")
+
+        # Header counts drift silently; assert them against disk too.
+        header = re.search(
+            rf"^## Plugin: {re.escape(plugin)} \((\d+) skills?\)$",
+            text,
+            re.MULTILINE,
+        )
+        if not header:
+            fail(f"{rel} missing '## Plugin: {plugin} (N skills)' header")
+        if int(header.group(1)) != len(actual):
+            fail(
+                f"{rel} header count stale for {plugin}: "
+                f"says {header.group(1)}, disk has {len(actual)}"
+            )
+
+
 def validate_mirrors() -> None:
     canonical = sorted(
         path.parent.name
@@ -207,9 +265,10 @@ def main() -> None:
     validate_json_files()
     validate_versions()
     validate_skills()
+    validate_catalog()
     validate_mirrors()
     validate_claude_tests()
-    print("[PASS] repository metadata, skills, commands, versions, and mirrors are valid")
+    print("[PASS] repository metadata, skills, commands, versions, catalog, and mirrors are valid")
 
 
 if __name__ == "__main__":

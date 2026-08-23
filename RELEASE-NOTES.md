@@ -2,6 +2,31 @@
 
 Newest first.
 
+## 5.13.1 — validate the skill catalog
+
+### Fixed
+
+- **`skill-catalog.md` was never machine-validated.** `using-srepowers` loads
+  it to route work, so a missing row makes a skill invisible to the router and
+  a stale row advertises one that does not exist — but `validate-repo.py`
+  checked skill dirs, command wrappers, mirrors, versions and the README counts
+  while never opening the catalog. Confirmed by inserting a row for a
+  nonexistent skill and watching the validator pass.
+
+  New `validate_catalog()` asserts row membership in both directions (no
+  missing rows, no rows for skills that do not exist, no duplicates) and that
+  every `## Plugin: <name> (N skills)` header matches disk. It caught real
+  drift on its first run: the core header read `33 skills` while carrying 34.
+
+  All four failure modes were adversarially verified to fail — nonexistent row,
+  deleted row, wrong header count, missing header.
+
+- Docs claimed **18 version sites across 11 manifests**; the real figure is
+  **22 across 13**, per the validator's own `--show-versions`. Corrected in
+  `CONTRIBUTING.md` (twice) and `docs/testing.md`.
+- `CONTRIBUTING.md` said adding a skill touches five places, then named the
+  catalog separately in prose. It is six places, now listed in the block.
+
 ## 5.13.0 — verification-guardrails: mechanical enforcement for lying gates
 
 New `srepowers-core:verification-guardrails` skill (core 33 → 34) and two hooks.
