@@ -80,7 +80,8 @@ than a tool — on a non-RHEL host they simply never fire.
 ## How it ships
 
 `block-lying-gates` is **bundled and active on install**. There is no settings
-file to edit.
+file to edit — but "on install" is load-bearing: the guard travels with the
+plugin, so a stale or absent marketplace has no guard. See Limitations.
 
 - Script: `plugins/srepowers-core/hooks/block-lying-gates` (extensionless,
   dispatched cross-platform via `run-hook.cmd`, same wrapper as the SessionStart
@@ -186,6 +187,20 @@ capture-and-test form the rule tells you to write.
 
 ## Limitations
 
+- **The guard lives in the installed marketplace, not in your dotfiles — and its
+  absence is silent.** A fresh machine, a new `CLAUDE_CONFIG_DIR`, or a
+  marketplace clone predating the release that added it has no
+  `block-lying-gates` at all, and nothing announces that. Every other limitation
+  below degrades a guard that is at least present; this one removes it. Verify:
+
+  ```bash
+  M="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/marketplaces/srepowers-marketplace"
+  grep -c block-lying-gates "$M/plugins/srepowers-core/hooks/hooks.json"   # want 1
+  ```
+
+  A `0` (or a missing path) means unguarded — refresh with `/plugin` → update
+  the marketplace, then re-run. Check this after switching `CLAUDE_CONFIG_DIR`;
+  each config dir carries its own marketplace clone at its own revision.
 - Matches the **command string** with regexes; an obfuscated command (aliases,
   variable-built strings, `eval`) can evade it. A safety net, not a sandbox.
 - Requires `jq`; without it the hook fails open (allows), so on minimal hosts
