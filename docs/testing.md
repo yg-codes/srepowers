@@ -17,7 +17,8 @@ CI runs everything except the model-dependent suite.
 scripts/validate-repo.py         packaging, skills, mirrors, version lockstep
 scripts/lint-shell.sh            shellcheck + shfmt + syntax across shell files
 
-tests/hooks/                     SessionStart hook output shapes (offline)
+tests/hooks/                     hook behavior: SessionStart output shapes,
+                                 PreToolUse block/allow matrices (offline)
 tests/shell-lint/                tests for the linter itself (offline)
 tests/codex/                     Codex manifest and hook invariants (offline)
 tests/claude-code/               per-skill behavior suite (needs the `claude` CLI;
@@ -30,7 +31,8 @@ tests/verify-skills.md           manual verification walkthrough
 ```bash
 python3 scripts/validate-repo.py
 bash scripts/lint-shell.sh --all --strict
-bash tests/hooks/test-session-start.sh
+for t in tests/hooks/test-*.sh; do bash "$t"; done
+python3 tests/hooks/test-block-unsourced-claims.py
 bash tests/shell-lint/test-lint-shell.sh
 bash tests/codex/run-skill-tests.sh
 bash tests/claude-code/run-skill-tests.sh   # slow, needs `claude` on PATH;
@@ -89,6 +91,28 @@ session. If it breaks, no skill ever auto-triggers, and the failure is silent.
 - The output is valid JSON with no leaked heredoc terminator
 - The hook uses `printf`, not `cat <<` — a regression guard for the bash 5.3+
   hang ([upstream #571](https://github.com/obra/superpowers/issues/571))
+
+The two PreToolUse guards each assert a block/allow matrix — feed a
+PreToolUse-shaped event on stdin, assert exit 2 (deny) or 0 (allow), plus
+fail-open cases and a `run-hook.cmd` dispatch case:
+
+- `test-block-dangerous-git.sh` — destructive git commands
+- `test-block-lying-gates.sh` — shell idioms that make a verification gate lie
+
+For both, **the allow-cases are the load-bearing half.** Every pattern is one
+character from banning the correct form it prescribes: an earlier `comm` rule
+blocked exactly the capture-and-test idiom the rule recommends, and an earlier
+short-flag rule blocked `git push -u origin fix/my-bugfix` because `-bugf`
+matched. Add allow-cases whenever you add a pattern.
+
+`test-block-unsourced-claims.py` covers the **opt-in** Stop hook (shipped but
+wired into no hooks.json). It is weighted toward false positives, because a
+Stop-hook false positive stops a turn from finishing at all. Its "REAL TEXT
+regression guard" section holds verbatim messages — three of them genuine false
+positives found by running the hook over 140 real session messages.
+
+CI globs `tests/hooks/test-*.sh` rather than naming scripts individually; the
+Python suite gets its own step.
 
 ### `tests/codex/`
 

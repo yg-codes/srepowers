@@ -2,6 +2,44 @@
 
 Newest first.
 
+## 5.13.0 — verification-guardrails: mechanical enforcement for lying gates
+
+New `srepowers-core:verification-guardrails` skill (core 33 → 34) and two hooks.
+The advisory layer already existed; the record showed it did not self-apply —
+the `PIPESTATUS` rule was written into a runbook template's own conventions
+section and violated three steps later in the same file.
+
+### Added
+
+- **`block-lying-gates` (PreToolUse/Bash, active on install).** Blocks seven
+  shell idioms that make a verification gate lie, in both directions — gates
+  that **cannot fail** (`comm … && echo PASS`, `$?` read after a pipe, an
+  unprivileged glob handed to a privileged reader, a `grep -v`-on-errors
+  denylist) and gates that **cannot pass** (a trailing-slash pointer grep, an
+  exact-string grep on column-aligned output, `is-active | grep active`
+  matching `activating`). Each denial names the fix, not just the ban. Fails
+  open on malformed input or missing `jq`.
+
+- **`block-unsourced-claims` (Stop) — shipped but wired into no hooks.json.**
+  Blocks a final message that asserts system state when the turn contains no
+  tool call that could have established it, covering both negative claims
+  ("the apply never ran") and perfect-tense mutations ("I committed"). Enable
+  it yourself via the snippet in the skill.
+
+  This is a deliberate departure from the `git-guardrails` precedent, not an
+  oversight: a denied Bash call costs one retry, while a Stop false positive
+  stops the turn from finishing at all. The blast radius is asymmetric, so the
+  consent model is too.
+
+### Fixed
+
+- **`tests/hooks/test-block-dangerous-git.sh` never ran in CI.** The workflow
+  named `test-session-start.sh` explicitly with no glob, so the git guard's
+  41-case matrix had been dead since 5.8.0. CI now globs
+  `tests/hooks/test-*.sh`, with a separate step for the Python suite.
+- `CLAUDE.md` was stale — it advertised v5.9.0 / 32 core skills and omitted
+  `ops-brief`. Corrected and reconciled against disk.
+
 ## 5.12.1 — puppet-fact-query accuracy fixes
 
 Version-only bump for the other four plugins; the change is in
