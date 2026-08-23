@@ -9,24 +9,59 @@ description: "Use when starting any infrastructure operation that needs design b
 
 Help turn infrastructure operation ideas into fully formed designs through collaborative dialogue.
 
-Start by understanding the current infrastructure state, then ask questions one at a time to refine the operation. Once you understand what you're executing, present the design in small sections (200-300 words), checking after each section whether it looks right so far.
+Start by classifying how much process the operation needs, then work through your path: understand the infrastructure state, refine the operation, present a design, and get the operator's approval.
 
 **Announce at start:** "I'm using the brainstorming-operations skill to design this infrastructure operation."
 
 **Save designs to:** `docs/plans/YYYY-MM-DD-<operation-name>-design.md`
 
 <HARD-GATE>
-Do NOT execute any operation, run any kubectl/terraform commands, or make any infrastructure changes until you have presented a design and the user has approved it. This applies to EVERY operation regardless of perceived simplicity.
+Do NOT execute any operation, run any mutating command, or make any infrastructure change until you have told the operator what you intend and they have approved it. This applies to EVERY operation on EVERY path below — the ceremony scales with the operation; the approval gate never does.
 </HARD-GATE>
 
-## Anti-Pattern: "This Is Too Simple To Need A Design"
+## Three Paths
 
-Every operation goes through this process. A single config tweak, a one-line Hiera change, "just restart the service", a routine cert renewal — all of them. "Simple" operations are where unexamined assumptions cause the most damage: the config tweak that restarts a pod without a PodDisruptionBudget, the "just restart" that clears a queue you needed, the cert renewal that breaks a pinned client. The design can be short (a few sentences for a genuinely low-risk operation), but you MUST present it — including the rollback and verification — and get approval.
+Before your first question, classify the request and say the classification out loud — "this is read-only, so I'll state the probe and run it rather than write a design doc" — so the operator can override it:
+
+- **Probe** — a **read-only** investigation whose output is an answer, not a change: "is the cert expiring", "which hosts are on 9.4", "why is p99 up". State what you will read and how, in 2-3 sentences, get a nod, then find out. No design doc, no plan file. Report findings as a recommendation. A probe is defined by *reading only* — the moment a diagnostic step would mutate anything (a restart "to see if it helps", a cache flush, a test write), it is no longer a probe: stop and re-classify.
+- **Bounded** — a **single mutating change to infrastructure that already exists**, with a rollback you can write in one command and a blast radius of one host or one namespace: a Hiera value, one DNS record, one manifest field. Understanding the *kind* of system is not enough — bounded means the thing you are changing is already there to read, and you have read it. Ask the clarifying questions that matter, present a short design IN CHAT (a few sentences to a few short paragraphs) **including the rollback and the verification**, and STOP. Execution starts only after the operator says yes — a bounded operation's approval is as hard a gate as an architectural one. No design doc, no plan file.
+- **Architectural** — new systems, fleet-wide or multi-host changes, anything touching a quorum, a VIP, or a shared dependency; anything whose rollback takes more than a command or two; anything on production. Follow the full process: questions, approaches, sectioned design, written design doc, then `srepowers-core:writing-operation-plans`.
+
+When in doubt between two paths, take the heavier one. **The ratchet is one-way:** hidden complexity discovered mid-operation upgrades the path — stop, say so, and step up. Nothing downgrades mid-operation. Two ops-specific forced upgrades, regardless of how small the change looks:
+
+- **Multi-host, or a shared dependency** (quorum member, keepalived pair, shared Hiera key, a VIP) → architectural. Correctness lives *between* the hosts, not in any one change.
+- **A rollback you cannot state in one or two commands** → architectural. If you cannot write the undo within about ten seconds, the blast radius is not understood yet.
+
+## Anti-Pattern: "Too Simple To Need Approval"
+
+Every path ends with the operator approving your intent before execution. A single config tweak, a one-line Hiera change, "just restart the service", a routine cert renewal — the design may be two sentences in chat, but you MUST present it and get approval. "Simple" operations are where unexamined assumptions cause the most damage: the config tweak that restarts a pod without a PodDisruptionBudget, the "just restart" that clears a queue you needed, the cert renewal that breaks a pinned client. What scales with simplicity is the artifact, never the approval — and never the rollback or the verification, which a bounded design states just as explicitly as an architectural one.
+
+## Red Flags
+
+| Thought | Reality |
+|---------|---------|
+| "This is too simple to need a design" | Simple means a short design, not no design. Two sentences plus rollback and verification, then approval. |
+| "I'll call it bounded and skip the design doc" | Reaching for a label to skip work IS the doubt — take the heavier path. |
+| "It's bounded and obvious — I'll start while they read it" | The gate is the approval, not the design's length. Present, then stop until you hear yes. |
+| "I know this kind of cluster, so it's bounded" | Bounded measures the live system, not your familiarity. Unread state is architectural. |
+| "It's one command per host, so it's still bounded" | Multi-host is architectural. Two correct single-host changes take down a pair. |
+| "The probe showed the fix, so I'll just apply it" | A probe's output is an answer. Applying it is a new operation — classify it. |
+| "A restart is just a diagnostic step" | A restart mutates. That is not a probe; re-classify before running it. |
+| "It grew, but I'm almost done — no need to re-classify" | Hidden complexity upgrades the path mid-operation. Stop and say so. |
+| "They approved the noop, so the apply is approved too" | Each action gets its own approval. An apply approval never carries to a reboot. |
 
 ## Process Flow
 
 ```dot
 digraph brainstorming {
+    "Classify: probe / bounded / architectural" [shape=diamond];
+    "State the read plan (2-3 sentences)" [shape=box];
+    "Ask clarifying questions (bounded)" [shape=box];
+    "Present short design in chat\n(incl. rollback + verification)" [shape=box];
+    "Operator approves?" [shape=diamond];
+    "Investigate read-only; report recommendation" [shape=doublecircle];
+    "Execute via TDO (no plan doc)" [shape=doublecircle];
+    "Hidden complexity / multi-host? Upgrade path" [shape=box];
     "Explore infrastructure context" [shape=box];
     "Ask clarifying questions" [shape=box];
     "Propose 2-3 approaches" [shape=box];
@@ -38,6 +73,15 @@ digraph brainstorming {
     "User reviews design?" [shape=diamond];
     "Invoke writing-operation-plans skill" [shape=doublecircle];
 
+    "Classify: probe / bounded / architectural" -> "State the read plan (2-3 sentences)" [label="probe"];
+    "Classify: probe / bounded / architectural" -> "Ask clarifying questions (bounded)" [label="bounded"];
+    "Classify: probe / bounded / architectural" -> "Explore infrastructure context" [label="architectural"];
+    "State the read plan (2-3 sentences)" -> "Operator approves?";
+    "Ask clarifying questions (bounded)" -> "Present short design in chat\n(incl. rollback + verification)";
+    "Present short design in chat\n(incl. rollback + verification)" -> "Operator approves?";
+    "Operator approves?" -> "Investigate read-only; report recommendation" [label="probe: yes"];
+    "Operator approves?" -> "Execute via TDO (no plan doc)" [label="bounded: yes"];
+    "Hidden complexity / multi-host? Upgrade path" -> "Classify: probe / bounded / architectural";
     "Explore infrastructure context" -> "Ask clarifying questions";
     "Ask clarifying questions" -> "Propose 2-3 approaches";
     "Propose 2-3 approaches" -> "Present design sections";
@@ -53,12 +97,26 @@ digraph brainstorming {
 }
 ```
 
-**The terminal state is invoking writing-operation-plans.** Do NOT invoke test-driven-operation, subagent-driven-operation, or any other execution skill. The ONLY skill you invoke after brainstorming is writing-operation-plans.
+**Terminal states are path-bound.** Architectural: the ONLY skill you invoke after brainstorming is `srepowers-core:writing-operation-plans` — never test-driven-operation, subagent-driven-operation, or any other execution skill. Bounded: after approval, execution proceeds directly through `srepowers-core:test-driven-operation`; no design doc, no plan file. Probe: the terminal state is a reported recommendation.
 
 ## Checklist
 
-You MUST create a task for each of these items and complete them in order:
+Classify first, announce the path, then create a task for each item on your path and complete them in order.
 
+**Probe:**
+1. **State the read plan** — what you will read, with what commands, in 2-3 sentences
+2. **Get approval** — a nod is enough
+3. **Investigate** — read-only throughout; if a step would mutate, stop and re-classify
+4. **Report findings** — a recommendation, with the evidence you read
+
+**Bounded:**
+1. **Read the live state you are about to change** — the current value, the resource as it exists now
+2. **Ask clarifying questions** — one at a time, the ones that matter
+3. **Present short design in chat** — the change, the blast radius, the rollback command, the verification
+4. **Get approval** — STOP and wait for an explicit yes; presenting the design and starting in the same breath is skipping the gate
+5. **Execute** — via `srepowers-core:test-driven-operation`; no plan document
+
+**Architectural:**
 1. **Explore infrastructure context** — current state (kubectl/terraform/configs), recent changes, known issues
 2. **Ask clarifying questions** — one at a time; understand purpose, scope, constraints, risk level
 3. **Propose 2-3 approaches** — with trade-offs (downtime, rollback complexity, verification) and your recommendation
@@ -69,6 +127,8 @@ You MUST create a task for each of these items and complete them in order:
 8. **Transition to planning** — invoke writing-operation-plans skill to create the execution plan
 
 ## The Process
+
+The subsections below serve the bounded and architectural paths (a probe stops at "state the read plan, get a nod"). Sections from **Exploring approaches** onward are architectural-path depth — for bounded work, reading the live state plus a few questions plus a short in-chat design (change, blast radius, rollback, verification) is the whole process.
 
 **Understanding the operation:**
 - Check current infrastructure state (kubectl, configs, recent changes)
@@ -86,7 +146,7 @@ You MUST create a task for each of these items and complete them in order:
 - Ask after each section whether it looks right
 - Cover: current state, desired state, operation steps, verification commands, rollback plan, risk assessment
 
-## Design Document Structure
+## Design Document Structure (architectural path)
 
 | Section | What to Cover |
 |---------|---------------|

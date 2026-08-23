@@ -17,7 +17,20 @@ Execute infrastructure operation plan by dispatching fresh subagent per task, wi
 
 **Narration:** between tool calls, narrate at most one short line — the ledger and the tool results carry the record.
 
-**Continuous execution:** Do not pause to check in between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are: a `BLOCKED`/`R4` status you cannot resolve, an explicit production/approval gate the plan declares, ambiguity that genuinely prevents progress, or all tasks complete. "Should I continue?" prompts waste the operator's time — you were asked to execute the plan, so execute it (respecting any STOP gate the plan marks).
+**Continuous execution:** Do not pause to check in between tasks. Execute all tasks from the plan without stopping. The only reasons to stop are the six named below, or all tasks complete. "Should I continue?" prompts waste the operator's time — you were asked to execute the plan, so execute it (respecting any STOP gate the plan marks).
+
+**Rulings, not stalls — inside the approved envelope.** A running plan does not wait on a human for questions the plan and the spec can settle. Reviewer findings that contest plan text, a plan that argues with itself, an ambiguity in a task's wording, a fix-round cap you would have asked to exceed — decide them. The spec is the binding authority, the plan is its argument, and your judgment settles what neither answers. Record every decision in the ledger as `Ruling: <what you decided> — <why> — <what it costs if wrong>`, and keep going. A wrong ruling on a reversible question costs rework the operator can see and undo; a session parked on it costs their whole day.
+
+**Six things stop you, and only these.** The first four are the general set; the last two exist because this skill mutates infrastructure, where a wrong ruling is not always rework.
+
+1. An irreversible or destructive operation.
+2. A security-sensitive action.
+3. A side effect outside this worktree that norms say you ask about first — a merge, a push to a shared branch, a publish, a change to a live system beyond the plan's declared target.
+4. A plan so broken that every path forward is a guess.
+5. **Any mutating infrastructure step whose approval you do not already hold.** A subagent cannot ask for approval mid-flight, so an unapproved mutating step is either pre-approved in the dispatch prompt or stays with you. An apply approval never carries to a reboot, a restart, or a second host.
+6. **Any ruling that would change blast radius, the rollback path, or a verification gate.** Widening scope, dropping a rollback, relaxing a gate, or re-authoring a runbook step is not inside the envelope the operator approved — no matter how confident the reasoning. Rule freely on *how* to satisfy the plan; never on *how much* it may touch or *whether* the undo survives.
+
+For those six, stop and ask. Everything else gets a ruling.
 
 ## When to Use
 
@@ -47,12 +60,16 @@ digraph when_to_use {
 
 ## Pre-Flight Plan Review
 
-Before dispatching Task 1, scan the plan once for conflicts:
+Read the plan once, note its context and Global Constraints, and create a todo per task. **If the plan names a Spec, read that too:** the spec is the authority the plan argues from, and conflicts inside the plan resolve against it. A plan with no reachable spec gets a ledger note saying so — rulings made without one are provisional.
+
+Before dispatching Task 1, scan the plan once for conflicts, writing down what you checked as you check it:
 
 - tasks that contradict each other or the plan's Global Constraints
 - anything the plan explicitly mandates that the review rubric would treat as a defect (a verification that checks nothing, a task with no rollback)
 
-Present everything you find to the human as **one batched question** — each finding beside the plan text that mandates it, asking which governs — before execution begins, not one interrupt per discovery mid-plan. If the scan is clean, proceed without comment. The task review loop remains the net for conflicts that only emerge during execution.
+**The scan's output is a table, not a verdict.** One row for every pair of tasks that share a host, a resource, a repo path, or an interface: the two tasks, what one produces against what the other consumes, and what you found. One row for every task: whether its own text agrees with itself — the verification it specifies against the change it specifies, the resources it creates against the resources it later touches, the rollback it declares against the change it makes. "The scan is clean" without those rows is not a scan you ran.
+
+Write the table to the ledger. Rule on everything you find before execution begins — each finding against the plan text that mandates it — and record each ruling beside its row. A finding that trips a stop class (a missing rollback, an undeclared blast radius, an unapproved mutating step) is not yours to rule on: batch those and present them to the operator before Task 1. If the scan is clean, proceed without comment. The task review loop remains the net for conflicts that only emerge during execution.
 
 ## Plan Parsing
 
@@ -121,6 +138,10 @@ digraph process {
         "Task reviewer reports spec ✅ and quality approved?" [shape=diamond];
         "Resolve any ⚠️ cannot-verify items yourself" [shape=box];
         "Dispatch operator subagent to fix Critical/Important findings" [shape=box];
+        "Finding conflicts with plan text?" [shape=diamond];
+        "Trips a stop class?" [shape=diamond];
+        "Rule on the conflict, ledger the ruling" [shape=box];
+        "STOP: present to operator" [shape=box];
         "Mark task complete in TodoWrite" [shape=box];
     }
 
@@ -141,7 +162,12 @@ digraph process {
     "Operator subagent executes operations, verifies, commits, self-reviews" -> "Generate review package (./scripts/review-package PLAN_FILE BASE HEAD)";
     "Generate review package (./scripts/review-package PLAN_FILE BASE HEAD)" -> "Dispatch task reviewer subagent (./task-reviewer-prompt.md)";
     "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" -> "Task reviewer reports spec ✅ and quality approved?";
-    "Task reviewer reports spec ✅ and quality approved?" -> "Dispatch operator subagent to fix Critical/Important findings" [label="no"];
+    "Task reviewer reports spec ✅ and quality approved?" -> "Finding conflicts with plan text?" [label="no"];
+    "Finding conflicts with plan text?" -> "Trips a stop class?" [label="yes"];
+    "Finding conflicts with plan text?" -> "Dispatch operator subagent to fix Critical/Important findings" [label="no"];
+    "Trips a stop class?" -> "STOP: present to operator" [label="yes"];
+    "Trips a stop class?" -> "Rule on the conflict, ledger the ruling" [label="no"];
+    "Rule on the conflict, ledger the ruling" -> "Dispatch operator subagent to fix Critical/Important findings";
     "Dispatch operator subagent to fix Critical/Important findings" -> "Dispatch task reviewer subagent (./task-reviewer-prompt.md)" [label="re-review"];
     "Task reviewer reports spec ✅ and quality approved?" -> "Resolve any ⚠️ cannot-verify items yourself" [label="yes"];
     "Resolve any ⚠️ cannot-verify items yourself" -> "Dispatch operator subagent to fix Critical/Important findings" [label="real gap found"];
@@ -184,7 +210,8 @@ Operator subagents report one of four statuses. Handle each appropriately:
 1. If it's a context problem, provide more context and re-dispatch with the same model
 2. If the task requires more reasoning, re-dispatch with a more capable model
 3. If the task is too large, break it into smaller pieces
-4. If the operation requires human approval (e.g., production changes), escalate to the human
+4. If the operation requires human approval (e.g., production changes), escalate to the human — this is stop class 5, not a ruling
+5. If the plan itself is wrong in a way no stop class covers, rule on the correction, ledger it, and re-dispatch with the ruling carried in the dispatch
 
 **Never** ignore an escalation or force the same model to retry without changes. If the operator said it's stuck, something needs to change.
 
@@ -195,7 +222,7 @@ The loop triggers when the review reports spec ❌, any Critical or Important fi
 Before the loop starts, two routes leave it immediately:
 
 - Record Minor findings in the ledger as you go (`Task <N>: minor (deferred): <one-liner>`), and point the final whole-operation review at that list so it can triage which must be fixed before merge. A roll-up nobody reads is a silent discard. Minor findings never enter the loop.
-- A finding labeled plan-mandated — or any finding that conflicts with what the plan's text requires — is the human's decision: present the finding and the plan text, ask which governs. Do not dismiss the finding because the plan mandates it, and do not dispatch a fix that contradicts the plan without asking.
+- A finding labeled plan-mandated — or any finding that conflicts with what the plan's text requires — is yours to rule on: weigh the finding against the plan text, decide with the spec as the binding authority, and ledger the ruling before you act on it. Do not dismiss the finding because the plan mandates it, and do not dispatch a fix that contradicts the plan without a recorded ruling. If the ruling would change blast radius, the rollback path, or a verification gate, it is stop class 6 — present it instead.
 
 Everything else enters the loop. A fix round is one fix dispatch plus one scoped re-review. **Five rounds maximum per task.**
 
@@ -214,9 +241,9 @@ Never fix findings yourself in the controller session — your context stays cle
 
 **The breaker.** When round 5's re-review still leaves findings open, stop dispatching. Adjudicate each open finding yourself — you hold the plan and the cross-task context the reviewer lacks:
 
-- **The reviewer is wrong, or the point is contestable:** park it — `Task <N>: parked — <finding> — ruling: <why the change stands>`. The final review sees both sides.
+- **The reviewer is wrong, or the point is contestable:** park it — `Task <N>: parked — <finding> — Ruling: <why the change stands>`. The final review sees both sides.
 - **Real, but nothing downstream builds on it:** park it the same way, with a ruling that says it's real and deferred.
-- **Real and load-bearing** — a later task builds on it, or it reveals a plan defect: STOP. Append `Task <N>: BLOCKED — <reason>` and report to your human partner with the finding, the plan text it collides with, and the fix history. Parking a structural failure lets every dependent task build on it and hands the final review a problem it cannot fix either.
+- **Real and load-bearing** — a later task builds on it, or it reveals a plan defect: rule on the smallest change that unblocks the dependent work, ledger it as `Task <N>: Ruling: <finding> — <what you decided and why>`, and carry it into the next task's dispatch. Parking a structural failure silently lets every dependent task build on it and hands the final review a problem it cannot fix either. Stop only when the defect trips a stop class, or leaves every path forward a guess — then append `Task <N>: BLOCKED — <reason>` and report with the finding, the plan text it collides with, and the fix history.
 
 Adjudicate only at the cap. Adjudicating earlier to end a loop is pre-judging with a different name. Every adjudication is a ledger entry — a silent discard is forbidden.
 
@@ -242,7 +269,7 @@ When an operator encounters unexpected situations during execution, classify the
 1. Operator classifies the deviation as R1-R4
 2. R1-R3: Operator attempts fix (max 3 retries). If still failing after 3 attempts, escalate to R4
 3. R4: Operator stops and reports: what was expected, what was found, what change is needed, rollback status
-4. Human decides: approve the change, modify the approach, or rollback
+4. **You classify the returned R4, because the operator could not ask.** If the change it needs trips a stop class — an unapproved mutating step, a wider blast radius, a lost rollback, a relaxed gate — present it to the operator and wait. Otherwise rule on it, ledger the ruling, and re-dispatch with the ruling carried in the dispatch. An R4 is a report, not automatically an escalation; what makes it one is the stop-class test, not the label.
 
 **Scope boundary:** Operators must NOT auto-fix pre-existing issues unrelated to their assigned task. If an unrelated issue blocks execution, classify as R4.
 
@@ -278,8 +305,20 @@ Per-task reviews are task-scoped gates. The broad review happens once, at the fi
 - The **global-constraints block is the reviewer's attention lens.** Copy the binding requirements verbatim from the plan's Global Constraints section or the spec: exact values, exact formats, and the stated relationships between components ("same labels as X", "matches namespace Y"). The reviewer template already carries the process rules — the constraints block is for what THIS operation's spec demands.
 - **Hand the reviewer its diff as a file:** run `scripts/review-package PLAN_FILE BASE HEAD` and pass the printed path. The diff never enters your own context, and the reviewer sees the commit list, stat summary, and full diff in one Read. Use the recorded BASE — never `HEAD~1`.
 - A dispatch prompt describes one task, not the session's history. Do not paste accumulated prior-task summaries into later dispatches — a fresh subagent needs its task brief, the interfaces it touches, and the global constraints. Nothing else.
-- A finding labeled plan-mandated — or any finding that conflicts with what the plan's text requires — is the human's decision: present the finding and the plan text, ask which governs. Do not dismiss the finding because the plan mandates it, and do not dispatch a fix that contradicts the plan without asking.
+- **The dispatch carries the no-subagents contract** (it is in the operator and reviewer templates): a dispatched subagent never dispatches subagents — not helpers, and never a reviewer. Review arrives from you, after the report. Every reviewer a worker spawns duplicates the task review you dispatch anyway — a full extra review seat per task — and its verdict counts for nothing. It also breaks the approval chain: a sub-subagent inherits no bound from the prompt you wrote.
+- **The dispatch carries its negative scope.** Name the one target it may touch, the approved action, and the forbidden list — the adjacent destructive actions it must not take (reboot, restart, apply to a sibling host, hunt for a credential). A prompt that states only the goal leaves every adjacent mutation implicitly available.
+- A finding labeled plan-mandated — or any finding that conflicts with what the plan's text requires — is yours to rule on with the spec as the binding authority, and the ruling goes in the ledger before you act on it. Do not dismiss the finding because the plan mandates it, and do not dispatch a fix that contradicts the plan without a recorded ruling. If the ruling would change blast radius, the rollback path, or a verification gate, present it instead (stop class 6).
 - The final whole-operation review uses a different template from the per-task ones: fill `srepowers-core:requesting-review-sre`'s `code-reviewer.md`, which judges production readiness across the whole branch. It gets a package too: run `scripts/review-package PLAN_FILE MERGE_BASE HEAD` (MERGE_BASE = the commit the branch started from, e.g. `git merge-base main HEAD`) and include the printed path. If the final review returns findings, dispatch **ONE** fix subagent with the complete findings list — not one fixer per finding (per-finding fixers each rebuild context and re-run checks).
+
+## Batching and Waiting
+
+**Batch small same-shape work.** When the plan lists several tasks that are each a small, independent change of the same kind — the same one-line edit, the same annotation added across manifests, the same read-only probe repeated per host — do not dispatch one subagent per task. Compose ONE dispatch brief listing every target and its change, send the whole batch to a single subagent, and review its diff as one unit. Reserve one-dispatch-per-task for work that needs its own judgment, its own verification, or its own review surface.
+
+Two limits specific to infrastructure. A batch is delegable only when its members are genuinely independent: hosts sharing a quorum, a VIP, or a service pairing are sequential in your own thread, never batched to one subagent (nor split across parallel ones). And the same command across N hosts with no per-host judgment is not subagent work at all — that is `parallel-ssh`, which costs no context.
+
+**Waiting on dispatched subagents:** never poll a wait interface with short timeouts, and never sit in one silent, open-ended wait either. While you have local work — ledger updates, packaging the next review, reading reports — keep working; child results arrive on their own. When you are genuinely idle, wait in bounded stretches (five to ten minutes, where your platform allows), and between stretches post one line of status and reconcile your live children: list them, and chase any that finished without reporting. A bounded stretch keeps nearly all of a long wait's efficiency while guaranteeing a stuck or lost child is noticed within minutes, not at the end of the session.
+
+**Reconcile N-in against N-out.** Subagents share one session token budget, so exhausting it kills them together — a correlated failure, not the independent ones the fan-out was chosen for. Dispatched count must equal verdict count before you build any summary; a missing child is a silent partial that reads as full coverage. Do not re-dispatch as the recovery — replacements inherit the same limit. Finish the remainder inline, sequentially.
 
 ## File Handoffs
 
@@ -300,6 +339,12 @@ Conversation memory does not survive compaction. A controller that loses its pla
 - The ledger is your recovery map: the commits it names exist in git even when your context no longer remembers creating them. After compaction, trust the ledger and `git log` over your own recollection.
 - `git clean -fdx` will destroy the workspace (it's git-ignored scratch under `.srepowers/`); if that happens, recover from `git log`.
 - **Delete the workspace once the final review is clean.** Git history is the durable record; a workspace that outlives its plan is the stale-ledger hazard in waiting.
+
+## Finish
+
+**Before you delete anything, surface every ruling.** Collect every ledger line containing `Ruling:` — preflight rulings, parked findings, breaker adjudications, all of them — into your final message under "Rulings I made", in the order you made them, each with what it costs if wrong. The list is exhaustive: if the ledger holds a ruling, the list holds it. That list is the only place the decisions you took on the operator's behalf reach them — they read it and rework whatever you got wrong. A ruling that dies with the workspace was a decision made in secret, and in an ops context it is also an audit-trail gap: the plan file and the ticket are where the record belongs, not a deleted scratch directory. Append the ruling list to the plan file's evidence section before the workspace goes.
+
+Then use `srepowers-core:finishing-operation-branch`.
 
 ## Prompt Templates
 
@@ -379,6 +424,10 @@ send it back to the operator and re-review.
 - Re-dispatch a task the progress ledger already marks complete — check the ledger (and `git log`) after any compaction or resume
 - Ignore subagent questions (answer before letting them proceed)
 - Mark a task complete with unresolved ⚠️ cannot-verify items — resolve each yourself first
+- Accept a subagent's spawned reviewer as extra assurance — it is a duplicate seat on the same diff, and its verdict counts for nothing. Flag it as a defect
+- Rule your way past a stop class: an unapproved mutating step, a change to blast radius, a dropped rollback, or a relaxed verification gate is presented, never decided
+- Delete the workspace before the "Rulings I made" list has reached the operator and the plan file
+- Poll a wait interface with short timeouts, or report coverage without reconciling dispatched count against verdict count
 
 **Environment Context for Subagents:**
 - Subagents run in isolated contexts and don't inherit environment variables from parent session

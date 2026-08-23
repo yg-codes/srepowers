@@ -2,6 +2,125 @@
 
 Newest first.
 
+## 5.14.0 — upstream sync: superpowers v6.3.0
+
+Adopts the portable skill changes from [superpowers
+v6.3.0](https://github.com/obra/superpowers/releases). No new skills; no count
+changes. Upstream's harness work (Devin/Hermes plugin manifests, the
+`render-graphs.js` ESM rewrite, `bump-version.sh` rework) is deliberately not
+ported — srepowers has no equivalent targets.
+
+Surveyed alongside it: **mattpocock/skills** and **i-have-adhd**. Neither
+contributed a change this release. Details under "Surveyed, not adopted".
+
+### Added
+
+- **`brainstorming-operations` now classifies before it designs.** A
+  three-path router — **probe** (read-only investigation), **bounded** (one
+  mutating change to existing infrastructure, rollback statable in one
+  command, blast radius of one host or namespace), **architectural**
+  (everything else) — replaces the single heavyweight path. Ceremony scales
+  with the operation; the approval gate never does, and a bounded design still
+  states its rollback and verification explicitly.
+
+  Two ops-specific forced upgrades that have no upstream equivalent: **any
+  multi-host change or shared dependency** (quorum, VIP, shared Hiera key) is
+  architectural regardless of how small the edit looks, because correctness
+  lives between the hosts; and **a rollback you cannot state in one or two
+  commands** is architectural, because a rollback you cannot write in ten
+  seconds means the blast radius is not understood yet. The ratchet is one-way
+  — a probe whose next step would mutate is re-classified, never continued.
+
+- **`subagent-driven-operation`: rulings instead of stalls, inside a
+  six-class stop list.** The controller now decides plan-vs-finding conflicts,
+  self-contradicting plan text, and cap overruns itself, recording each as
+  `Ruling: <decision> — <why> — <cost if wrong>` in the ledger, rather than
+  parking the session on a question.
+
+  Upstream's four stop classes (irreversible, security-sensitive, side effects
+  outside the worktree, unresolvably broken plan) are **widened by two** for
+  infrastructure, where a wrong ruling is not always recoverable rework:
+  **(5)** any mutating step whose approval is not already held — a subagent
+  cannot ask mid-flight, and an apply approval never carries to a reboot; and
+  **(6)** any ruling that would change blast radius, the rollback path, or a
+  verification gate. Rule freely on *how* to satisfy the plan; never on *how
+  much* it may touch or *whether* the undo survives.
+
+- **The no-subagents contract, in all four dispatch templates**
+  (`operator-prompt`, `task-reviewer-prompt`, `re-review-prompt`, and
+  `requesting-review-sre`'s `code-reviewer`). A dispatched agent never
+  dispatches: every reviewer a worker spawns duplicates the review the
+  controller dispatches anyway, at full cost, and its verdict counts for
+  nothing. The ops-specific half of the argument is containment — the approval
+  and the forbidden list bind the agent you dispatched, not one it spawns, so a
+  sub-subagent can reach a host or a mutation the prompt forbade.
+
+- **Batching, bounded waiting, and N-in/N-out reconciliation** in
+  `subagent-driven-operation`. Same-shape small changes go out as one batched
+  dispatch reviewed as one unit; wait interfaces are never short-polled;
+  dispatched count must reconcile against verdict count before any summary,
+  since subagents share one token budget and therefore die together rather
+  than independently. Two ops carve-outs: hosts sharing a quorum, VIP, or
+  service pairing are never batched or parallelised, and the same command
+  across N hosts with no per-host judgment is `parallel-ssh` work, not subagent
+  work.
+
+- **A `Rulings I made` handoff at finish.** Every ledger line containing
+  `Ruling:` is collected into the final message and appended to the plan file
+  before the workspace is deleted. Upstream's reason is that a ruling dying
+  with the workspace is a decision made in secret; the ops reason is
+  additionally that it is an audit-trail gap, and the plan file is where the
+  record belongs.
+
+- **`writing-operation-plans` plans now carry a `spec:` pointer** in
+  frontmatter and in the prose header. The plan argues from the design, so the
+  design travels with it — `subagent-driven-operation` reads both, and resolves
+  intra-plan conflicts against the spec. A plan with no reachable spec gets a
+  ledger note saying its rulings are provisional.
+
+- **The pre-flight plan scan now produces a table, not a verdict.** One row
+  per pair of tasks sharing a host, resource, repo path, or interface; one row
+  per task for self-consistency (its verification against its change, its
+  rollback against its change). "The scan is clean" without those rows is not a
+  scan that was run. Findings that trip a stop class are batched to the
+  operator before Task 1 rather than ruled on.
+
+- **`task-reviewer-prompt`: illegible evidence is a gap to report, not
+  grounds to re-run.** Re-read the file at its stated path first; regenerating
+  evidence you failed to read is not verification. The ops rider is that the
+  "re-run" reached for reflexively may not be the read-only command assumed.
+  The same prompt now checks a batched dispatch target-by-target — a listed
+  host or file with no hunk and no evidence row is a Missing finding, because
+  that is exactly the silent partial that makes a batch summary read as full
+  coverage.
+
+### Changed
+
+- **`finishing-operation-branch`: a refused worktree removal is a question,
+  never a `--force`.** The refusal means files exist nowhere else — and in an
+  ops context those are frequently evidence captures, ledger entries, or host
+  output that git cannot reconstruct. The skill now prints
+  `git status --porcelain -uall` and offers commit / move / delete, with a
+  matching Red Flag.
+
+### Surveyed, not adopted
+
+- **mattpocock/skills** — the deltas touching skills srepowers carries are
+  cosmetic (an em-dash sweep, YAML description quoting). Two upstream fixes
+  were checked against this repo and found not to apply: no srepowers skill has
+  an unquoted-colon `description:` (all parse), and none instructs the agent to
+  call the Skill tool on a user-invoked skill — srepowers already phrases those
+  as "run `srepowers-swe:project-onboarding`". The `grilling` HR round-separator
+  fix does not apply either: srepowers' `grilling` asks one question at a time
+  rather than in rounds, so there is no multi-question round to separate.
+  `implement-spec` is upstream `in-progress`, 35 lines, and overlaps
+  `subagent-driven-operation` — not adopted.
+
+- **i-have-adhd** — changes since the `ops-brief` port are hook plumbing for
+  that project's own distribution (SessionStart timeout, Codex launcher
+  hardening) plus contributing docs. The rule content `ops-brief` carries is
+  unchanged upstream.
+
 ## 5.13.1 — validate the skill catalog
 
 ### Fixed

@@ -46,6 +46,16 @@ Subagent (general-purpose):
     `dig`, `curl` against a health endpoint) are fine when reading the code
     raises a specific doubt.
 
+    ## You Do Not Dispatch Subagents
+
+    Do all of this review yourself. Never spawn a subagent to review part
+    of the fix diff, and never spawn another reviewer for a second opinion.
+    This process already provides every review seat the work gets; a
+    reviewer you spawn duplicates one of them at full cost, and its verdict
+    counts for nothing. It is also unbounded — the read-only constraint
+    above binds you, not an agent you spawn. If the diff feels too large for
+    one pass, review it in passes yourself and say so in your report.
+
     ## Scope
 
     Your scope is the findings list and the fix diff. Verdict every finding.

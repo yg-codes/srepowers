@@ -57,6 +57,17 @@ Subagent (general-purpose):
     API GET. Never a live apply or a destructive action. If heavier validation
     seems warranted, recommend it rather than running it.
 
+    ## You Do Not Dispatch Subagents
+
+    Do all of this review yourself. Never spawn a subagent to review part of
+    the branch, and never spawn another reviewer for a second opinion. This
+    process already provides every review seat the work gets; a reviewer you
+    spawn duplicates one of them at full cost, and its verdict counts for
+    nothing. It is also unbounded — the read-only constraints above bind
+    you, not an agent you spawn, so a sub-subagent can reach a live system
+    you were told to leave alone. If the branch feels too large for one
+    pass, review it in passes yourself and say so in your report.
+
     ## What to Check
 
     **Plan alignment:**

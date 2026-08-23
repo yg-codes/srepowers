@@ -62,6 +62,17 @@ Subagent (general-purpose):
     Your review is read-only on this checkout. Do not mutate the working tree,
     the index, HEAD, branch state, or any live infrastructure in any way.
 
+    ## You Do Not Dispatch Subagents
+
+    Do all of this review yourself. Never spawn a subagent to review part
+    of the diff, and never spawn another reviewer for a second opinion.
+    This process already provides every review seat the work gets; a
+    reviewer you spawn duplicates one of them at full cost, and its
+    verdict counts for nothing. It is also unbounded — the read-only
+    constraint above binds you, not an agent you spawn. If the diff feels
+    too large for one pass, review it in passes yourself and say so in
+    your report.
+
     ## Do Not Trust the Report
 
     Treat the operator's report as unverified claims. It may be incomplete,
@@ -87,6 +98,15 @@ Subagent (general-purpose):
     Warnings or other noise in the operator's reported command output are
     findings — verification output should be pristine.
 
+    Evidence you cannot see is not evidence that doesn't exist. If the
+    report or its verification output looks truncated, or you cannot locate
+    the results it claims, re-read the file at its stated path — and if it
+    is genuinely missing or garbled, report that as a gap for the
+    controller. Re-running verifications to regenerate what you failed to
+    read is not verification; illegibility of the evidence is not
+    invalidation of it. On live infrastructure it is also a mutation risk:
+    the "re-run" you reach for may not be the read-only command you assume.
+
     ## Part 1: Spec Compliance
 
     Compare the diff against What Was Requested:
@@ -97,6 +117,14 @@ Subagent (general-purpose):
       requested; over-provisioning; scope creep
     - **Misunderstood:** right operation executed the wrong way, wrong problem
       solved, wrong environment/target
+
+    If the brief lists several targets each with its own change (a batched
+    dispatch), check the diff against that list target by target: every
+    listed file, host, or resource must have its corresponding hunk or
+    verification evidence. A listed target the diff never touches is a
+    Missing finding, no matter how clean the rest of the batch looks — and
+    on a per-host batch, a target with no evidence row is the silent
+    partial that makes a batch summary read as full coverage.
 
     If a requirement cannot be verified from this diff alone (it lives in
     unchanged config, live cluster/host state, or spans tasks), report it as a

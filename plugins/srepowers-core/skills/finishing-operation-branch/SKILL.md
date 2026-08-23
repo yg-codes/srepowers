@@ -232,6 +232,26 @@ git worktree remove "$WORKTREE_PATH"
 git worktree prune  # Self-healing: clear any stale registrations
 ```
 
+**If removal is refused** (`contains modified or untracked files`): the worktree holds files that exist nowhere else — uncommitted plan edits, evidence captures, ledger entries, host output. **Never `--force` on your own initiative.** In an ops context those files are frequently the only record of what a change did to a live system, and the audit trail is not reconstructible from git once they are gone. Show the operator what is at stake and ask:
+
+```bash
+git -C "$WORKTREE_PATH" status --porcelain -uall
+```
+
+```
+Worktree removal refused — these files were never committed:
+
+<file list>
+
+1. Commit them to <branch> before cleanup
+2. Move them into <main repo root>
+3. Delete them (unrecoverable)
+
+Which?
+```
+
+Carry out the choice, then remove the worktree.
+
 **Otherwise:** The harness owns this workspace (provenance check failed). Do NOT remove it. If your platform provides a workspace-exit tool (e.g., `ExitWorktree`), use it. Otherwise leave the workspace in place.
 
 **Detached HEAD:** No branch was created here and the workspace is externally managed — skip removal entirely.
@@ -275,6 +295,7 @@ git worktree prune  # Self-healing: clear any stale registrations
 - Clean up a worktree you didn't create (provenance check must pass)
 - Run `git worktree remove` from inside the worktree being removed
 - Remove a worktree before confirming the merge succeeded
+- Reach for `git worktree remove --force` after a refusal — the refusal means files exist only in that worktree, and `--force` destroys them permanently. Show the operator the list and ask
 
 **Always:**
 - Detect workspace state before presenting the menu

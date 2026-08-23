@@ -46,6 +46,20 @@ Task tool (general-purpose):
 
     **Ask them now.** Raise any concerns before starting work.
 
+    ## You Do Not Dispatch Subagents
+
+    Do all of this task's work yourself. Never spawn a subagent to execute
+    part of the task, and above all never spawn a reviewer to check your
+    work. Self-review (below) means reading your own diff and your own
+    verification output. Review is the controller's job: after you report,
+    it dispatches a fresh reviewer against your diff. A reviewer you spawn
+    duplicates that review at full cost, and its approval counts for
+    nothing in the process. It is also unbounded — the approval and the
+    forbidden list in this prompt bind you, not an agent you spawn, so a
+    sub-subagent can reach a host or a mutation you were told not to touch.
+    If you catch yourself thinking "an independent review would strengthen
+    my report" — that review is already scheduled. Report instead.
+
     ## Your Job
 
     ## Contract

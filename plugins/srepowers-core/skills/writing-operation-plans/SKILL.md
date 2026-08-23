@@ -26,6 +26,7 @@ Write comprehensive infrastructure operation plans assuming the operator has zer
 # Plan Frontmatter (machine-parseable, used by execution skills)
 ticket: "[TICKET-ID or empty]"  # Issue tracker ID (e.g., INFRA-1234, PROJ-456)
 ticket_url: "[URL or empty]"    # Full tracker URL
+spec: "[path to the design doc this plan implements, or empty]"
 risk_level: "[low|medium|high]"
 risk_rationale: "[Why this risk level]"
 environment: "[sit|uat|prod|mgmt]"
@@ -40,6 +41,7 @@ status: "pending"               # pending | in_progress | completed | rolled_bac
 > **For Claude:** REQUIRED SUB-SKILL: Use srepowers-core:subagent-driven-operation to implement this plan task-by-task.
 
 **Goal:** [One sentence describing what this achieves]
+**Spec:** [path to the design doc this plan implements — the plan argues from the design, so the design travels with it; executors read both]
 **Risk Level:** [Low/Medium/High] — [rationale]
 **Rollback Plan:** [Brief rollback strategy]
 **Stakeholder Notification:** [Who to inform before/during/after]
