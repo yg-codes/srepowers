@@ -62,6 +62,13 @@ if grep -q '/home/' "$README"; then
     fail "staged README contains a local filesystem path"
 fi
 
+# Intro prose must not claim the edition ships an unshipped plugin
+if grep -qE 'it also ships an \*\*opt-in\*\* `srepowers-swe`' "$README"; then
+    fail "staged README intro claims the edition ships srepowers-swe"
+fi
+grep -q 'full distribution (not this edition) also includes' "$README" \
+    || fail "staged README intro lost the edition-neutral swe wording"
+
 echo "ok   install lines: core+infra only"
 echo "ok   no /home/ paths"
 echo "PASS: staged README edition-conditioning regression"

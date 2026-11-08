@@ -1,6 +1,6 @@
 # Release Notes
 
-## 5.41.3 — SREPowers public edition
+## 5.41.4 — SREPowers public edition
 
 An edition of SREPowers, shipping the
 srepowers-core and srepowers-infra plugins.
