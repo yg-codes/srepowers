@@ -1,0 +1,130 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          # Full history + tags: validate-repo.py's release-tag gate reads
+          # `git tag -l` locally. The default depth-1 checkout has no tags,
+          # which would false-fail the gate on every run.
+          fetch-depth: 0
+
+      # The only third-party dependency in the repo, installed BEFORE every
+      # step that needs it: the metadata validator (YAML-parses skill
+      # frontmatter), the hook-python tests, the fixture linter, and the
+      # packet extractor. It ran after the validator once, which armed the
+      # frontmatter parse only via ubuntu's ambient PyYAML — the gate would
+      # have silently degraded to the regex that missed this defect class if
+      # the runner image ever dropped the preinstall.
+      - name: Install python dependencies
+        run: pip install pyyaml==6.0.3
+
+      - name: Validate repository metadata and skills
+        run: python3 scripts/validate-repo.py
+
+      - name: Validate Codex packaging mirrors
+        run: bash tests/codex/run-skill-tests.sh
+
+      # Glob rather than naming one script: test-block-dangerous-git.sh existed
+      # for four releases without ever running in CI because the step named
+      # test-session-start.sh explicitly.
+      - name: Test hooks (shell)
+        run: |
+          for t in tests/hooks/test-*.sh; do
+            echo "== $t"
+            bash "$t"
+          done
+
+      # Globbed for the same reason the shell step above is: naming one file
+      # left test_memory_lint.py unrun for a release, and a test that never
+      # runs is indistinguishable from one that passes.
+      - name: Test hooks (python)
+        run: |
+          shopt -s nullglob
+          found=0
+          for t in tests/hooks/test-*.py; do
+            echo "== $t"
+            python3 "$t"
+            found=$((found + 1))
+          done
+          [ "$found" -gt 0 ] || { echo "FAIL: no python hook tests found"; exit 1; }
+          echo "ran $found python hook test(s)"
+
+      # Every Python test suite a skill ships. Glob rather than naming each
+      # file: test_memory_lint.py was committed with 25 tests and left out of
+      # CI for a release, so a regression in it would have shipped green —
+      # the same defect the "Test hooks (shell)" step above was globbed to fix.
+      - name: Test skill scripts (python)
+        run: |
+          # CI runners ship no pandoc; install it so suites with a
+          # real-render test (md-to-html) run it instead of skipping —
+          # previously OK (skipped=1), the silent-skip class the globbed
+          # steps above exist to prevent.
+          sudo apt-get install -y pandoc
+          shopt -s nullglob
+          found=0
+          for t in plugins/*/skills/*/scripts/test_*.py; do
+            echo "== $t"
+            python3 -B "$t"
+            found=$((found + 1))
+          done
+          [ "$found" -gt 0 ] || { echo "FAIL: no skill test suites found"; exit 1; }
+          echo "ran $found skill test suite(s)"
+
+      - name: Lint the fixture store
+        run: python3 plugins/srepowers-core/skills/fixture-lint/scripts/fixture_lint.py
+
+      # Fast content-invariant tests for skills (tests/claude-code/test-*.sh).
+      # The suite is mixed: ~half are plain rg-based content checks needing no
+      # model, the rest call the claude CLI via run_claude (test-helpers.sh)
+      # and cannot run here. Discriminate on the helper, not a hand-kept list —
+      # a test left out of a list never runs, and a test that never runs is
+      # indistinguishable from one that passes.
+      - name: Test skills (content invariants)
+        run: |
+          # The content tests use rg, which is NOT preinstalled on
+          # ubuntu-latest — a locally-installed ripgrep masked this and the
+          # step failed on its first CI run (run 36680041118).
+          sudo apt-get install -y ripgrep
+          shopt -s nullglob
+          found=0
+          for t in tests/claude-code/test-*.sh; do
+            grep -q 'run_claude' "$t" && continue
+            echo "== $t"
+            bash "$t"
+            found=$((found + 1))
+          done
+          [ "$found" -gt 0 ] || { echo "FAIL: no content tests found"; exit 1; }
+          echo "ran $found content test(s)"
+
+      - name: Test the shell linter
+        run: bash tests/shell-lint/test-lint-shell.sh
+
+      # Edition destination guards: globbed like every other test family —
+      # naming one file has repeatedly left tests unrun (see the comments
+      # on the steps above).
+      - name: Test the edition destination guards
+        run: |
+          shopt -s nullglob
+          found=0
+          for t in tests/publish-edition/test-*.sh; do
+            echo "== $t"
+            bash "$t"
+            found=$((found + 1))
+          done
+          [ "$found" -gt 0 ] || { echo "FAIL: no edition guard tests found"; exit 1; }
+          echo "ran $found edition guard test(s)"
+
+      # --all so CI lints the full tracked baseline, not just the PR's
+      # changed files: a fresh checkout has no useful diff base.
+      - name: Lint shell scripts
+        run: bash scripts/lint-shell.sh --all --strict

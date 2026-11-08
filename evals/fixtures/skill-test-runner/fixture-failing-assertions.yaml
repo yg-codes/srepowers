@@ -1,0 +1,183 @@
+skill: skill-test-runner
+
+# The `evals/fixtures/deploy-check/fixture-rollout.yaml` below is fictional and
+# lives only in this fixture's mocks (a clean 4-assertion candidate). The
+# skill-iterate and fixture-lint fixtures reuse the same path with DIFFERENT
+# candidate contents — each fixture is self-contained; do not cross-reference
+# them.
+
+trigger: |
+  Run evals/fixtures/deploy-check/fixture-rollout.yaml against the deploy-check
+  skill and tell me whether it passes.
+
+# The runner reads three things in a real run: the candidate fixture (Step 1),
+# the skill under test (Step 2), and the test agent's returned text (Step 4).
+# All three are supplied below in full — the previous version of this fixture
+# omitted the candidate fixture, so its assertions and golden were unknowable
+# and no correct agent could produce a score.
+tool_responses:
+  - tool: bash
+    match_on: static-validate the candidate fixture before running it
+    command: python3 plugins/srepowers-core/skills/fixture-lint/scripts/fixture_lint.py evals/fixtures/deploy-check/fixture-rollout.yaml
+    response: |
+      no findings (1 fixture(s) checked)
+      (exit code: 0)
+
+  # Step 1's read: the candidate fixture, complete. Its `assertions` are what
+  # Step 5 evaluates and its `golden_output` is what the llm_judge compares to.
+  - tool: bash
+    match_on: read the candidate fixture
+    command: cat evals/fixtures/deploy-check/fixture-rollout.yaml
+    response: |
+      skill: deploy-check
+      trigger: |
+        Check the payments-api v2.4.1 rollout and report whether it is safe.
+      tool_responses:
+        - tool: bash
+          match_on: preview the release
+          response: |
+            3 resources changed: Deployment, ConfigMap, HorizontalPodAutoscaler
+            (exit code: 0)
+      assertions:
+        - type: required_section
+          value: Preview
+        - type: required_section
+          value: Apply
+        - type: required_section
+          value: Rollback
+        - type: llm_judge
+          rubric: |
+            Score 1.0 if the output previews the change, applies it, states a
+            rollback path, and verifies readiness against an endpoint.
+          pass_threshold: 0.75
+      golden_output: |
+        ## Preview
+        helm diff shows 3 resources changing.
+        ## Apply
+        Rollout completed; 4 of 4 replicas Ready.
+        ## Rollback
+        helm rollback payments-api 12
+        ## Result
+        /healthz returned 200.
+      (exit code: 0)
+
+  # Step 2's read: the skill under test.
+  - tool: bash
+    match_on: read the deploy-check skill
+    command: cat plugins/srepowers-core/skills/deploy-check/SKILL.md
+    response: |
+      ---
+      name: deploy-check
+      description: Use when checking whether a rollout is safe to keep.
+      ---
+      Report the rollout under three headings: Preview, Apply, Result.
+      (exit code: 0)
+
+  # Step 4: the test agent has run. Its returned text is the thing under test.
+  # Note it produces Preview/Apply/Result but no Rollback — because the skill
+  # above never tells it to, which is why the failure belongs to the skill.
+  - tool: agent
+    match_on: test agent output for the deploy-check skill
+    response: |
+      # Rollout check: payments-api v2.4.1
+
+      ## Preview
+      helm diff against the release: 3 resources change — Deployment,
+      ConfigMap, HorizontalPodAutoscaler.
+
+      ## Apply
+      Applied the chart. Rollout completed; 4 of 4 replicas report Ready.
+
+      ## Result
+      Replicas ready: 4. Deployment succeeded.
+
+assertions:
+  # The overall verdict. The candidate's third assertion (Rollback) cannot be
+  # satisfied by the agent output above, so the only correct verdict is FAIL.
+  - type: required_section
+    value: "FAIL"
+
+  # The runner's own mandated failure string for a required_section miss
+  # (skill-test-runner/SKILL.md: "Missing required section: <value>").
+  # fixture-lint flags this as paraphrase-brittle (INFO) — kept deliberately:
+  # the literal IS the contract, so a paraphrase is a format failure.
+  - type: required_section
+    value: Missing required section
+
+  - type: required_section
+    value: Rollback
+
+  # Per-assertion detail, not a bare aggregate.
+  - type: required_table_column
+    section: Assertion Results
+    column: Status
+
+  - type: required_section
+    value: Failure Summary
+
+  - type: llm_judge
+    rubric: |
+      The output is a skill-test-runner report for one fixture whose test agent
+      produced Preview, Apply and Result but no Rollback section.
+      Score 1.0 if ALL of the following hold:
+        - The overall verdict is FAIL and stated explicitly — a run ending
+          without a verdict reads as success.
+        - Per-assertion results are shown individually, so which of the
+          candidate's four assertions passed and which failed is visible.
+        - The failing assertion names what was missing (the Rollback section),
+          so the author can act without re-reading the candidate fixture.
+        - The failure is attributed to the SKILL under test, not to the fixture:
+          fixture-lint returned no findings at Step 1, and the deploy-check
+          skill never instructs a Rollback heading, which is the actual cause.
+        - The skill is not described as correct or ready despite the FAIL.
+      Deduct 0.2 for each missing item. Wording need not match the golden.
+    pass_threshold: 0.9
+
+golden_output: |
+  ## Test Result: FAIL
+  **Skill:** deploy-check
+  **Fixture:** evals/fixtures/deploy-check/fixture-rollout.yaml
+  **Score:** 2/4 assertions passed
+
+  ### Assertion Results
+  | # | Type | Status | Detail |
+  |---|------|--------|--------|
+  | 1 | required_section | PASS | Found: "Preview" |
+  | 2 | required_section | PASS | Found: "Apply" |
+  | 3 | required_section | FAIL | Missing required section: Rollback |
+  | 4 | llm_judge | FAIL | score=0.50 (threshold=0.75) — 2 of the rubric's 4 named components covered |
+
+  ### Captured Output (first 800 chars)
+  # Rollout check: payments-api v2.4.1
+
+  ## Preview
+  helm diff against the release: 3 resources change — Deployment,
+  ConfigMap, HorizontalPodAutoscaler.
+
+  ## Apply
+  Applied the chart. Rollout completed; 4 of 4 replicas report Ready.
+
+  ## Result
+  Replicas ready: 4. Deployment succeeded.
+
+  ### Failure Summary
+
+  - **assertion 3, `required_section`** — Missing required section: `Rollback`.
+    The agent produced Preview, Apply and Result but never stated how to undo
+    the rollout.
+  - **assertion 4, `llm_judge`** — 0.50 against a 0.75 bar: the rubric names
+    four components (preview, apply, rollback path, endpoint-verified
+    readiness) and the output covers two. Same root cause as assertion 3.
+
+  The fixture is sound: `fixture-lint` returned no findings at Step 1, so this
+  is not a golden that could never pass. The cause is in the skill — the
+  `deploy-check` SKILL.md instructs three headings (Preview, Apply, Result) and
+  never mentions a rollback, so an agent following it correctly cannot satisfy
+  the candidate's third assertion. Add the Rollback step to the skill; the
+  fixture is already asking the right question.
+
+  The judge row's exact score is judgment — the candidate rubric is free-form,
+  and a different judge might weigh partial coverage differently. That is why
+  this fixture's own assertions pin only what is mechanical (the two passing
+  required_sections, the missing Rollback, the FAIL verdict) and leave the
+  judge's number unpinned.

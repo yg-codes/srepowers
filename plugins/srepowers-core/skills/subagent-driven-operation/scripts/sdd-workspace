@@ -1,0 +1,263 @@
+#!/usr/bin/env bash
+# Resolve and ensure the working-tree directory srepowers SDD uses for one
+# operation plan's short-lived artifacts: task briefs, operator reports, review
+# packages, and the progress ledger. Print the plan directory's absolute path.
+#
+# One directory per plan under .srepowers/sdd/. Basenames can collide
+# (docs/alpha/plan.md and docs/beta/plan.md), so each workspace records its
+# owning plan path. A collision is disambiguated with the parent directory and,
+# if needed, a counter. A marker-less legacy workspace is adopted only when it
+# has no progress ledger or its ledger identifies this plan.
+#
+# The workspace lives in the working tree (not under .git/) because Claude Code
+# treats .git/ as a protected path and denies agent writes there — which would
+# block an operator subagent from writing its report file. A self-ignoring
+# .gitignore at .srepowers/sdd/ keeps every plan's workspace out of
+# `git status` and out of accidental commits without modifying any tracked file.
+#
+# Single source of truth for the workspace location, so task-brief and
+# review-package cannot drift to different directories.
+#
+# Usage: sdd-workspace [-C DIR] PLAN_FILE
+# -C selects the execution working tree; the plan path never selects it.
+set -euo pipefail
+
+here=$(cd "$(dirname "$0")" && pwd)
+if [ "${1:-}" = "-C" ]; then
+  [ -d "${2:-}" ] || { echo "bad -C directory: ${2:-}" >&2; exit 2; }
+  cd "$2"
+  shift 2
+fi
+
+if [ $# -ne 1 ]; then
+  echo "usage: sdd-workspace [-C DIR] PLAN_FILE" >&2
+  exit 2
+fi
+
+plan=$1
+[ -f "$plan" ] || { echo "no such plan file: $plan" >&2; exit 2; }
+
+# The claim protocol needs GNU coreutils `mv -T` (rename a directory onto a
+# path, never move-into). On BSD/macOS mv the flag does not exist and every
+# acquire would fail silently into the 10s timeout with a misleading message
+# — fail fast instead. Probe by renaming onto an ABSENT target: GNU succeeds,
+# non-GNU rejects the flag itself.
+mv_probe=$(mktemp -d) || exit 2
+if ! mkdir "$mv_probe/t" 2>/dev/null \
+   || ! mv -T "$mv_probe/t" "$mv_probe/x" 2>/dev/null; then
+  echo "sdd-workspace: GNU coreutils mv -T is required (atomic claim publish); this mv does not support it" >&2
+  rm -rf "$mv_probe"
+  exit 2
+fi
+rm -rf "$mv_probe"
+
+slug=$(basename "$plan" .md)
+[ -n "$slug" ] && [ "$slug" != "." ] && [ "$slug" != ".." ] \
+  || { echo "cannot derive a workspace name from: $plan" >&2; exit 2; }
+
+# Resolve physical paths on both sides of the marker comparison. Git Bash may
+# spell the root C:/... while pwd -P spells the plan /c/...; symlinks differ too.
+# Keep the calls separate so a failed resolver cannot pass an empty path to cd.
+toplevel=$("${BASH:-bash}" "$here/sdd-repo")
+root=$(CDPATH='' cd -- "$toplevel" && pwd -P)
+base="$root/.srepowers/sdd"
+
+# Normalize equivalent relative/absolute spellings. Keep in-repo marker values
+# repo-relative so worktrees remain readable and portable.
+plan_dir=$(CDPATH='' cd -- "$(dirname "$plan")" && pwd -P)
+plan_abs="$plan_dir/$(basename "$plan")"
+case "$plan_abs" in
+  "$root"/*) plan_id=${plan_abs#"$root"/} ;;
+  *)         plan_id=$plan_abs ;;
+esac
+
+mkdir -p "$base"
+# Create only: a project may deliberately version some workspace artifacts.
+[ -e "$base/.gitignore" ] || printf '*\n' > "$base/.gitignore"
+
+held_lock=''
+my_claim=''
+cleanup_claim() {
+  if [ -n "$held_lock" ]; then
+    rm -f "$held_lock/owner.$$"
+    rmdir "$held_lock" 2>/dev/null || :
+  fi
+  # A scratch claim left behind by a kill between mkdir and the rename must
+  # not linger as *.claimant.* clutter.
+  [ -n "$my_claim" ] && rm -rf "$my_claim" 2>/dev/null || :
+}
+trap cleanup_claim EXIT
+trap 'cleanup_claim; exit 130' HUP INT TERM
+
+# Print "<type> <pid>" for the owner marker observed in claim directory $1,
+# if any: type `owner` for the `owner.<pid>` marker (the owner is its NAME,
+# so it identifies exactly one claim generation), type `pid` for the
+# pre-5.36.2 `pid` file, still read so an upgraded install can reclaim a
+# claim a dead older process left behind.
+claim_owner() {
+  for f in "$1"/owner.*; do
+    if [ -e "$f" ]; then printf 'owner %s\n' "${f##*/owner.}"; return 0; fi
+  done
+  if [ -f "$1/pid" ]; then printf 'pid %s\n' "$(cat "$1/pid" 2>/dev/null || :)"; fi
+}
+
+# True when pid $1 is alive. `kill -0` also fails (EPERM) for a live process
+# of another user, so a failed signal check falls back to `ps -p`, which sees
+# every user's processes. A recycled pid can still make a dead owner look
+# alive; that only delays reclaim until the bounded wait times out.
+owner_alive() {
+  kill -0 "$1" 2>/dev/null || ps -p "$1" > /dev/null 2>&1
+}
+
+# Acquire a per-candidate claim ATOMICALLY. The claim directory is built at a
+# private scratch path with our owner marker already inside, then renamed
+# into place with `mv -T`: rename onto a NON-EMPTY target fails, and a
+# published claim always contains its marker — so a contender's rename can
+# only succeed against a briefly-empty claim, and that is exactly a clean
+# handoff. Two such gaps exist, both tolerated: the release gap (marker
+# removed → rmdir in release_lock) and the dead-owner reclaim below (marker
+# renamed out, empty dir left for the next claimant to replace). There is no
+# empty-claim window for a grace steal to hit and no marker to clobber — the
+# pre-fix design published mkdir-then-pid, and a waiter's grace steal during
+# that gap let two processes both believe they held the claim (CI flake,
+# 2026-10-27: both same-basename claimants resolved one shared workspace).
+# A killed claimant always leaves its marker behind, so the dead-owner check
+# below is the only recovery path needed. Guarded by
+# tests/claude-code/test-sdd-workspace-race.sh and
+# tests/claude-code/test-sdd-workspace-reap.sh.
+acquire_lock() {
+  lock=$1
+  attempts=0
+  while :; do
+    claim="$lock.claimant.$$"
+    rm -rf "$claim" 2>/dev/null || :
+    my_claim=$claim
+    mkdir "$claim" || return 2
+    : > "$claim/owner.$$" || { rm -rf "$claim"; my_claim=''; return 2; }
+    if mv -T "$claim" "$lock" 2>/dev/null; then
+      my_claim=''
+      held_lock=$lock
+      return 0
+    fi
+    rm -rf "$claim" 2>/dev/null || :
+    my_claim=''
+    # Someone holds the claim. Reclaim it only when the owner is dead; a
+    # live owner is never stolen. A failed marker write is impossible past
+    # this point (it happened on our private scratch path), so an acquire
+    # failure is always fatal here — never misread as "owned by another plan".
+    seen=$(claim_owner "$lock")
+    kind=${seen%% *}
+    owner=${seen#* }
+    case "$owner" in
+      ''|*[!0-9]*) ;;
+      *)
+        if ! owner_alive "$owner"; then
+          # Reclaim by IDENTITY, never by path (#78), and only the marker
+          # type actually observed — never fall back to another type because
+          # the observed marker has since gone. An `owner.<pid>` rename
+          # succeeds only while that exact marker is there, so a claim
+          # someone else acquired after our check is never touched; the
+          # emptied claim dir is then replaced by the next claimant's
+          # `mv -T`. A legacy `pid` file has no identity in its name: take
+          # it, and if it is not the dead owner's (a pre-5.36.2 client
+          # republished in between), hand it straight back. That return
+          # can still lose to a third claimant, so do not run pre-5.36.2
+          # and 5.36.2+ clients against one repository at the same time.
+          reap="$lock.reap.$$"
+          if [ "$kind" = owner ]; then
+            mv -T "$lock/owner.$owner" "$reap" 2>/dev/null || :
+          elif mv -T "$lock/pid" "$reap" 2>/dev/null \
+              && [ "$(cat "$reap" 2>/dev/null || :)" != "$owner" ]; then
+            ln "$reap" "$lock/pid" 2>/dev/null || :
+          fi
+          rm -f "$reap"
+        fi
+        ;;
+    esac
+    attempts=$((attempts + 1))
+    if [ "$attempts" -ge 200 ]; then
+      echo "timed out waiting for workspace claim: $lock" >&2
+      return 2
+    fi
+    sleep 0.05
+  done
+}
+
+release_lock() {
+  rm -f "$held_lock/owner.$$"
+  # A contender may have replaced the briefly-empty claim during the
+  # rm→rmdir gap above (rename onto an empty target succeeds) — that is a
+  # clean handoff, not ours to remove. Tolerate ENOTEMPTY/ENOENT instead of
+  # erroring: callers run owns in an `if` today, but release must stay safe
+  # in any context.
+  rmdir "$held_lock" 2>/dev/null || :
+  held_lock=''
+}
+
+# Return 0 when a workspace belongs to this plan, 1 when another plan owns it,
+# and 2 when the claim lock cannot be acquired. A legacy progress ledger is
+# ownership evidence. A non-empty marker-less workspace without a ledger is
+# never adopted because its briefs/reports may belong to an unknown plan.
+owns() {
+  workspace=$1
+  lock="${workspace}.claim"
+  lock_rc=0
+  acquire_lock "$lock" || lock_rc=$?
+  [ "$lock_rc" -eq 0 ] || return "$lock_rc"
+
+  result=1
+  if [ -e "$workspace/plan-path" ]; then
+    [ "$(cat "$workspace/plan-path")" = "$plan_id" ] && result=0
+  elif [ -e "$workspace/progress.md" ]; then
+    ledger_plan=$(sed -n '1s/^# SDO ledger — plan: //p' "$workspace/progress.md")
+    case "$ledger_plan" in
+      "$plan"|"$plan_id"|"$plan_abs")
+        marker_tmp="$workspace/plan-path.tmp.$$"
+        printf '%s\n' "$plan_id" > "$marker_tmp" \
+          && mv -f "$marker_tmp" "$workspace/plan-path"
+        result=0
+        ;;
+    esac
+  elif [ ! -e "$workspace" ] \
+      || [ -z "$(find "$workspace" -mindepth 1 -maxdepth 1 -print -quit)" ]; then
+    mkdir -p "$workspace"
+    # Marker write is atomic (tmp + rename): a concurrent reader either sees
+    # no plan-path or a complete one — never a half-written ownership record.
+    marker_tmp="$workspace/plan-path.tmp.$$"
+    printf '%s\n' "$plan_id" > "$marker_tmp" \
+      && mv -f "$marker_tmp" "$workspace/plan-path"
+    result=0
+  fi
+
+  release_lock
+  return "$result"
+}
+
+dir="$base/$slug"
+if owns "$dir"; then
+  :
+else
+  rc=$?
+  [ "$rc" -eq 1 ] || exit "$rc"
+  parent=$(basename "$plan_dir")
+  dir="$base/$slug-$parent"
+  if owns "$dir"; then
+    :
+  else
+    rc=$?
+    [ "$rc" -eq 1 ] || exit "$rc"
+    n=2
+    while :; do
+      dir="$base/$slug-$parent-$n"
+      if owns "$dir"; then break; fi
+      rc=$?
+      [ "$rc" -eq 1 ] || exit "$rc"
+      n=$((n + 1))
+    done
+  fi
+fi
+
+CDPATH='' cd -- "$dir"
+# Native Windows callers cannot resolve MSYS paths. Only the printed path
+# changes; ownership markers retain the existing physical-path spelling.
+if command -v cygpath >/dev/null 2>&1; then cygpath -m "$PWD"; else pwd; fi

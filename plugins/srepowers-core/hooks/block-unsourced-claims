@@ -1,0 +1,253 @@
+#!/usr/bin/env python3
+"""Stop hook: block a final message that asserts system state with no read behind it.
+
+Enforcement layer for the SREPowers reporting contract (see
+skills/verification-guardrails/SKILL.md and skills/evidence-first-reporting).
+It exists because that rule was already written down and was not applied:
+an agent told an operator "the apply never ran" when it had run 20 minutes
+earlier, having inferred the negative from a rejected tool call. The operator
+found out when a service broke.
+
+SHIPPED BUT NOT WIRED
+  Unlike block-lying-gates and block-dangerous-git, this hook is deliberately
+  absent from every hooks.json. A denied Bash call costs one retry; a Stop
+  false positive stops the turn from finishing at all, so the consent model is
+  asymmetric too — the user opts in by adding it to their own settings.json.
+  This is a considered decision, not an oversight; see the skill before
+  "fixing" the inconsistency by wiring it up.
+
+WHAT IT CHECKS
+  Scans the assistant's final message for assertions about *infrastructure or
+  repository state* and, when the turn contains no tool call that could have
+  established them, blocks the stop with a reason naming the missing read.
+
+  Two claim families, both from the record:
+    - NEGATIVE: "the apply never ran", "was not applied", "no changes were
+      made"  -> needs a live read, exactly like a positive claim.
+    - PERFECT-TENSE MUTATION: "I committed", "I pushed", "I've applied"
+      -> needs a tool call in THIS turn's transcript.
+
+DESIGN CONSTRAINTS (why this is conservative)
+  A Stop hook that false-positives blocks the turn from ever finishing, which
+  is far worse than a denied Bash call. So:
+    - Corroboration is generous: ANY plausibly-relevant tool call in the turn
+      clears the claim. The goal is catching the turn where nothing was read,
+      not adjudicating whether the right thing was read.
+    - Patterns require a first-person subject and a concrete verb. Reported
+      speech ("the log says the apply failed"), questions, hypotheticals,
+      quoted text and fenced code are excluded.
+    - stop_hook_active short-circuits (recursion guard, mirrors the
+      security-guidance reference implementation).
+    - Any exception, unreadable transcript, or missing field -> exit 0 (allow).
+      Fail OPEN. A guard that wedges the session gets disabled, and then it
+      guards nothing.
+    - At most 3 findings are reported per block, to keep the guidance short.
+      Repeat blocking is bounded by the harness (CLAUDE_CODE_STOP_HOOK_BLOCK_CAP)
+      and by stop_hook_active, NOT by this script — it keeps no cross-invocation
+      state.
+
+PROTOCOL (Stop is NOT in CC's hookSpecificOutput union)
+  Guidance goes on stderr (the model-visible body channel); stdout carries
+  valid JSON with top-level decision/reason for the sync path. Emitting
+  hookSpecificOutput{hookEventName:"Stop"} would fail schema validation.
+"""
+
+import json
+import os
+import re
+import sys
+
+# --- fail-open wrapper ------------------------------------------------------
+def _allow():
+    sys.exit(0)
+
+
+# Claims about state that need evidence. Each entry is (regex, what_to_read).
+# Anchored on a first-person subject or an explicit "was/were not" so that
+# describing someone else's output does not trip them.
+NEGATIVE_CLAIMS = [
+    (r"\b(?:the\s+)?(?:apply|upgrade|transaction|reboot|deploy(?:ment)?|change|commit|push|migration)\b[^.!?\n]{0,40}\b(?:never\s+(?:ran|happened|executed|applied)|did\s?n[o']t\s+(?:run|happen|execute|apply)|was\s+not\s+(?:applied|run|executed)|were\s+not\s+applied)",
+     "the actual state on the target (transaction history Return-Code, installed version, uptime -s, or the file you expected to change)"),
+    (r"\bno\s+(?:changes?|commits?|packages?|files?)\s+(?:were\s+)?(?:made|applied|installed|written|committed)\b",
+     "the state itself (git log / rpm -q / stat the file), not the outcome of a tool call"),
+    (r"\bnothing\s+(?:was\s+)?(?:changed|applied|committed|installed|written)\b",
+     "the state itself, not the outcome of a tool call"),
+]
+
+PERFECT_TENSE_CLAIMS = [
+    (r"\bI(?:'ve|\s+have)?\s+(?:committed|pushed|applied|deployed|rebooted|installed|merged)\b",
+     "git log / the remote / host state confirming it, quoted in the report"),
+    (r"\bI(?:'ve|\s+have)?\s+(?:created|written|added)\s+(?:the\s+)?(?:file|script|commit|hook|rule)\b",
+     "ls / git log / Read confirming the artifact exists"),
+]
+
+# Tool calls that could plausibly establish such a claim. Deliberately broad —
+# see DESIGN CONSTRAINTS. Bash covers nearly every real verification.
+CORROBORATING_TOOLS = {
+    "Bash", "Read", "Grep", "Glob", "Edit", "Write", "NotebookEdit",
+}
+
+
+def strip_uncheckable(text):
+    """Remove regions where a claim is not an assertion of fact.
+
+    Fenced code, inline code, blockquotes (reported speech / quoted output),
+    and any line that is a question. Also drops lines that hedge explicitly,
+    since those are the correct behaviour this hook wants to encourage.
+    """
+    text = re.sub(r"```.*?```", " ", text, flags=re.S)
+    text = re.sub(r"`[^`\n]*`", " ", text)
+    # Quoted spans are citation, not assertion. Discussing the defect —
+    # 'an agent told the operator "the apply never ran"' — must not trip the
+    # guard that exists because of it. Found by running this hook over 140
+    # real messages: 3 of 4 hits were quoted examples inside exactly that
+    # discussion. Straight and curly quotes both.
+    text = re.sub(r'"[^"\n]{0,200}"', " ", text)
+    text = re.sub(r"“[^”\n]{0,200}”", " ", text)
+    out = []
+    for line in text.split("\n"):
+        s = line.strip()
+        if s.startswith(">"):          # quoted / reported
+            continue
+        if s.endswith("?"):            # question, not a claim
+            continue
+        low = s.lower()
+        # Explicit hedging or an admitted absence of proof is the desired
+        # behaviour — never block it.
+        if any(h in low for h in (
+            "i don't know", "i do not know", "unverified", "not verified",
+            "cannot confirm", "can't confirm", "checking", "would need to",
+            "i have not", "i haven't", "not done", "did not verify",
+        )):
+            continue
+        out.append(line)
+    return "\n".join(out)
+
+
+def turn_tool_names(transcript_path):
+    """Tool names used since the last user turn. Empty set if unreadable.
+
+    Reads the tail only; a long transcript must not make the hook slow.
+    """
+    if not transcript_path or not os.path.exists(transcript_path):
+        return None  # unknown -> caller fails open
+    try:
+        with open(transcript_path, "rb") as f:
+            try:
+                f.seek(-3_000_000, os.SEEK_END)
+            except OSError:
+                f.seek(0)
+            raw = f.read().decode("utf-8", "replace")
+    except Exception:
+        return None
+
+    names = []
+    for line in raw.split("\n"):
+        line = line.strip()
+        if not line or not line.startswith("{"):
+            continue
+        try:
+            d = json.loads(line)
+        except Exception:
+            continue
+        t = d.get("type")
+        if t == "user":
+            # A genuine user turn resets the window. Tool RESULTS also arrive
+            # as type=user, so only reset on a real text prompt.
+            content = (d.get("message") or {}).get("content")
+            if isinstance(content, str) and content.strip():
+                names = []
+            elif isinstance(content, list) and any(
+                isinstance(c, dict) and c.get("type") == "text" for c in content
+            ):
+                names = []
+            continue
+        if t != "assistant":
+            continue
+        for c in ((d.get("message") or {}).get("content") or []):
+            if isinstance(c, dict) and c.get("type") == "tool_use":
+                n = c.get("name")
+                if n:
+                    names.append(n)
+    return set(names)
+
+
+def main():
+    try:
+        raw = sys.stdin.read()
+    except Exception:
+        _allow()
+    if not raw.strip():
+        _allow()
+
+    try:
+        data = json.loads(raw)
+    except Exception:
+        _allow()
+
+    if not isinstance(data, dict):
+        _allow()
+
+    # Recursion guard FIRST: CC sets this while a Stop block is in flight.
+    if data.get("stop_hook_active"):
+        _allow()
+
+    msg = data.get("last_assistant_message") or ""
+    if not isinstance(msg, str) or not msg.strip():
+        _allow()
+
+    body = strip_uncheckable(msg)
+    if not body.strip():
+        _allow()
+
+    tools = turn_tool_names(data.get("transcript_path"))
+    if tools is None:
+        _allow()          # cannot corroborate -> cannot fairly block
+    if tools & CORROBORATING_TOOLS:
+        _allow()          # something was read this turn; generous by design
+
+    findings = []
+    for pattern, needed in NEGATIVE_CLAIMS + PERFECT_TENSE_CLAIMS:
+        m = re.search(pattern, body, re.I)
+        if m:
+            findings.append((m.group(0).strip(), needed))
+            if len(findings) >= 3:
+                break
+
+    if not findings:
+        _allow()
+
+    lines = [
+        "BLOCKED by srepowers verification-guardrails (reporting contract):",
+        "this turn's final message asserts system state, but the turn contains",
+        "no tool call that could have established it.",
+        "",
+    ]
+    for claim, needed in findings:
+        lines.append('  claim: "%s"' % claim[:160])
+        lines.append("  needs: %s" % needed)
+        lines.append("")
+    lines += [
+        "A negative claim needs the same evidence as a positive one. An",
+        "interrupted or rejected tool call is NOT proof the work did not run.",
+        "",
+        "Do one of:",
+        "  - read the state, quote it, then restate the claim; or",
+        '  - say plainly what you did not verify ("I have not confirmed X"),',
+        "    which this hook accepts.",
+        "",
+        "See the srepowers-core:verification-guardrails skill.",
+    ]
+    guidance = "\n".join(lines)
+
+    sys.stderr.write(guidance + "\n")
+    sys.stderr.flush()
+    print(json.dumps({"decision": "block", "reason": guidance}), flush=True)
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception:
+        _allow()

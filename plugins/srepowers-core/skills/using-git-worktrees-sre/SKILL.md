@@ -1,0 +1,330 @@
+---
+name: using-git-worktrees-sre
+description: Use when you need an isolated workspace for infrastructure changes — creates git worktrees so you can work without affecting the current branch. Also use for "work in a worktree", "isolate this change", "create a separate working directory", "worktree for this operation", or when starting Puppet, Kubernetes, or Terraform operations that need a clean branch.
+license: MIT
+---
+
+# Using Git Worktrees for Infrastructure
+
+## Overview
+
+Git worktrees create isolated workspaces sharing the same repository, allowing work on multiple infrastructure branches simultaneously without switching. Essential for safe control repo operations.
+
+**Core principle:** Detect existing isolation first. Then prefer the harness's native worktree tools. Fall back to manual `git worktree` only when no native tool exists. Never fight the harness. Then layer SRE safety on top: environment verification + ignore checks + clean baseline.
+
+**Announce at start:** "I'm using the using-git-worktrees-sre skill to set up an isolated workspace for infrastructure operations."
+
+## When to Use
+
+**Always for control repo operations:**
+- Creating new Kubernetes manifests
+- Modifying Terraform configurations
+- Updating ArgoCD/Flux deployments
+- Changing Keycloak realm configurations
+- Any infrastructure-as-code changes
+
+**Required before:**
+- `subagent-driven-operation`
+- `writing-operation-plans` execution
+- Any multi-step infrastructure change
+
+## Step 0: Detect Existing Isolation
+
+**Before creating anything, check if you are already in an isolated workspace.**
+
+```bash
+GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
+GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
+BRANCH=$(git branch --show-current)
+```
+
+**Submodule guard:** `GIT_DIR != GIT_COMMON` is also true inside git submodules. Before concluding "already in a worktree," verify you are not in a submodule:
+
+```bash
+# If this returns a path, you're in a submodule, not a worktree — treat as normal repo
+git rev-parse --show-superproject-working-tree 2>/dev/null
+```
+
+**If `GIT_DIR != GIT_COMMON` (and not a submodule):** You are already in a linked worktree. Skip worktree creation entirely — jump to Environment Detection and the verification steps. Do NOT create another worktree.
+
+Report with branch state:
+- On a branch: "Already in isolated workspace at `<path>` on branch `<name>`."
+- Detached HEAD: "Already in isolated workspace at `<path>` (detached HEAD, externally managed). Branch creation needed at finish time."
+
+**If `GIT_DIR == GIT_COMMON` (or in a submodule):** You are in a normal repo checkout.
+
+Has the user already declared a worktree preference in CLAUDE.md or your instructions? If not, ask for consent before creating one:
+
+> "Would you like me to set up an isolated worktree? It protects your current branch — and any in-flight environment — from changes."
+
+Honor any existing declared preference without asking. If the user declines, work in place and skip to Environment Detection.
+
+## Creation Mechanism
+
+**You have two mechanisms. Try them in this order.**
+
+### Native Worktree Tools (preferred)
+
+The user has consented (Step 0). Do you already have a way to create a worktree — a tool named something like `EnterWorktree`/`WorktreeCreate`, a `/worktree` command, or a `--worktree` flag? If so, use it, then skip to Environment Detection.
+
+Native tools handle directory placement, branch creation, and cleanup automatically. Using `git worktree add` when you have a native tool creates phantom state the harness can't see or manage.
+
+Only fall through to the **git worktree fallback** below if you have no native worktree tool.
+
+## Directory Selection Process
+
+*(Git worktree fallback only — skip if a native tool handled creation.)*
+
+### 1. Check Existing Directories
+
+```bash
+# Check in priority order
+ls -d .worktrees 2>/dev/null     # Preferred (hidden)
+ls -d worktrees 2>/dev/null      # Alternative
+```
+
+**If found:** Use that directory. If both exist, `.worktrees` wins.
+
+### 2. Check CLAUDE.md
+
+```bash
+grep -i "worktree.*director" CLAUDE.md 2>/dev/null
+```
+
+**If preference specified:** Use it without asking.
+
+### 3. Ask User
+
+If no directory exists and no CLAUDE.md preference:
+
+```
+No worktree directory found. Where should I create worktrees?
+
+1. .worktrees/ (project-local, hidden)
+2. ~/.config/srepowers/worktrees/<project-name>/ (global location)
+
+Which would you prefer?
+```
+
+## Safety Verification
+
+### For Project-Local Directories (.worktrees or worktrees)
+
+**MUST verify directory is ignored before creating worktree:**
+
+```bash
+git check-ignore -q .worktrees 2>/dev/null || git check-ignore -q worktrees 2>/dev/null
+```
+
+**If NOT ignored:**
+
+Per safety-first principle:
+1. Add appropriate line to .gitignore
+2. Commit the change
+3. Proceed with worktree creation
+
+**Why critical:** Prevents accidentally committing worktree contents into control repo, which could trigger unintended deployments.
+
+### For Global Directory (~/.config/srepowers/worktrees)
+
+No .gitignore verification needed - outside project entirely.
+
+## Environment Detection
+
+Before creating worktree, determine the target environment:
+
+```bash
+# Check current branch for environment indicators
+current_branch=$(git branch --show-current)
+
+# Common patterns
+if [[ "$current_branch" == "sit" ]] || [[ "$current_branch" == *"sit"* ]]; then
+ environment="sit"
+elif [[ "$current_branch" == "uat" ]] || [[ "$current_branch" == *"uat"* ]]; then
+ environment="uat"
+elif [[ "$current_branch" == "prod" ]] || [[ "$current_branch" == *"prod"* ]]; then
+ environment="prod"
+else
+ environment="unknown"
+fi
+```
+
+**If environment is prod:**
+- Warn user about direct production work
+- Recommend using sit/uat promotion workflow
+- Require explicit confirmation to proceed
+
+## Creation Steps
+
+### 1. Detect Project Name
+
+```bash
+project=$(basename "$(git rev-parse --show-toplevel)")
+```
+
+### 2. Create Worktree
+
+```bash
+# Determine full path
+case $LOCATION in
+  .worktrees|worktrees)
+    path="$LOCATION/$BRANCH_NAME"
+    ;;
+  ~/.config/srepowers/worktrees/*)
+    path="~/.config/srepowers/worktrees/$project/$BRANCH_NAME"
+    ;;
+esac
+
+# Create worktree with new branch
+git worktree add "$path" -b "$BRANCH_NAME"
+cd "$path"
+```
+
+### 3. Verify Control Repo Structure
+
+Check for expected infrastructure directories:
+
+```bash
+# Kubernetes control repo
+if [ -d manifests/ ] || [ -d k8s/ ] || [ -d clusters/ ]; then
+    echo "Kubernetes control repo detected"
+    ls -la manifests/ 2>/dev/null || ls -la k8s/ 2>/dev/null
+ fi
+
+# Terraform repo
+if [ -d terraform/ ] || [ -f main.tf ]; then
+    echo "Terraform repo detected"
+    grep -l "backend" *.tf 2>/dev/null | head -5
+ fi
+
+# Ansible repo
+if [ -d playbooks/ ] || [ -d roles/ ]; then
+    echo "Ansible repo detected"
+fi
+```
+
+### 4. Environment Isolation Check
+
+**Critical for infrastructure repos:**
+
+```bash
+# Check if this repo has environment-specific directories
+for env in sit uat prod; do
+    if [ -d "$env" ] || [ -d "manifests/$env" ] || [ -d "overlays/$env" ]; then
+        echo "Environment-specific structure detected: $env"
+    fi
+done
+
+# Warn if branch name doesn't match environment structure
+if [[ "$BRANCH_NAME" == *"prod"* ]] && [[ "$current_branch" != "prod" ]]; then
+    echo "WARNING: Creating production branch from non-production base"
+fi
+```
+
+### 5. Verify Clean Baseline
+
+For infrastructure repos, verify baseline state:
+
+```bash
+# Check for uncommitted changes in main worktree
+cd "$(git rev-parse --git-common-dir)/.."
+if [ -n "$(git status --porcelain)" ]; then
+    echo "WARNING: Main worktree has uncommitted changes"
+fi
+
+# Return to new worktree
+cd "$path"
+
+# Validate YAML/JSON files if present
+find . -name "*.yaml" -o -name "*.yml" 2>/dev/null | head -5 | while read f; do
+    if command -v yq >/dev/null 2>&1; then
+        yq eval '.' "$f" > /dev/null 2>&1 && echo "Valid YAML: $f" || echo "INVALID YAML: $f"
+    fi
+done
+```
+
+### 6. Report Location
+
+```
+Infrastructure worktree ready at <full-path>
+Environment: <detected-environment>
+Control repo type: <k8s/terraform/ansible>
+Clean baseline: verified
+Ready to implement <operation-name>
+
+Next steps:
+1. Use /writing-operation-plans to create detailed steps
+2. Use /test-driven-operation for each change
+3. Use /finishing-operation-branch when complete
+```
+
+## Quick Reference
+
+| Situation | Action |
+|-----------|--------|
+| Already in linked worktree | Skip creation (Step 0) |
+| In a submodule | Treat as normal repo (Step 0 guard) |
+| Native worktree tool available | Use it, skip git fallback |
+| No native tool | Git worktree fallback |
+| No consent given | Ask before creating (Step 0) |
+| `.worktrees/` exists | Use it (verify ignored) |
+| `worktrees/` exists | Use it (verify ignored) |
+| Both exist | Use `.worktrees/` |
+| Neither exists | Check CLAUDE.md → Ask user |
+| Directory not ignored | Add to .gitignore + commit |
+| Target is production | Warn + require explicit confirmation |
+| Uncommitted changes in main | Warn about state consistency |
+
+## Common Mistakes
+
+| Mistake | Problem | Fix |
+|-------|---------|-----|
+| Skipping ignore verification | Worktree contents get tracked, could trigger unintended deployments | Always use `git check-ignore` before creating project-local worktree |
+| Ignoring environment context | Operating on production without awareness, causing incidents | Always detect environment from branch name and structure, warn appropriately |
+| Assuming repo type | Using wrong verification commands for Use `find` to auto-detect from directory structure |
+| Not checking baseline state | Starting from dirty state, conflates existing issues | Verify main worktree is clean, validate YAML/JSON in new worktree |
+
+## Red Flags
+
+**Never:**
+- Create a worktree when Step 0 detects existing isolation
+- Use `git worktree add` when you have a native worktree tool (e.g., `EnterWorktree`) — this is the #1 mistake; if you have it, use it
+- Create a worktree without consent when in a normal checkout
+- Create worktree without verifying it's ignored (project-local)
+- Proceed with production operations without explicit confirmation
+- Skip environment detection
+- Ignore uncommitted changes in main worktree
+- Assume control repo type without verification
+
+**Always:**
+- Run Step 0 detection first
+- Prefer native tools over git fallback
+- Follow directory priority: existing > CLAUDE.md > ask
+- Verify directory is ignored for project-local
+- Detect and report target environment
+- Verify clean baseline
+- Confirm repo type before proceeding
+
+## Integration
+
+**Called by:**
+- **brainstorming-operations** (Phase 4) - REQUIRED when design is approved
+- **subagent-driven-operation** - REQUIRED before executing any tasks
+- **writing-operation-plans** - REQUIRED before plan execution
+- Any infrastructure skill needing isolated workspace
+
+**Pairs with:**
+- **writing-operation-plans** - Create detailed steps after workspace ready
+- **test-driven-operation** - Execute each step with verification
+- **finishing-operation-branch** - REQUIRED for cleanup and merge decision
+
+## Differences from Software Development Worktrees
+
+| Aspect | Software (Superpowers) | Infrastructure (SREPowers) |
+|-------|----------------------|---------------------------|
+| **Primary concern** | Test isolation | Environment isolation |
+| **Baseline check** | Run test suite | Verify YAML/JSON validity |
+| **Key detection** | package.json, Cargo.toml | manifests/, terraform/, etc. |
+| **Environment awareness** | Not critical | Critical (sit/uat/prod) |
+| **Safety mechanism** | Test failures block | Production warnings |
+| **Completion workflow** | finishing-a-development-branch | finishing-operation-branch |

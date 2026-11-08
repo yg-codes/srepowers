@@ -1,0 +1,251 @@
+#!/usr/bin/env bash
+# PreToolUse guard: block shell idioms that make a verification gate lie.
+#
+# This is the enforcement layer for the SREPowers verification discipline
+# (see skills/verification-guardrails/SKILL.md and
+# skills/verification-before-completion). Those are advice; this hook is the
+# part that cannot be skimmed past. It exists because the record shows the
+# prose does not self-apply: the PIPESTATUS rule was written into a template's
+# own conventions section and violated three steps later in the same file.
+#
+# A gate has two ways to lie, and both are blocked here:
+#   - CANNOT FAIL — reports PASS while the condition is broken. Manufactures
+#     confidence exactly when an operator decides whether to cross an
+#     irreversible step.
+#   - CANNOT PASS — reports FAIL on a healthy system. Trains the operator to
+#     override the one gate guarding the irreversible step.
+#
+# Design contract (mirrors srepowers-core/hooks/block-dangerous-git):
+#   - BLOCK only idioms that are *silently* wrong — the command succeeds,
+#     prints something reassuring, and the operator acts on it. An idiom that
+#     fails loudly is not this hook's business.
+#   - Exit 2 with a stderr message = deny. Claude Code surfaces the message
+#     to the model, so each message must name the fix, not just the ban.
+#   - Exit 0 (allow) on anything else, and fail OPEN on malformed/absent
+#     input or a missing jq. A parsing hiccup must never wedge every Bash
+#     call. A guard that blocks everything gets disabled, and then it guards
+#     nothing.
+#   - Scope: gate/verification idioms only. Destructive-command blocking is
+#     block-dangerous-git's job; do not duplicate it here.
+#
+# PARITY WITH THE LOCAL PYTHON HOOK (~/.claude/hooks/block-lying-gates), whose
+# deletion is gated on it. Measured 2026-09-14 by feeding both hooks the same
+# PreToolUse payloads across all five rule families plus the prose-containment
+# and ordinary-command cases:
+#   - §2.5 (privileged glob) is now CLOSED in both directions. The for-loop
+#     form (glob in an unprivileged `for` header, sudo in the body) was the
+#     Python hook's rule 3 and had no counterpart here; it is the second §2.5
+#     rule below. The sudo-verb one-liner form stays a bash-only rule.
+#   - §2.4, §2.7, §2.10, prose containment: identical verdicts on every case
+#     tested, deny and allow alike.
+#   - §2.9: both allow — retired as prose-only here, never implemented there.
+#   - This hook is STRICTER on four cases (`comm -3 && echo ok`, and the three
+#     sudo-verb glob one-liners). Strictly-more-denials is safe for deletion.
+#   - §2.2 parity CLOSED in 5.20.1: the rule now matches bare `diff` as well
+#     as `comm` (Python's `(comm|diff)` set). The diff alternative requires
+#     the literal token PASS — see the rule's comment for the `git diff`
+#     rationale — so every §2.2 case now draws the same verdict from both
+#     hooks, deny and allow alike.
+#
+# PROSE CONTAINMENT (ported from the local Python rewrite): writing PROSE THAT
+# DISCUSSES these idioms is not running them. Hit for real on 2026-09-08 — a
+# `git commit -m` whose body quoted `comm ... && echo PASS` while explaining
+# the rule was denied, blocking a commit that contained no gate at all.
+# Documenting a defect must not trip the guard that exists because of it.
+# Containment is not a bypass: the payload is stripped and the rules below
+# still fire when an idiom marker survives in open command position. Three
+# rejected designs, each recorded because it failed a real case:
+#   - Whole-command prose detection is a bypass: `git commit -m "wip" &&
+#     comm -13 a b && echo PASS` sails through.
+#   - Splitting on `&&`/`;` and blanking prose segments breaks the checks
+#     themselves, because the idioms SPAN the operator (`comm ... && echo
+#     PASS` is exactly such a span).
+#   - Requiring the prose construct at position 0 cannot separate the two:
+#     the bypass legitimately starts at 0, while `cat >> notes.md <<EOF`
+#     starts at 4.
+# What distinguishes them is CONTAINMENT: in real prose the idiom sits inside
+# the message string or heredoc body; in the bypass it sits in open command
+# position after the chain operator. So: strip the payload, and evaluate the
+# rules only when an idiom marker survives outside it.
+#
+# RETIRED AS PROSE-ONLY (advice, never blocked — see SKILL.md and
+# verification-gates.md §2.9): the trailing-slash pointer grep
+# (`grep -q "/uat/"`) and the exact-string grep on column-aligned output
+# (`grep -q "Return-Code: Success"`). Both require knowing the exact string
+# the target tool prints; a regex broad enough to catch them mechanically
+# false-positives constantly, and a noisy gate gets disabled — then it guards
+# nothing.
+#
+# DELIBERATELY NOT BLOCKED (false-positive cost exceeds the benefit):
+#   - `cmd | head`/`tail` generally — truncating for volume is fine and
+#     common; only the `echo $?`-after-pipe form is a real lie.
+#   - `${VAR:-default}` generally — most uses are display fallbacks
+#     (`${N:-UNKNOWN}`). Only the forms that select what a change DOES.
+#   - `grep -c` without `|| true` — depends on `set -e` being active, which
+#     this hook cannot see from the command string alone.
+
+set -uo pipefail
+
+input="$(cat 2>/dev/null || true)"
+[ -n "$input" ] || exit 0
+
+cmd=""
+if command -v jq >/dev/null 2>&1; then
+  cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // empty' 2>/dev/null || true)"
+fi
+
+# jq missing or field absent → nothing to inspect. Fail open.
+[ -n "$cmd" ] || exit 0
+
+# --- prose containment --------------------------------------------------------
+# A prose-payload construct is any of (grep ORs the -e patterns):
+#   1. a git commit/tag/notes message flag  (-m / -am / …, or -F)
+#   2. a redirect into a prose file         (.md .markdown .txt .rst)
+#   3. a redirect into a prose directory    (/docs/ /memory/ /tickets/
+#                                            /runbooks/)
+# `(^|[^[:alnum:]_])` before `git` and `([^[:alpha:]_]|$)` after the message
+# flag / file extension spell \b in ERE (ERE has no zero-width boundary after
+# the subcommand, so `git commitx -m` would also trigger — harmless: it is
+# not a real command, and a trigger only means "run the strip and marker
+# check"). Heredocs need no trigger of their own: every heredoc payload worth
+# containing is redirected into a file.
+prose_git_msg='(^|[^[:alnum:]_])git[[:space:]]+(commit|tag|notes)[^|]*[[:space:]]-[[:alpha:]]*m([^[:alpha:]_]|$)'
+prose_git_file='(^|[^[:alnum:]_])git[[:space:]]+(commit|tag)[^|]*[[:space:]]-F([^[:alpha:]_]|$)'
+prose_redirect_file='>>?[[:space:]]*[^[:space:]]+\.(md|markdown|txt|rst)([^[:alnum:]_]|$)'
+prose_redirect_dir='>>?[[:space:]]*[^[:space:]]*(/docs/|/memory/|/tickets/|/runbooks/)'
+
+# Here-strings, not `printf | grep`: under pipefail, grep -q closes the pipe
+# on first match and SIGPIPEs printf, silently swallowing the match (same
+# reason the rule loop below uses one).
+if grep -qE \
+     -e "$prose_git_msg" \
+     -e "$prose_git_file" \
+     -e "$prose_redirect_file" \
+     -e "$prose_redirect_dir" \
+     <<<"$cmd" 2>/dev/null; then
+  # Strip the payloads — heredoc bodies, then quoted -m message strings — and
+  # ask whether any idiom marker survives OUTSIDE them.
+  #
+  # Heredoc bodies are stripped by the awk state machine, line-based: the
+  # opener line stays, body lines are dropped, and the FIRST line that is
+  # exactly `EOF` ends the payload (an opener with no terminator drops
+  # everything after it — which is also where bash would put that text). A
+  # single sed expression cannot say "first terminator": under POSIX
+  # leftmost-longest, `.*\nEOF` spans to the LAST `\nEOF`, swallowing a lying
+  # gate sandwiched between two doc heredocs (found in review, round 1). The
+  # terminator is the exact line `EOF` — slightly stricter than the Python
+  # original's first `\nEOF` substring (a body line that merely starts with
+  # `EOF` does not terminate), so this strips LESS than Python, never more:
+  # the divergence can only turn an allow into a deny, not the unsafe way.
+  # The -m payload strip stays in sed -z because a quoted message string can
+  # span lines. If the strip cannot run (no awk, non-GNU sed, any error)
+  # `stripped` is empty and we fall through to the rules on the full command:
+  # the pre-containment behavior — wrong only in the known false-positive
+  # direction, never a bypass.
+  stripped="$(awk '
+      /^EOF$/ { inh = 0; next }
+      inh { next }
+      /<<-?[[:space:]]*['"'"'"]?EOF['"'"'"]?/ { inh = 1 }
+      { print }
+    ' <<<"$cmd" 2>/dev/null | sed -zE \
+      -e 's/-[[:alpha:]]*m[[:space:]]+("[^"]*"|'"'"'[^'"'"']*)/ /g' \
+      2>/dev/null || true)"
+  if [ -n "$stripped" ] && ! grep -qE \
+      '(^|[^[:alnum:]_])(comm|diff|for|grep|is-active)([^[:alnum:]_]|$)' \
+      <<<"$stripped" 2>/dev/null; then
+    # The command only DISCUSSES an idiom — nothing idiom-shaped survives in
+    # command position. Allow.
+    exit 0
+  fi
+fi
+
+# Each entry is "extended-regex<TAB>reason<TAB>fix".
+# Patterns are deliberately narrow: they target the exact lying form, not the
+# tool. Over-broad patterns are how a guard earns its way into being disabled.
+#
+# SC2016 is suppressed for this array only: the entries are regex and shell
+# literals that must reach grep and the operator verbatim. Expanding $?,
+# ${PIPESTATUS[0]}, or a $-anchor here would corrupt both the pattern and the
+# suggested fix. (block-dangerous-git needs no such directive only because its
+# patterns happen to contain no `$`.)
+# shellcheck disable=SC2016
+rules=(
+  # --- gates that cannot fail -------------------------------------------
+  # `comm ... && echo PASS`: comm exits 0 even while printing differences, so
+  # this prints the regression and then prints PASS.
+  # Narrow on purpose: no `.*` before `&&`, and the comm must not be inside a
+  # command substitution. `NEW=$(comm -13 a b); [ -z "$NEW" ] && echo PASS` is
+  # the CORRECT form and must not match — an earlier `.*&&` version blocked it,
+  # which would have banned exactly what the rule prescribes.
+  # The `diff` alternative (added 5.20.1 to close the last parity gap with the
+  # Python hook) requires the literal success token PASS where comm accepts the
+  # wider OK/ok/pass set: `git diff --stat HEAD~1 && echo ok` is a common
+  # informational command and must stay allowed, and `git diff` prints its
+  # differences and exits 0 — so `git diff ... && echo PASS` is itself the
+  # lying-gate shape and SHOULD deny (Python's \bdiff\b matches it too; exact
+  # parity). Known edge, matching Python: `git diff --quiet && echo PASS` is a
+  # correct gate (--quiet exits 1 on differences) and is still denied — write
+  # it as capture-and-test.
+  'comm[[:space:]]+-[0-9]{1,3}[^;&|$)]*&&[[:space:]]*(echo|printf)[[:space:]]*.?(PASS|OK|ok|pass)|diff[[:space:]][^;&|$)]*&&[[:space:]]*(echo|printf)[[:space:]]*.?PASS.?	comm and diff exit 0 even while printing differences, so this prints the regression AND reports PASS	capture to a variable and test it empty: NEW=$(comm -13 a b); [ -z "$NEW" ] && echo PASS || { echo FAIL; echo "$NEW"; }'
+
+  # `$?` read straight after a pipe: it is the LAST command status, so a
+  # failed producer reports rc=0.
+  '\|[[:space:]]*(tee|head|tail)[[:space:]][^;&|]*[;&][[:space:]]*(echo|printf|rc=)[^;]*\$\?	$? after a pipe is the LAST command status, so a failed command reports rc=0	use rc=${PIPESTATUS[0]} (send the payload via ssh host '"'"'bash -s'"'"' so it is bash, not /bin/sh), or drop the pipe'
+
+  # Unprivileged glob handed to a privileged command: the glob expands in the
+  # OUTER shell, so over a mode-700 dir it expands to nothing, the command
+  # never sees the files, and the check reports clean having read nothing.
+  # `sudo bash -c '...*...'` is the CORRECT form (glob expands inside the
+  # privileged shell) so `bash|sh` must not appear in the verb list. The
+  # boundary is a non-word char rather than line-start, so the pattern still
+  # fires inside a quoted ssh payload: ssh h "sudo ls /boot/loader/entries/*".
+  '(^|[^[:alnum:]_-])sudo[[:space:]]+(ls|cat|stat|wc|grep|head|tail|find)[[:space:]][^;&|]*/(boot/loader/entries|etc/ssh/ssh_host|root/)[^;&|]*\*	the glob expands in the UNPRIVILEGED outer shell before sudo runs, so over a mode-700 path it expands to nothing and the check reports clean having read nothing	put the whole thing inside the privileged shell: sudo bash -c '"'"'shopt -s nullglob; ...'"'"' and assert it iterated (fail if the count is 0)'
+
+  # The other half of §2.5: the glob sits in a `for` header evaluated by the
+  # UNPRIVILEGED outer shell, and only the loop BODY is privileged. Over a
+  # mode-700 path the header expands to nothing, the loop iterates zero times,
+  # and the check reports clean having inspected nothing. Ported from the local
+  # Python hook's rule 3 to close the §2.5 parity gap (the sudo-verb rule above
+  # covers the one-liner form; this covers the loop form).
+  # Narrow the same way: `[^;*]*\*` keeps the glob inside the header, and
+  # `[^;]*sudo` keeps the privileged verb in the same simple command list as
+  # the `do`. `sudo bash -c '...for...*...'` is the CORRECT form and must not
+  # match — it does not, because there `sudo` precedes `for`, never follows it.
+  # `do` and `sudo` carry their own surrounding-whitespace requirement instead
+  # of the `(^|[^[:alnum:]_-])` boundary group used elsewhere: after `do[[:space:]]`
+  # the `[^;]*` cannot also yield a separator character for a leading boundary
+  # group when sudo is the first word of the body, so the group form never
+  # matched the very case this rule exists for.
+  'for[[:space:]]+[[:alnum:]_]+[[:space:]]+in[[:space:]]+[^;*]*\*[^;]*;[[:space:]]*do[[:space:]][^;]*sudo[[:space:]]	the glob expands in the UNPRIVILEGED outer shell before the loop body sudo runs, so over a mode-700 path it expands to nothing, the loop iterates zero times, and the check reports clean having inspected nothing	put the WHOLE loop inside the privileged shell: sudo bash -c '"'"'shopt -s nullglob; N=0; for e in ...*; do N=$((N+1)); ...; done; [ $N -eq 0 ] && { echo "FAIL: zero entries parsed"; exit 9; }'"'"''
+
+  # Denylisting error values in a gate hides exactly what the gate is for.
+  'grep[[:space:]]+(-[[:alnum:]]*[[:space:]]+)*-[[:alnum:]]*v[[:alnum:]]*[[:space:]]+.?(Error|FAIL|failed|CRITICAL)	a gate that denylists error values hides the failure it exists to catch	allowlist the known-good value instead (grep for the success string) and treat everything else as failure'
+
+  # --- gates that cannot pass -------------------------------------------
+  # (The trailing-slash pointer grep and the exact-string grep on aligned
+  # output used to live here; both are retired as prose-only — see the header
+  # and SKILL.md.)
+  #
+  # `grep -q active` matches `activating` as a substring, so a crash-looping
+  # unit passes the gate while the service is dead.
+  'systemctl[[:space:]]+is-active[^;&|]*\|[[:space:]]*grep[[:space:]]+(-[[:alnum:]]*[[:space:]]+)*.?active.?[[:space:]]*($|[;&|])	"active" matches "activating" as a substring, so a crash-looping unit passes this gate while the service is dead	compare exactly ([ "$(systemctl is-active X)" = active ]) or use systemctl is-active --quiet; for a service endpoint, probe the port instead'
+)
+
+for rule in "${rules[@]}"; do
+  pattern="${rule%%$'\t'*}"
+  rest="${rule#*$'\t'}"
+  reason="${rest%%$'\t'*}"
+  fix="${rest#*$'\t'}"
+  # Here-string, not `printf | grep -q`: under pipefail, grep -q closes the
+  # pipe on first match and SIGPIPEs printf, which pipefail reports as a
+  # pipeline failure — silently swallowing the match.
+  if grep -qE "$pattern" <<<"$cmd" 2>/dev/null; then
+    echo "BLOCKED by srepowers verification-guardrails: ${reason}." >&2
+    echo "Fix: ${fix}" >&2
+    echo "Command: ${cmd}" >&2
+    echo "See the srepowers-core:verification-guardrails skill. If this is genuinely required, ask the user to run it directly (! prefix) or disable the guard." >&2
+    exit 2
+  fi
+done
+
+exit 0

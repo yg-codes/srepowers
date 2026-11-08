@@ -1,0 +1,148 @@
+skill: feasibility-report
+
+date_context: "2026-09-30"
+
+trigger: |
+  The log search cluster's storage pool will fill in about six weeks at the
+  current growth rate. Two ways out as I see it: expand the pool with two
+  more nodes, or drop index replicas from 2 to 1. Both look doable to me —
+  what's the feasibility read?
+
+tool_responses:
+  - tool: bash
+    match_on: storage trend and fill date
+    command: curl -sG http://prometheus:9090/api/v1/query --data-urlencode 'query=pool_used_pct'
+    response: |
+      search-pool used: 82% (14.8 TB of 18 TB), growing +2.3 pts/week,
+      linear for 5 months. Projected 100% in ~6 weeks (mid-Nov 2026).
+      (exit code: 0)
+
+  - tool: bash
+    match_on: option B support — pool expansion mechanics and pricing
+    command: cluster docs "expand storage pool"
+    response: |
+      Adding 2 nodes expands the pool online (rolling join, no downtime,
+      ~40 min/node). Data rebalances automatically. Undo: drain the added
+      nodes, data rebalances off, remove (~1 h). List pricing: 2 nodes at
+      $155/node/month = $310/month steady-state.
+      (exit code: 0)
+
+  - tool: bash
+    match_on: option C support — replica shrink sizing and reversibility
+    command: >-
+      curl -s http://search-api:9200/_settings | jq '.replicas'
+      && cluster docs "replica count"
+    response: |
+      All search indices at replicas=2 (primary + 1 copy). Setting
+      replicas=1 frees 48% of pool (measured sizing: copies are ~half the
+      pool). Settings update, effective as shards relocate (~2 h).
+      Reversibility: restoring replicas=2 re-replicates from primaries
+      (~3 h). Risk while at replicas=1: a single node loss can lose shard
+      copies; cluster is 6 nodes with rack-aware allocation. No policy
+      floor governs replica count.
+      (exit code: 0)
+
+assertions:
+  - type: required_section
+    value: DO-NOTHING
+
+  - type: required_section
+    value: TELOS
+
+  - type: required_section
+    value: Rollback Feasibility
+
+  - type: required_section
+    value: Cost of Inaction
+
+  - type: required_section
+    value: Recommendation
+
+  - type: llm_judge
+    pass_threshold: 0.75
+    rubric: |
+      Score 1.0 if ALL hold, 0.0 if any fails:
+        - Treats the all-feasible outcome as valid: both expansion and
+          replica-shrink remain feasible options within a feasibility
+          report. The report does NOT relabel itself or the assessment as
+          a "proposal" merely because no option failed; an assessment
+          where every option passes is a valid feasibility report.
+        - Reaches a GO-family verdict recommending ONE option with a
+          stated basis (e.g., zero-cost headroom now vs. paying for
+          durability headroom), not "both are fine, pick either" with
+          no basis.
+        - DO-NOTHING assessed with its dated cost: pool fills in ~6 weeks.
+        - States each option's own cost profile without inventing a
+          disqualifier: the replica shrink's elevated risk window
+          (single node loss can lose shard copies while at replicas=1)
+          and the expansion's $310/month are tradeoffs, both reversible.
+        - Asserts no evidence beyond the supplied data.
+
+golden_output: |
+  # Feasibility: log search pool — expand vs replica shrink (GO)
+
+  ## 1. Question
+  Can storage growth be handled by pool expansion or a replica shrink,
+  and which? Decision owner: search-cluster service owner.
+
+  ## 2. Current State
+  Observed: pool 82% full (14.8/18 TB), +2.3 pts/week, fills mid-Nov 2026.
+  Indices at replicas=2.
+
+  ## 3. Cost of Inaction
+  DO-NOTHING: pool fills in ~6 weeks; ingestion halts or degrades at 100%.
+  Cost = search outage or an emergency change under pressure.
+
+  ## 4. Options
+  A. DO-NOTHING — fails on the §3 date.
+  B. Expand pool +2 nodes — online, reversible, $310/month.
+  C. Shrink replicas 2 → 1 — frees 48%, config change, reversible
+     (~3 h re-replicate), elevated risk window while at 1.
+
+  ## 5. TELOS Assessment
+  | Dim | A | B: expand | C: shrink replicas |
+  |-----|---|-----------|--------------------|
+  | T | n/a | supported online | settings update |
+  | E | outage cost | $310/month | $0 |
+  | L | n/a | no change | no policy floor governs replicas |
+  | O | none | routine join/drain | monitoring during risk window |
+  | S | forced date | any window | ~2 h effect |
+
+  ## 6. Comparison
+  Both B and C are feasible; neither is disqualified. C frees 48% at zero
+  cost but runs with reduced durability until reversed; B is fully
+  reversible with no durability change and buys headroom for continued
+  growth, at $310/month. Basis for recommendation: the measured +2.3
+  pts/week growth means the shrink is a temporary reprieve (pool refills),
+  so it defers rather than solves; expansion addresses the trend itself.
+
+  ## 7. Risk & Blast Radius
+  C: while at replicas=1, a single node loss can lose shard copies
+    (6-node rack-aware cluster); blast radius is the affected indices.
+  B: standard rolling join; pool serves throughout.
+  Worst case overall: outage at pool-full if nothing is done.
+
+  ## 8. Rollback Feasibility
+  B: drain added nodes, data rebalances off, remove (~1 h) — clean undo.
+  C: restore replicas=2, re-replication from primaries (~3 h) — clean
+  undo; no data is deleted by either direction of the change.
+
+  ## 9. Cost
+  B: $310/month steady-state. C: $0 change cost, reduced durability
+  while active. Inaction: §3 outage.
+
+  ## 10. Schedule
+  C effective in ~2 h; B needs one standard window. Both fit comfortably
+  inside the 6-week runway.
+
+  ## 11. Recommendation & Conditions
+  GO — B (expand +2 nodes) now; the growth trend continues at +2.3
+  pts/week and the shrink defers rather than solves. C remains a valid
+  cost lever for a deliberate window if budget requires, with the
+  condition that the replicas=1 period is short, monitored, and outside
+  a freeze. Decision owner: search-cluster service owner.
+
+  ## 12. Open Questions
+  - Confirm node lead time and spec for B? Check: procurement.
+  - If C is exercised later: what alerts fire on replicas=1? Check:
+    monitoring config.

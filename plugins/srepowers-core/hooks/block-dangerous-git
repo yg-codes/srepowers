@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+# PreToolUse guard for SREPowers in Claude Code and Codex.
+#
+# Mechanically blocks the destructive git commands enumerated in the SREPowers
+# safety guardrails BEFORE they run, regardless of whether the model chose to
+# invoke the advisory `srepowers-core:safety-validator` skill. This is the
+# enforcement layer; safety-validator is the advice layer.
+#
+# Design contract (see skills/git-guardrails/SKILL.md):
+#   - BLOCK the irreversible / history-rewriting / mass-staging operations
+#     below. Plain `git push`, `git push origin <branch>`, and `git push -u`
+#     are ALLOWED — SREPowers' own finishing-operation-branch workflow pushes
+#     branches, so a blanket push block would break the toolchain.
+#   - On a blocked command, exit 2 with a stderr message. Claude Code's
+#     PreToolUse protocol treats a non-zero exit with stderr as a deny and
+#     surfaces the message to the model.
+#   - On anything else, exit 0 (allow). Fail open on malformed/absent input so
+#     a parsing hiccup never wedges every Bash call.
+
+set -euo pipefail
+
+# The harness pipes the PreToolUse event as JSON on stdin. We only guard Bash
+# tool calls; the command string lives at .tool_input.command.
+input="$(cat 2>/dev/null || true)"
+[ -n "$input" ] || exit 0
+
+command_string=""
+if command -v jq >/dev/null 2>&1; then
+  command_string="$(printf '%s' "$input" | jq -r '.tool_input.command // empty' 2>/dev/null || true)"
+fi
+
+# jq missing or field absent → nothing to inspect. Fail open.
+[ -n "$command_string" ] || exit 0
+
+# --- payload containment ------------------------------------------------------
+# Text that only MENTIONS a dangerous command is not running it. Before 5.32.2
+# the rules ran over the raw string, so `rg "git reset --hard" docs/`, a commit
+# message quoting the rule, and a heredoc writing these docs were all denied.
+# Containment strips only payloads that can never execute; anything that
+# might execute (an `ssh h '…'` or `bash -c "…"` argument, a heredoc fed to a
+# shell or written to a script) stays in and is still matched:
+#   1. heredoc bodies whose opener writes a prose file (.md .markdown .txt .rst,
+#      or a /docs/ /memory/ /tickets/ /runbooks/ path) with no pipe, or passes
+#      the body as a message (`-m "$(cat <<'EOF'`, `--body`, `-d`, …);
+#   2. quoted arguments of a search command (rg, grep, egrep, fgrep, ag) or of
+#      git grep/log/commit/tag/notes, in command position, up to the next
+#      separator. A double-quoted string containing `$` or a backtick is kept
+#      — command substitution inside it would run.
+# If either strip fails, scan_text falls back to the full command: the error
+# direction is a false deny, never a bypass.
+#
+# SC2016 is suppressed for the regex literals below: `$` must reach awk, sed
+# and grep verbatim.
+# shellcheck disable=SC2016
+strip_heredocs='
+  inh {
+    line = $0
+    if (strip_tabs) sub(/^\t+/, "", line)
+    if (line == delim) { inh = 0; print; next }
+    if (!keep) next
+    print; next
+  }
+  {
+    print
+    if (match($0, /<<-?[ \t]*["\x27]?[A-Za-z_][A-Za-z0-9_]*["\x27]?/)) {
+      op = substr($0, RSTART, RLENGTH)
+      strip_tabs = (op ~ /^<<-/)
+      gsub(/^<<-?[ \t]*/, "", op); gsub(/["\x27]/, "", op)
+      delim = op; inh = 1
+      prose = ($0 ~ />>?[ \t]*[^ \t]*(\.(md|markdown|txt|rst)([^A-Za-z0-9_]|$)|\/(docs|memory|tickets|runbooks)\/)/ && $0 !~ /\|/)
+      msg = ($0 ~ /(-m|-F|--message|--body|--description|-d|-b)[ \t=]+"?\$\(cat[ \t]+<</)
+      keep = !(prose || msg)
+    }
+  }
+'
+# shellcheck disable=SC2016
+search_head='((^|[;&|(\n])[[:space:]]*((sudo|env|command|xargs)[[:space:]]+)*(rg|grep|egrep|fgrep|ag|git([[:space:]]+-[^[:space:];&|]+([[:space:]]+[^-[:space:];&|][^[:space:];&|]*)?)*[[:space:]]+(grep|log|commit|tag|notes))([[:space:]][^;&|\n"'"'"']*)?)'
+# shellcheck disable=SC2016
+quoted_data='("[^"$`]*"|'"'"'[^'"'"']*'"'"')'
+
+scan_text="$(awk "$strip_heredocs" <<<"$command_string" 2>/dev/null \
+  | sed -zE ':a; s/'"$search_head$quoted_data"'/\1 /; ta' 2>/dev/null || true)"
+[ -n "$scan_text" ] || scan_text="$command_string"
+
+# --- rules --------------------------------------------------------------------
+# Each entry is "extended-regex<TAB>human reason". grep matches line by line,
+# so a newline already ends a command.
+#
+# G: `git` followed by any global options, so `git -C <path> reset --hard`
+# cannot slip past a rule anchored on `git reset` (it did before 5.32.2).
+# Covers -C/-c with a plain or quoted value, --git-dir/--work-tree style
+# options with a value, and bare flags (--no-pager, -P, …).
+#
+# A: the argument span after a subcommand. `[^;&|]*` stops at a command
+# separator, so `git push origin x && rm -f tmp` no longer reads `-f` as a
+# force-push flag (`.*` did).
+#
+# Short-flag rules (-f, -D) require the cluster to be a whitespace-delimited
+# token: `([[:space:]]|A[[:space:]])FLAG([[:space:]]|$)`. Without the trailing
+# boundary, `-[[:alnum:]]*f` matched any hyphenated word ending in the flag
+# letter — `git push -u origin fix/my-bugfix` was blocked as a force-push
+# because `-bugf` matched. Order does not matter — first match wins.
+#
+# E: the end of a flag token. Whitespace and end-of-line alone missed a flag
+# closed by a quote, backtick, `)` or separator, so `ssh h "git clean -fd"`
+# and `bash -c "git push -f"` passed before 5.32.2.
+G='git([[:space:]]+(-[Cc][[:space:]]+("[^"]*"|'"'"'[^'"'"']*'"'"'|[^[:space:]]+)|--(git-dir|work-tree|namespace|exec-path|config-env)([[:space:]]+|=)[^[:space:]]+|-[[:alpha:]]|--[[:alnum:]-]+(=[^[:space:]]+)?))*[[:space:]]+'
+A='[^;&|]*'
+E='([[:space:]"'"'"'`);&|]|$)'
+rules=(
+  "${G}push([[:space:]]|${A}[[:space:]])(--force(-with-lease|-if-includes)?(=[^[:space:]]*)?|-[[:alnum:]]*f[[:alnum:]]*)${E}	force-push rewrites remote history (use a normal push)"
+  "${G}reset[[:space:]]${A}--hard	reset --hard discards uncommitted work irrecoverably"
+  "${G}clean([[:space:]]|${A}[[:space:]])(--force|-[[:alnum:]]*f[[:alnum:]]*)${E}	clean -f deletes untracked files irrecoverably"
+  "${G}branch([[:space:]]|${A}[[:space:]])-[[:alnum:]]*D[[:alnum:]]*${E}	branch -D force-deletes a branch, losing unmerged commits"
+  "${G}checkout[[:space:]]+(--[[:space:]]+)?\.${E}	checkout . discards all unstaged changes irrecoverably"
+  "${G}checkout([[:space:]]|${A}[[:space:]])(--force|-[[:alnum:]]*f[[:alnum:]]*)${E}	checkout -f discards local changes irrecoverably"
+  "${G}switch([[:space:]]|${A}[[:space:]])(--discard-changes|--force|-[[:alnum:]]*f[[:alnum:]]*)${E}	switch --discard-changes / -f discards local changes irrecoverably"
+  "${G}restore[[:space:]]+(--staged[[:space:]]+|--[[:space:]]+)*\.${E}	restore . discards working-tree changes irrecoverably"
+  "${G}worktree[[:space:]]+remove([[:space:]]|${A}[[:space:]])(--force|-[[:alnum:]]*f[[:alnum:]]*)${E}	worktree remove --force deletes the worktree with its uncommitted and untracked files (use plain remove; revert --abort first)"
+  "${G}add([[:space:]]|${A}[[:space:]])(-[[:alnum:]]*A${E}|--all|\.${E})	git add -A / add . stages indiscriminately (stage explicit files)"
+  "git[[:space:]]${A}--no-verify	--no-verify skips pre-commit hooks"
+)
+
+for rule in "${rules[@]}"; do
+  pattern="${rule%%$'\t'*}"
+  reason="${rule#*$'\t'}"
+  # Use a here-string, not `printf | grep -q`: under `set -o pipefail`, grep -q
+  # closes the pipe on first match and SIGPIPEs printf, which pipefail then
+  # reports as a pipeline failure — silently swallowing the match.
+  if grep -qE "$pattern" <<<"$scan_text"; then
+    echo "BLOCKED by srepowers git-guardrails: ${reason}." >&2
+    echo "Command: ${command_string}" >&2
+    echo "If this is genuinely required, ask the user to run it directly (! prefix) or disable the guard." >&2
+    exit 2
+  fi
+done
+
+exit 0

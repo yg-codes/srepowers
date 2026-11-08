@@ -1,0 +1,6 @@
+# desc: last event per expected host; prints SENDING/STALE/ABSENT per host (ABSENT = FAIL)
+# earliest: -30d
+# hosts: HOSTS
+# usage: -q host-last-seen HOSTS=web01,web02   (short names; profile HOST_FORMAT applied)
+| tstats count max(_time) as last where index=* host IN ({{HOSTS}}) by host index sourcetype
+| eval last_iso=strftime(last,"%Y-%m-%dT%H:%M:%S%z")

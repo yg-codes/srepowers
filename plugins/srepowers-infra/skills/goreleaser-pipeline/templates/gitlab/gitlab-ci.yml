@@ -1,0 +1,20 @@
+stages:
+  - release
+
+release:
+  stage: release
+  image: golang:{{GO_IMAGE}}-bookworm
+  only:
+    - /^v\d+\.\d+\.\d+$/
+  variables:
+    GOPATH: "$CI_PROJECT_DIR/.go"
+    GORELEASER_VERSION: "2.15.4"
+  before_script:
+    - go version
+    - curl -sL https://github.com/goreleaser/goreleaser/releases/download/v${GORELEASER_VERSION}/goreleaser_Linux_x86_64.tar.gz | tar -C /usr/local/bin -xz goreleaser
+  script:
+    - goreleaser release --clean
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 week

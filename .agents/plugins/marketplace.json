@@ -1,0 +1,49 @@
+{
+  "name": "srepowers-marketplace",
+  "description": "SRE + software-engineering agent skills marketplace for Codex compatibility",
+  "owner": {
+    "name": "yg-codes",
+    "email": "yg-codes@users.noreply.github.com"
+  },
+  "interface": {
+    "displayName": "SREPowers"
+  },
+  "plugins": [
+    {
+      "name": "srepowers-core",
+      "description": "SRE workflow spine, mandatory gates, and incident response",
+      "version": "5.41.1",
+      "source": {
+        "source": "local",
+        "path": "./plugins/srepowers-core"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Engineering",
+      "author": {
+        "name": "yg-codes",
+        "email": "yg-codes@users.noreply.github.com"
+      }
+    },
+    {
+      "name": "srepowers-infra",
+      "description": "Portable Proxmox, Puppet analysis, DNS, TLS, backup, and GitLab CI/CD administration",
+      "version": "5.41.1",
+      "source": {
+        "source": "local",
+        "path": "./plugins/srepowers-infra"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Engineering",
+      "author": {
+        "name": "yg-codes",
+        "email": "yg-codes@users.noreply.github.com"
+      }
+    }
+  ]
+}

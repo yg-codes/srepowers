@@ -1,0 +1,7 @@
+# desc: hosts seen in the lookback window but silent for at least SILENT
+# earliest: -30d
+# default: SILENT=24h
+| tstats count max(_time) as last where index=* by host index sourcetype
+| where last < relative_time(now(), "-{{SILENT}}")
+| eval last_iso=strftime(last,"%Y-%m-%dT%H:%M:%S%z")
+| sort last

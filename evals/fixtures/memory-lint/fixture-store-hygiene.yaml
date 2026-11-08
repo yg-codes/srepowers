@@ -1,0 +1,91 @@
+skill: memory-lint
+
+trigger: |
+  I just saved a few memories. Check the memory store is still consistent and
+  tell me what needs fixing.
+
+# The skill runs one script in a real run; its whole output is pre-answered here.
+tool_responses:
+  - tool: bash
+    match_on: run memory_lint over the store
+    command: python3 plugins/srepowers-core/skills/memory-lint/scripts/memory_lint.py
+    response: |
+      WARN unindexed-file: project-cutover-plan.md: not referenced from MEMORY.md
+      WARN possible-pii-email: MEMORY.md:7: email-shaped span (value redacted from this report — a real address re-egresses on every later read)
+      WARN duplicate-name: deploy_notes.md: name `deploy-notes` already used by deploy-notes.md
+      INFO dangling-link: project-cutover-plan.md: [[rollback-drill]] has no memory with that name yet
+      checked 9 memory files in /home/user/.config/agent/projects/-home-user-code/memory
+      (exit code: 1)
+
+assertions:
+  # Each WARN rule id appears verbatim in the mocked output, so a faithful
+  # report reproduces it. Each is a literal the tool emits, not a paraphrase.
+  - type: required_section
+    value: unindexed-file
+
+  - type: required_section
+    value: possible-pii-email
+
+  - type: required_section
+    value: duplicate-name
+
+  # The INFO must be surfaced too — as sanctioned, not as a defect.
+  - type: required_section
+    value: dangling-link
+
+  # The denominator is part of the result, verbatim from the mock.
+  - type: required_section
+    value: "9 memory files"
+
+  - type: llm_judge
+    rubric: |
+      The output reports a memory-lint run that found 3 WARNs and 1 INFO.
+      Score 1.0 if ALL of the following hold:
+        - All three WARN rules are reported, each with a concrete fix (add the
+          index line, redact the address, merge or rename the duplicate slug).
+        - The INFO dangling-link is explicitly NOT treated as an error: a link
+          to a not-yet-written memory is sanctioned, and the output must not
+          advise deleting the link to silence it.
+        - The PII finding is treated as a standing leak because MEMORY.md is
+          re-read every session, not as a one-time cosmetic issue.
+        - The number of files checked is stated, so "nothing else is wrong" has
+          a denominator rather than being an unbounded claim.
+        - No finding is invented beyond the five lines the tool emitted, and the
+          store is not described as healthy while WARNs are outstanding.
+      Deduct 0.2 for each missing item. Wording need not match the golden.
+    pass_threshold: 0.9
+
+golden_output: |
+  # memory-lint: 3 WARN, 1 INFO across 9 memory files
+
+  Exit 1 — three small fixes before the store is consistent again.
+
+  ## WARN — fix these now
+
+  **`unindexed-file` — `project-cutover-plan.md`**
+  Not referenced from MEMORY.md, so it is invisible to recall. Add a one-line
+  pointer to the index.
+
+  **`possible-pii-email` — `MEMORY.md:7`**
+  Redact the address. MEMORY.md is the index loaded into every session, so an
+  address there is a **standing** leak re-read on every later call — not a
+  one-time exposure. The value is redacted from the tool's own report by
+  design; open the line to fix it.
+
+  **`duplicate-name` — `deploy_notes.md` vs `deploy-notes.md`**
+  Both resolve to the slug `deploy-notes` (`-` and `_` are equivalent), so one
+  wins arbitrarily on lookup. Merge them, or rename one.
+
+  ## INFO — leave alone
+
+  `dangling-link: project-cutover-plan.md: [[rollback-drill]]` is **not** an
+  error. A link to a memory that does not exist yet marks something worth
+  writing later — the sanctioned use. Do not delete the link to silence the
+  line; that discards the signal.
+
+  ## Scope
+
+  9 memory files were checked. Those five findings are the complete set for
+  those files, and the store is **not** clean until the three WARNs are fixed.
+  This check covers structure only — it cannot tell you whether a memory is
+  stale or wrong in substance.

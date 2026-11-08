@@ -1,0 +1,82 @@
+skill: md-to-html
+
+trigger: |
+  I drafted a status report at notes/status-report.md. Render it to HTML and
+  open it in my browser so I can see it as it will actually read.
+
+tool_responses:
+  - tool: bash
+    match_on: render the report to HTML with the skill's script
+    command: python3 plugins/srepowers-core/skills/md-to-html/scripts/md_to_html.py notes/status-report.md
+    response: |
+      converted: notes/status-report.md -> notes/status-report.html
+      opened in default browser (wsl)
+      (exit code: 0)
+
+  - tool: bash
+    match_on: confirm the rendered table and fence survived
+    command: >-
+      python3 plugins/srepowers-core/skills/md-to-html/scripts/md_to_html.py
+      notes/status-report.md -o /tmp/preview.html
+    response: |
+      converted: notes/status-report.md -> /tmp/preview.html
+      opened in default browser (wsl)
+      (exit code: 0)
+
+assertions:
+  # The conversion went through the script's pandoc path — not hand-written HTML.
+  - type: required_section
+    value: pandoc
+
+  # The output path is stated so the reader can open it again later.
+  - type: required_section
+    value: .html
+
+  # On WSL the reply must be explicit that the file opened in the WINDOWS
+  # browser — "opened in browser" alone hides which desktop it appeared on.
+  - type: required_section
+    value: WSL
+
+  - type: llm_judge
+    rubric: |
+      The output reports a Markdown-to-HTML conversion done with md-to-html.
+      Score 1.0 if ALL of the following hold:
+        - The HTML was produced by running scripts/md_to_html.py (pandoc
+          underneath), not by hand-writing HTML in the reply.
+        - The rendered output path is stated exactly as the tool printed it.
+        - The open step names the platform routing actually used — on WSL,
+          the Windows default browser via wslview or cmd.exe start — not a
+          generic "opened in browser".
+        - No claim is made that the file was opened when the tool response
+          did not show a successful open.
+        - The reply does not offer to convert by hand or re-render manually;
+          deviations (e.g. a missing file) route back to the script's errors.
+      Deduct 0.2 for each missing item. Wording need not match the golden.
+    # 5 items x 0.2 means one omission scores 0.8; the threshold must exceed
+    # that or "ALL of the following" is not what the gate enforces.
+    pass_threshold: 0.9
+
+golden_output: |
+  Rendered with the md-to-html skill — conversion via pandoc (GFM), so the
+  pipe tables and fenced blocks in your draft come through exactly as GitHub
+  would show them.
+
+  ```text
+  converted: notes/status-report.md -> notes/status-report.html
+  opened in default browser (wsl)
+  ```
+
+  You are on WSL, so "default browser" means the **Windows** default — the
+  script translated the path with `wslpath -w` and handed it to
+  `cmd.exe /c start ""`, which opens it in Chrome (or whatever Windows has
+  associated with `.html`). No Linux browser exists inside the VM, so plain
+  `xdg-open` would have opened nothing; the routing above is the reason the
+  window actually appeared.
+
+  - Source: `notes/status-report.md`
+  - Rendered: `notes/status-report.html` (standalone HTML, opens anywhere)
+  - Custom previews: `-o /tmp/preview.html` writes elsewhere without
+    touching the source directory
+
+  If you edit the draft, rerun the same command — the script overwrites the
+  output and reopens it.

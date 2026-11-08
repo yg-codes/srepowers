@@ -1,0 +1,6 @@
+# desc: event counts per sourcetype and host in one index (cheap tstats) — explore before a raw search
+# earliest: -24h
+# default: INDEX=main
+| tstats count max(_time) as last where index={{INDEX}} by sourcetype host
+| eval last_iso=strftime(last,"%Y-%m-%dT%H:%M:%S%z")
+| sort - count

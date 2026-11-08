@@ -1,0 +1,100 @@
+skill: fixture-lint
+
+# The `evals/fixtures/deploy-check/fixture-rollout.yaml` below is fictional and
+# lives only in this fixture's mocks (a 2-WARN candidate). The skill-test-runner
+# and skill-iterate fixtures reuse the same path with DIFFERENT candidate
+# contents — each fixture is self-contained; do not cross-reference them.
+
+trigger: |
+  Check this fixture before I spend an agent run on it:
+  evals/fixtures/deploy-check/fixture-rollout.yaml
+
+tool_responses:
+  # Repo-root-relative fixture path with the script path prefixed, per the cwd
+  # contract in fixture-lint's SKILL.md — the form a fixture should record.
+  - tool: bash
+    match_on: lint the candidate fixture
+    command: python3 plugins/srepowers-core/skills/fixture-lint/scripts/fixture_lint.py evals/fixtures/deploy-check/fixture-rollout.yaml
+    response: |
+      > evals/fixtures/deploy-check/fixture-rollout.yaml
+        WARN golden-misses-required-section: golden_output does not contain required_section 'rollback' (case-insensitive substring, per runner semantics) — the golden would fail the fixture's own assertion
+        WARN weak-judge-threshold: rubric lists 5 items deducting 0.2 each, so one missing item scores 0.8 — at pass_threshold 0.75 that still PASSES, so the rubric cannot enforce 'all of the following'; raise the threshold above 0.8
+        INFO bash-response-no-exit-code: bash response has no `(exit code: N)` line — store convention for bash mocks
+      (exit code: 1)
+
+assertions:
+  # Both rule ids appear verbatim in the mocked output.
+  - type: required_section
+    value: golden-misses-required-section
+
+  - type: required_section
+    value: weak-judge-threshold
+
+  - type: required_section
+    value: bash-response-no-exit-code
+
+  # The run must be blocked, not merely annotated. "do not run" is the verdict
+  # the skill's own "When to run" section prescribes for a WARN.
+  - type: required_section
+    value: do not run
+
+  - type: llm_judge
+    rubric: |
+      The output reports a fixture-lint run that found 2 WARNs and 1 INFO on a
+      candidate fixture.
+      Score 1.0 if ALL of the following hold:
+        - It states the fixture must NOT go through skill-test-runner until the
+          WARNs are fixed: a golden that cannot satisfy its own assertion fails
+          regardless of the skill, wasting the agent run AND misattributing the
+          failure to the skill.
+        - The golden-misses-required-section fix is concrete — add the missing
+          string to the golden, or drop the assertion if the skill should not
+          produce it.
+        - The weak-judge-threshold finding is explained as arithmetic: with five
+          items at 0.2, one omission scores 0.8, so a 0.75 bar cannot enforce
+          "all of the following".
+        - The INFO is distinguished from the WARNs as a convention nudge that
+          does not block the run and does not affect the exit code.
+        - The fixture is not described as usable as-is, and no finding is
+          invented beyond the three the tool emitted.
+      Deduct 0.2 for each missing item. Wording need not match the golden.
+    pass_threshold: 0.9
+
+golden_output: |
+  # fixture-lint: 2 WARN, 1 INFO — do not run this fixture yet
+
+  Exit 1. Both WARNs would make the test lie, so fix them before spending an
+  agent run.
+
+  ## WARN 1 — `golden-misses-required-section`
+
+  The fixture asserts `required_section: rollback`, but the word never appears
+  in its own `golden_output`. That fixture can never pass: the assertion fails
+  no matter how correct the skill under test is, and the failure then gets
+  misattributed to the skill rather than to the fixture.
+
+  Fix: add the rollback content to the golden if the skill really should
+  produce it, or drop the assertion if it should not.
+
+  ## WARN 2 — `weak-judge-threshold`
+
+  Arithmetic, not judgment: five rubric items deducting 0.2 each means one
+  missing item scores 0.8. A `pass_threshold` of 0.75 sits below that, so a
+  golden missing a mandatory item still passes — the rubric cannot enforce
+  "all of the following".
+
+  Fix: raise the threshold above 0.8. At 0.9, one omission fails and two
+  certainly do.
+
+  ## INFO — not blocking
+
+  `bash-response-no-exit-code` is a convention nudge: bash mocks normally end
+  with an `(exit code: N)` line because exit codes are load-bearing for ops
+  skills. It does not affect the exit status and does not block the run.
+
+  ## Verdict
+
+  **Do not run** `evals/fixtures/deploy-check/fixture-rollout.yaml` through
+  skill-test-runner until both WARNs are resolved. The runner calls this linter
+  at its Step 1 and aborts on WARN anyway — catching it here saves the round
+  trip.

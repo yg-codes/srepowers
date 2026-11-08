@@ -1,0 +1,617 @@
+---
+name: pve-admin
+description: Use when managing Proxmox VE 8.x/9.x or Proxmox Backup Server 3.x - cluster management, VM/CT operations, ZFS storage, networking, HA, backup/restore, and health checks
+---
+
+# Proxmox VE Administration
+
+## Overview
+
+This skill provides comprehensive guidance for administering Proxmox Virtual Environment (PVE) hypervisors and Proxmox Backup Server (PBS). It covers cluster management, VM/container operations, storage configuration, network setup, high availability, backup strategies, and system health monitoring.
+
+## Quick Reference
+
+### Common Commands
+
+| Task | Command |
+|------|---------|
+| List VMs | `qm list` |
+| List Containers | `pct list` |
+| VM Status | `qm status <vmid>` |
+| Start VM | `qm start <vmid>` |
+| Stop VM | `qm stop <vmid>` |
+| Shutdown VM (graceful) | `qm shutdown <vmid>` |
+| Container Status | `pct status <ctid>` |
+| Start Container | `pct start <ctid>` |
+| Stop Container | `pct stop <ctid>` |
+| Cluster Status | `pvecm status` |
+| Storage Status | `pvesm status` |
+| ZFS Pool Status | `zpool status` |
+| HA Status | `ha-manager status` |
+
+### Service Management
+
+```bash
+# Core PVE services
+systemctl status pve-cluster pvedaemon pveproxy pvestatd
+
+# HA services (on cluster nodes)
+systemctl status pve-ha-lrm pve-ha-crm
+
+# Firewall service
+systemctl status pve-firewall
+
+# Restart all PVE services
+systemctl restart pve-cluster pvedaemon pveproxy pvestatd
+```
+
+## Cluster Operations
+
+### Cluster Join Procedure
+
+To join a node to an existing cluster:
+
+```bash
+# On the new node (not yet in cluster)
+pvecm add <existing-cluster-node-ip> --link0 <this-node-cluster-ip>
+
+# Example (using RFC 5737 documentation IP range):
+pvecm add 192.0.2.26 --link0 192.0.2.28
+```
+
+**Pre-requisites for cluster join:**
+1. Fresh PVE installation (no existing VMs/CTs)
+2. Unique hostname resolvable via DNS
+3. Time synchronized (NTP)
+4. Network connectivity to cluster nodes on port 22 (SSH) and 5405-5412 (Corosync)
+5. Same PVE major version as existing cluster
+6. No existing `/etc/pve/corosync.conf`
+
+### Cluster Status Commands
+
+```bash
+# Full cluster status
+pvecm status
+
+# List cluster nodes
+pvecm nodes
+
+# Get cluster resources (JSON)
+pvesh get /cluster/resources --output-format json-pretty
+
+# Get cluster status (JSON)
+pvesh get /cluster/status --output-format json-pretty
+```
+
+### Cluster Troubleshooting
+
+```bash
+# Check corosync ring status
+corosync-quorumtool -s
+
+# View corosync logs
+journalctl -u corosync
+
+# Check pmxcfs (cluster filesystem)
+systemctl status pve-cluster
+```
+
+## VM Management
+
+### VM Configuration
+
+```bash
+# View VM config
+qm config <vmid>
+
+# Set VM memory
+qm set <vmid> --memory 4096
+
+# Set VM CPU
+qm set <vmid> --cores 4 --sockets 1
+
+# Add disk
+qm set <vmid> --scsi1 local-zfs:32
+
+# Enable QEMU agent
+qm set <vmid> --agent 1
+
+# Set boot order
+qm set <vmid> --boot order=scsi0
+```
+
+### VM Migration
+
+```bash
+# Online migration
+qm migrate <vmid> <target-node> --online
+
+# Offline migration
+qm migrate <vmid> <target-node>
+
+# With local disk (requires shared storage or local-to-local)
+qm migrate <vmid> <target-node> --with-local-disks
+```
+
+### VM Snapshots
+
+```bash
+# Create snapshot
+qm snapshot <vmid> <snapname> --description "Before upgrade"
+
+# List snapshots
+qm listsnapshot <vmid>
+
+# Rollback to snapshot
+qm rollback <vmid> <snapname>
+
+# Delete snapshot
+qm delsnapshot <vmid> <snapname>
+```
+
+## Container Management
+
+### Container Configuration
+
+```bash
+# View container config
+pct config <ctid>
+
+# Set memory
+pct set <ctid> --memory 2048
+
+# Set CPU
+pct set <ctid> --cores 2
+
+# Add mount point
+pct set <ctid> --mp0 local-zfs:8,mp=/data
+
+# Set network
+pct set <ctid> --net0 name=eth0,bridge=vmbr0,ip=dhcp
+```
+
+### Container Operations
+
+```bash
+# Enter container shell
+pct enter <ctid>
+
+# Execute command in container
+pct exec <ctid> -- <command>
+
+# Push file to container
+pct push <ctid> <local-file> <container-path>
+
+# Pull file from container
+pct pull <ctid> <container-path> <local-file>
+```
+
+## Storage Management
+
+### ZFS Operations
+
+```bash
+# Pool status
+zpool status
+zpool status <poolname>
+
+# List datasets
+zfs list
+
+# Create dataset
+zfs create <pool>/<dataset>
+
+# Set ZFS properties
+zfs set compression=lz4 <pool>/<dataset>
+zfs set recordsize=128k <pool>/<dataset>
+
+# Snapshot management
+zfs snapshot <pool>/<dataset>@<snapname>
+zfs list -t snapshot
+zfs destroy <pool>/<dataset>@<snapname>
+
+# ZFS scrub
+zpool scrub <poolname>
+zpool status <poolname>  # Check scrub progress
+```
+
+### Proxmox Storage Configuration
+
+Storage configuration is in `/etc/pve/storage.cfg`:
+
+```bash
+# View storage status
+pvesm status
+
+# Add ZFS storage
+pvesm add zfspool local-zfs --pool rpool/data
+
+# Add directory storage
+pvesm add dir backup --path /mnt/backup --content backup
+
+# Add NFS storage
+pvesm add nfs nfs-backup --server 10.0.0.1 --export /backup --content backup,images
+
+# Enable/disable storage
+pvesm set <storage> --disable 0
+pvesm set <storage> --disable 1
+```
+
+## Network Configuration
+
+### Bonding Configuration
+
+Network configuration is in `/etc/network/interfaces`:
+
+```
+# Example active-backup bond for 10GbE
+auto bond1
+iface bond1 inet manual
+    bond-slaves eno1 eno2
+    bond-miimon 100
+    bond-mode active-backup
+    bond-primary eno1
+    bond-primary_reselect failure
+
+# Bridge on top of bond
+auto vmbr1
+iface vmbr1 inet manual
+    bridge-ports bond1
+    bridge-stp off
+    bridge-fd 0
+    bridge-vlan-aware yes
+```
+
+### Network Diagnostics
+
+```bash
+# View bonding status
+cat /proc/net/bonding/bond0
+cat /proc/net/bonding/bond1
+
+# Bridge status
+bridge link
+bridge fdb show
+
+# Network interfaces
+ip addr show
+ip link show
+
+# Apply network changes
+ifreload -a
+```
+
+### Network Failover Testing
+
+To test bond failover:
+1. Identify active slave: `cat /proc/net/bonding/<bond>`
+2. Disconnect primary link physically or via switch
+3. Verify failover in `dmesg -T` and bond status
+4. Reconnect and verify recovery
+
+## High Availability
+
+### HA Configuration
+
+```bash
+# HA status
+ha-manager status
+
+# Add VM to HA
+ha-manager add vm:<vmid> --group <group> --state started
+
+# Remove from HA
+ha-manager remove vm:<vmid>
+
+# Set HA state
+ha-manager set vm:<vmid> --state started
+ha-manager set vm:<vmid> --state stopped
+ha-manager set vm:<vmid> --state disabled
+
+# Migrate HA resource
+ha-manager migrate vm:<vmid> <target-node>
+```
+
+### HA Groups
+
+HA groups define which nodes can run HA resources:
+
+```bash
+# Create HA group
+pvesh create /cluster/ha/groups --group production --nodes pve01,pve02
+
+# With priority
+pvesh create /cluster/ha/groups --group production --nodes pve01:2,pve02:1
+
+# Restricted (only these nodes)
+pvesh create /cluster/ha/groups --group production --nodes pve01,pve02 --restricted 1
+```
+
+## Backup and Restore
+
+### Proxmox Backup Server Integration
+
+```bash
+# Add PBS storage
+pvesm add pbs pbs-backup \
+    --server pbs.example.com \
+    --datastore datastore1 \
+    --username backup@pbs \
+    --password <password> \
+    --fingerprint <fingerprint>
+
+# Backup VM to PBS
+vzdump <vmid> --storage pbs-backup --mode snapshot
+
+# List backups on PBS
+pvesm list pbs-backup
+```
+
+### vzdump Backup
+
+```bash
+# Snapshot backup
+vzdump <vmid> --mode snapshot --storage backup
+
+# Stop backup (consistent)
+vzdump <vmid> --mode stop --storage backup
+
+# Suspend backup
+vzdump <vmid> --mode suspend --storage backup
+
+# All VMs/CTs
+vzdump --all --mode snapshot --storage backup
+
+# With compression
+vzdump <vmid> --mode snapshot --storage backup --compress zstd
+```
+
+### Restore Operations
+
+```bash
+# Restore VM
+qmrestore <backup-file> <vmid>
+qmrestore <backup-file> <vmid> --storage local-zfs
+
+# Restore container
+pct restore <ctid> <backup-file>
+pct restore <ctid> <backup-file> --storage local-zfs
+
+# Restore from PBS
+qmrestore pbs-backup:backup/vm/<vmid>/<timestamp> <new-vmid>
+```
+
+## System Health Check
+
+### Scripts
+
+This skill includes `scripts/` with reusable PVE operations scripts for health checks, capacity reporting, and replication management.
+
+| Script | Purpose | Prerequisites |
+|--------|---------|---------------|
+| `check-pve-cluster.sh` | Comprehensive cluster health check (services, network, storage, HA, replication, quorum) | — |
+| `check-pve-capacity.sh` | Capacity reporting: memory, storage, inventory | `jq` |
+| `phase0-replication.sh` | ZFS replication job management (setup/verify/delete) | `jq` |
+
+```bash
+# Health check
+ssh root@<pve-host> 'bash -s' < scripts/check-pve-cluster.sh
+
+# Capacity report (memory, storage, inventory)
+ssh root@<pve-host> 'bash -s -- --section all --format text' < scripts/check-pve-capacity.sh
+
+# Memory only, JSON output
+ssh root@<pve-host> 'bash -s -- --section memory --format json' < scripts/check-pve-capacity.sh
+
+# Replication setup
+ssh root@<source-node> 'bash -s -- --target <target-node> setup <vmid> ...' < scripts/phase0-replication.sh
+```
+
+### Manual Health Checks
+
+```bash
+# System resources
+free -h
+df -h
+uptime
+
+# PVE services
+systemctl status pve-cluster pvedaemon pveproxy
+
+# Cluster quorum
+pvecm status | grep -E "Quorum|Total|Expected"
+
+# ZFS health
+zpool status -v
+
+# Recent errors
+journalctl -p err -n 50 --no-pager
+dmesg -T | tail -50
+```
+
+## Upgrade Procedures
+
+### PVE Minor Upgrade (Point Release)
+
+Minor upgrades are relatively safe but still require node-by-node execution:
+
+```bash
+# Per node — one at a time, never simultaneously
+
+# 1. Check what will change
+apt update
+apt list --upgradable
+
+# 2. Simulate first (dry-run, no changes made)
+apt dist-upgrade --simulate  # review output before proceeding
+
+# 3. Apply
+apt dist-upgrade
+
+# 4. Reboot if kernel updated
+#    FIRST: migrate or verify no critical VMs are running
+#    pvecm status  # confirm quorum will hold
+reboot
+```
+
+### PVE Major Upgrade (Version Bump)
+
+**⚠️ Major PVE upgrades are high-risk operations. Do NOT follow a simplified procedure.**
+
+A major upgrade (e.g., 7.x → 8.x, 8.x → 9.x) must follow a comprehensive upgrade plan that covers:
+
+**Pre-upgrade requirements:**
+- Verify cluster quorum on all nodes before starting
+- Create ZFS snapshots on all pools (`zfs snapshot -r <pool>@pre-upgrade`)
+- Live-migrate all VMs off the target node (or accept downtime)
+- Verify replication jobs are healthy (`pvesr status`)
+- Confirm all backups are current
+
+**Critical irreversible operations to avoid during upgrade:**
+- `zpool upgrade <pool>` — pool becomes unreadable by previous ZFS version. Do NOT run until the entire cluster is upgraded and validated, rollback window has passed.
+- `pvecm delnode` — permanent cluster removal. Never needed for upgrades.
+
+**One-node-at-a-time constraint:**
+- Upgrade exactly one node at a time
+- After upgrading each node, verify: cluster quorum, storage accessibility, VM functionality
+- Do not proceed to next node until current node is fully validated
+
+**If a comprehensive upgrade plan template exists** in the project (e.g., `docs/plans/upgrade-plan-template.md`), populate it rather than following a generic procedure. The template covers replication pre-sync, live-migration drain, quorum gates, single-vs-dual-pool conditionals, and rollback procedures.
+
+```bash
+# DO NOT use this as your upgrade procedure.
+# This shows ONLY the package-level commands for reference.
+# Always use a comprehensive plan template.
+
+# Per node (one at a time):
+sed -i 's/bookworm/trixie/g' /etc/apt/sources.list  # example — verify codename
+apt update
+apt dist-upgrade --simulate  # review before applying
+apt dist-upgrade
+reboot
+
+# Post-upgrade verification per node:
+pvecm status          # quorum OK?
+zpool status          # pools healthy?
+pvesm status          # storage accessible?
+qm list               # VMs visible?
+pvesr status          # replication OK?
+```
+
+**Known pitfalls:**
+- ZFS ARC cache incompatibility between versions — verify `zfs_arc_max` module parameter loads correctly after upgrade
+- Replication jobs may fail if `pvesr` state is inconsistent — verify and re-sync before migrating VMs that depend on replication
+- Mixed-storage VMs (local + shared) require special handling during live migration drain
+- Always run `apt dist-upgrade --simulate` and review the package list before applying — kernel and ZFS package changes are the highest risk
+
+## Troubleshooting
+
+### Common Issues
+
+**Cluster not forming:**
+- Check firewall rules (ports 22, 5405-5412)
+- Verify time sync across nodes
+- Check hostname resolution
+
+**VM not starting:**
+- Check storage availability: `pvesm status`
+- Review VM logs: `journalctl -u qemu-server@<vmid>`
+- Verify resources available: `free -h`, `df -h`
+
+**HA not working:**
+- Check quorum: `pvecm status`
+- Verify HA services: `systemctl status pve-ha-lrm pve-ha-crm`
+- Review HA logs: `journalctl -u pve-ha-lrm`
+
+**Network issues:**
+- Check bond status: `cat /proc/net/bonding/*`
+- Verify bridge: `bridge link`
+- Test connectivity: `ping`, `traceroute`
+
+### Log Locations
+
+| Log | Location/Command |
+|-----|------------------|
+| System journal | `journalctl` |
+| PVE tasks | `/var/log/pve/tasks/` |
+| Firewall | `/var/log/pve-firewall.log` |
+| Corosync | `journalctl -u corosync` |
+| QEMU | `journalctl -u qemu-server@<vmid>` |
+| Container | `journalctl -u pve-container@<ctid>` |
+
+## SRE Principles
+
+### Safety First
+- Use simulation flags before destructive operations (`apt dist-upgrade --simulate`, `zfs destroy -n`, `qm snapshot` before changes)
+- Create VM/CT snapshots or ZFS snapshots before any configuration change or upgrade
+- Phase structure: **Pre-check** (verify cluster quorum, check storage health, snapshot state) → **Execute** (apply change on single node first) → **Verify** (confirm service status, check cluster sync, validate replication)
+
+### Structured Output
+- Present cluster health using node status tables (node, status, CPU, memory, storage, uptime)
+- Use storage pool tables for capacity planning (pool, type, total, used, available, % used)
+- Include upgrade status summaries in tabular format (node, current version, target version, status)
+
+### Evidence-Driven
+- Reference specific `pvesh`, `qm`, and `pct` command outputs with actual values
+- Include `journalctl` and `/var/log/pve/tasks/` log entries for troubleshooting evidence
+- Cite ZFS pool status (`zpool status`), SMART data, and replication lag metrics
+
+### Audit-Ready
+- Document all configuration changes with before/after values and operator identity
+- Maintain snapshot history before every destructive operation for rollback capability
+- Track cluster changes with timestamps linking to change tickets or maintenance windows
+
+### Communication
+- Lead with infrastructure impact (e.g., "Rolling upgrade of 3-node cluster with zero VM downtime")
+- Present storage capacity trends in business terms (months until full, expansion cost)
+- Summarize cluster health in a single status table for operations review
+
+## Resources
+
+### Reference Documentation
+
+This skill includes official Proxmox documentation in `references/`:
+
+| Local File | Description | Web Link |
+|------------|-------------|----------|
+| `pve-admin-guide-8.4.pdf` | PVE 8.4 Administration Guide | https://pve.proxmox.com/pve-docs-8/pve-admin-guide.pdf |
+| `pve-admin-guide-9.1.2.pdf` | PVE 9.1.2 Administration Guide | https://pve.proxmox.com/pve-docs/pve-admin-guide.html |
+| `proxmox-backup-3-4.pdf` | Proxmox Backup Server 3.4 Guide | https://www.proxmox.com/images/download/pbs/docs/proxmox-backup-3-4.pdf |
+| `proxmox-datacenter-manager-1-0.pdf` | Proxmox Datacenter Manager 1.0 Guide | https://www.proxmox.com/images/download/pdm/docs/proxmox-datacenter-manager-1-0.pdf |
+
+**Prefer local PDFs first** - they work offline during incidents and avoid network dependencies. Use web links only when local docs are unavailable or outdated.
+
+To search these documents:
+```bash
+# Search for specific topics
+grep -i "cluster" references/*.pdf  # Won't work directly on PDF
+# Use pdftotext or read the PDF files in context
+```
+
+### Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/check-pve-cluster.sh` | Comprehensive cluster health check |
+| `scripts/check-pve-capacity.sh` | Capacity, allocation, and inventory reporting |
+| `scripts/phase0-replication.sh` | ZFS replication job management |
+
+> **Note:** These scripts are the versions bundled with this skill. If a canonical version exists in the operational PVE repository, prefer the repository version — it may include updates not yet synced to this skill.
+
+### Air-Gapped Data Collection
+
+For PVE clusters without direct SSH access, use the upload-run-collect relay pattern:
+
+1. **Bundle the collection script** into a self-contained archive (no external dependencies)
+2. **Upload** to the target node via available channel (web console file upload, manual USB, etc.)
+3. **Run** on the target node — script writes JSON output to a known path
+4. **Collect** the output — user copies/pastes the JSON output or downloads via the same channel
+5. **Validate** — verify JSON is well-formed (`jq -e . < output.json`) before integrating with aggregated data
+
+**Validation requirement:** When accepting pasted JSON output, always validate with `jq -e .` since the exit code comes from SSH or the paste operation, not from the script that generated the output. A truncated or malformed paste will silently produce bad data in the aggregate report.
+
+### External Resources
+
+- Proxmox VE Documentation: https://pve.proxmox.com/pve-docs/
+- Proxmox Backup Server Documentation: https://pbs.proxmox.com/docs/
+- Proxmox Forum: https://forum.proxmox.com/

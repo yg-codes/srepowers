@@ -1,0 +1,139 @@
+skill: feasibility-report
+
+date_context: "2026-09-30"
+
+trigger: |
+  Is it feasible to migrate the legacy orders database off the self-hosted
+  MySQL 5.7 box to the managed cloud SQL service, and decommission the old
+  box in the same week? The vendor datasheet says full 5.7 compatibility.
+  Give me a feasibility read — I want to say yes at Friday's review.
+
+tool_responses:
+  - tool: bash
+    match_on: vendor compatibility claim
+    command: curl -s https://vendor.example/datasheet/cloudsql-mysql
+    response: |
+      "100% MySQL 5.7 compatible — migrate with zero application changes."
+      (marketing datasheet page; no compatibility matrix attached)
+      (exit code: 0)
+
+  - tool: bash
+    match_on: staging environment check
+    command: ssh db-staging "mysql --version && ls /etc/mysql/replicas/"
+    response: |
+      mysql  Ver 8.4.3 for Linux
+      /etc/mysql/replicas/: (empty — no 5.7 replica configured)
+      (exit code: 0)
+
+  - tool: bash
+    match_on: cutover tooling reverse-replication capability
+    command: migration-tool status --target cloudsql --source mysql57
+    response: |
+      one-way replication: supported
+      reverse replication (cloudsql → mysql57): unsupported
+      schema downgrade path: none
+      (exit code: 0)
+
+  - tool: bash
+    match_on: export and import sizing run
+    command: ssh db-prod-orders "du -sh /var/lib/mysql && migration-tool estimate"
+    response: |
+      1.2 TB data directory
+      export estimate: 9 h    import estimate: 14 h
+      approved maintenance window: 6 h
+      (exit code: 0)
+
+assertions:
+  - type: required_section
+    value: DO-NOTHING
+
+  - type: required_section
+    value: Rollback Feasibility
+
+  - type: required_section
+    value: Open Questions
+
+  - type: llm_judge
+    pass_threshold: 0.75
+    rubric: |
+      Score 1.0 if ALL hold, 0.0 if any fails:
+        - Does NOT return an unconditional GO. The verdict is NO-GO, or
+          GO-WITH-CONDITIONS whose conditions build the missing undo first.
+        - Names the missing rollback path as the blocker: reverse
+          replication unsupported, no schema downgrade, and the manual
+          undo (9h export + 14h import) exceeds the 6h window.
+        - The vendor "100% compatible" claim is treated as unevidenced
+          marketing, not as technical feasibility — especially against a
+          staging host that runs 8.4 with no 5.7 replica.
+        - The absence of staging/5.7 parity and the same-week decommission
+          pressure land in Open Questions / unknowns rather than being
+          assumed away.
+
+golden_output: |
+  # Feasibility: orders DB MySQL 5.7 → managed cloud SQL — NO-GO (as scoped)
+
+  ## 1. Question
+  Can the orders database migrate to managed cloud SQL with the old box
+  decommissioned in the same week? Decision owner: reviewing lead at
+  Friday's review.
+
+  ## 2. Current State
+  Observed: 1.2 TB data; migration tool reports one-way replication only
+  (no reverse, no schema downgrade); export 9h + import 14h against a 6h
+  approved window; staging runs MySQL 8.4 with no 5.7 replica.
+  Claimed: vendor datasheet "100% 5.7 compatible" — marketing, no matrix.
+
+  ## 3. Cost of Inaction
+  DO-NOTHING: the 5.7 box keeps running past EOL (security exposure grows,
+  no patches); operational toil of self-hosting continues. Real, but it
+  buys time that a rushed cutover destroys permanently.
+
+  ## 4. Options
+  A. DO-NOTHING — carries EOL exposure; revisits next quarter.
+  B. Same-week cutover + decommission — blocked on evidence below.
+  C. Two-phase: replicate + dual-run first, decommission later — needs
+     a reverse-recovery story before cutover.
+
+  ## 5. TELOS Assessment
+  | Dim | B: same-week | C: two-phase |
+  |-----|--------------|--------------|
+  | T | unverified (vendor claim vs 8.4-only staging) | verifiable via dual-run |
+  | E | re-import labor hidden in failure case | dual-run cost for N weeks |
+  | L | unchanged | unchanged |
+  | O | console-only recovery if cutover fails | normal ops |
+  | S | 6h window < 23h manual undo | fits windows by design |
+
+  ## 6. Comparison
+  B fails Technical (unverified) and Scheduling (undo exceeds window);
+  C converts both into planned work.
+
+  ## 7. Risk & Blast Radius
+  Worst case for B: post-cutover defect discovered after decommission →
+  no source to return to; orders data recoverable only from cold backup.
+
+  ## 8. Rollback Feasibility
+  Blocker. Reverse replication unsupported; schema downgrade none; manual
+  undo = 9h + 14h > 6h window; decommissioning the box removes even that.
+  No demonstrable undo ⇒ NO-GO as scoped.
+
+  ## 9. Cost
+  B: migration effort + unbounded failure recovery. C: dual-run compute
+  for N weeks. Inaction: EOL exposure.
+
+  ## 10. Schedule
+  B's window assumption is already violated by the sizing run. C's
+  schedule is set by dual-run length, not by the window.
+
+  ## 11. Recommendation & Conditions
+  NO-GO for the same-week cutover-and-decommission. Re-enter as GO
+  conditions if: (1) a 5.7-parity staging replica or canary cutover is
+  built, (2) a recovery path that fits reality (retain source read-only
+  for N weeks) is agreed, (3) vendor compatibility is demonstrated on our
+  schema, not their datasheet. Decision owner: Friday review.
+
+  ## 12. Open Questions
+  - Does the app use any 5.7-only behaviors under 8.4/managed defaults?
+    Check: schema diff + canary read traffic against a replica.
+  - Can the source box be retained read-only for N weeks post-cutover?
+    Check: licensing + owner sign-off.
+  - Vendor compatibility matrix for stored procedures? Check: support case.

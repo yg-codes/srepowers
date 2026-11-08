@@ -1,0 +1,106 @@
+skill: tzstamp
+
+trigger: |
+  Build an incident timeline from these events for the post-mortem. The alert
+  fired at 2026-03-30T14:00:00Z, the operator acknowledged at 2026-03-31
+  09:10 JST, and the fix landed at epoch 1774885380. Include both zones.
+
+tool_responses:
+  - tool: bash
+    match_on: dual stamp the alert time
+    command: python3 scripts/tzstamp.py "2026-03-30T14:00:00Z"
+    response: |
+      2026-03-30 14:00:00 UTC = 2026-03-30 23:00:00 JST
+      (exit code: 0)
+
+  - tool: bash
+    match_on: dual stamp the operator acknowledgement
+    command: python3 scripts/tzstamp.py "2026-03-31 09:10 JST"
+    response: |
+      2026-03-31 00:10 UTC = 2026-03-31 09:10 JST
+      (exit code: 0)
+
+  - tool: bash
+    match_on: dual stamp the epoch fix time
+    command: python3 scripts/tzstamp.py 1774885380
+    response: |
+      2026-03-30 15:43:00 UTC = 2026-03-31 00:43:00 JST
+      (exit code: 0)
+
+  - tool: bash
+    match_on: build the sorted timeline table
+    command: >-
+      printf '%s\n' '2026-03-30T14:00:00Z | alert fired'
+      '2026-03-31 09:10 JST | operator ack' '1774885380 | fix deployed'
+      | python3 scripts/tzstamp.py --table
+    response: |
+      | UTC                 | JST                 | Event         |
+      |---------------------|---------------------|---------------|
+      | 2026-03-30 14:00:00 | 2026-03-30 23:00:00 | alert fired   |
+      | 2026-03-30 15:43:00 | 2026-03-31 00:43:00 | fix deployed  |
+      | 2026-03-31 00:10:00 | 2026-03-31 09:10:00 | operator ack  |
+      (exit code: 0)
+
+assertions:
+  # Both halves of every stamp survive into the output — the whole point.
+  - type: required_section
+    value: UTC
+
+  - type: required_section
+    value: JST
+
+  # The rollover is called out rather than left for the reader to notice.
+  - type: required_section
+    value: "2026-03-31"
+
+  # Timeline rows are chronological, not input order: the epoch fix (15:43 UTC)
+  # sorts before the 09:10 JST ack (00:10 UTC the next day).
+  - type: required_table_column
+    section: timeline
+    column: Event
+
+  - type: llm_judge
+    rubric: |
+      The output is an incident timeline built with tzstamp.
+      Score 1.0 if ALL of the following hold:
+        - Every timestamp carries BOTH zones; no bare time appears anywhere.
+        - The table is sorted chronologically by instant, not by input order —
+          "fix deployed" (15:43 UTC) precedes "operator ack" (00:10 UTC on the
+          next day) only if sorted by UTC instant, so check the ordering.
+        - A date rollover is stated explicitly where the UTC and JST halves
+          fall on different calendar days.
+        - The conversions are not re-derived by hand — the tool's output is
+          used as returned.
+        - No claim is made that a bare timestamp is acceptable.
+      Deduct 0.2 for each missing item. Wording need not match the golden.
+    # 5 items x 0.2 means one omission scores 0.8; the threshold must exceed
+    # that or "ALL of the following" is not what the gate enforces.
+    pass_threshold: 0.9
+
+golden_output: |
+  # Incident timeline
+
+  All times dual-stamped UTC = JST. Note the rollover: the operator
+  acknowledgement falls on **2026-03-31** in JST while the alert that triggered
+  it is still 2026-03-30 in UTC, so a JST reader would otherwise file the two
+  events on different days.
+
+  | UTC                 | JST                 | Event         |
+  |---------------------|---------------------|---------------|
+  | 2026-03-30 14:00:00 | 2026-03-30 23:00:00 | alert fired   |
+  | 2026-03-30 15:43:00 | 2026-03-31 00:43:00 | fix deployed  |
+  | 2026-03-31 00:10:00 | 2026-03-31 09:10:00 | operator ack  |
+
+  Rows are ordered by instant, not by the order the events were reported: the
+  fix (`2026-03-30 15:43:00 UTC = 2026-03-31 00:43:00 JST`) precedes the
+  acknowledgement (`2026-03-31 00:10 UTC = 2026-03-31 09:10 JST`) even though
+  the ack was reported first in JST local time.
+
+  ## Individual stamps
+
+  - Alert fired: `2026-03-30 14:00:00 UTC = 2026-03-30 23:00:00 JST`
+  - Fix deployed: `2026-03-30 15:43:00 UTC = 2026-03-31 00:43:00 JST`
+    (note: 2026-03-31 in JST)
+  - Operator ack: `2026-03-31 00:10 UTC = 2026-03-31 09:10 JST`
+
+  Every value above came from `scripts/tzstamp.py`; none was converted by hand.

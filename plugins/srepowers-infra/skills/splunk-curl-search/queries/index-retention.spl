@@ -1,0 +1,5 @@
+# desc: per-index events, size, min/max time and freeze policy — tells whether "all time" is complete
+# earliest: 0
+| rest /services/data/indexes splunk_server=local count=0
+| search totalEventCount>0
+| table title totalEventCount currentDBSizeMB maxTotalDataSizeMB frozenTimePeriodInSecs minTime maxTime

@@ -1,0 +1,98 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+#
+# DAEMON / SERVICE variant — linux-only, ships an RPM (nfpms) with a systemd
+# unit. Use this for a long-running service installed on a host. For a
+# cross-platform CLI binary with no system packaging, use goreleaser-cli.yaml.
+#
+# GitHub-native: no `gitlab_urls`/`force_token`; the `release:` block targets
+# GitHub Releases using GITHUB_TOKEN from the Actions job. The built RPM is
+# attached to the Release as an asset.
+#
+# Replace UPPERCASE placeholders only — leave goreleaser's own {{ .Version }}-
+# style Go templates untouched. The nfpms `contents` assume a packaging/ dir
+# with the service unit and config; adjust or drop entries you don't ship.
+---
+version: 2
+
+project_name: {{PROJECT_NAME}}
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: {{PROJECT_NAME}}
+    main: ./cmd          # adjust to the package containing main() (e.g. ".")
+    binary: {{PROJECT_NAME}}
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X main.version={{ .Version }}
+      - -X main.commit={{ .Commit }}
+      - -X main.date={{ .Date }}
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - id: default
+    formats:
+      - tar.gz
+    name_template: >-
+      {{ .ProjectName }}-
+      {{- .Version }}-
+      {{- .Os }}-
+      {{- .Arch }}
+
+checksum:
+  name_template: checksums.sha256
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - Merge pull request
+      - Merge branch
+
+nfpms:
+  - id: {{PROJECT_NAME}}
+    package_name: {{PROJECT_NAME}}
+    homepage: https://github.com/{{GH_OWNER}}/{{PROJECT_NAME}}
+    maintainer: {{MAINTAINER_NAME}} <{{MAINTAINER_EMAIL}}>
+    license: Apache 2.0
+    formats:
+      - rpm
+      - deb
+    bindir: /usr/bin
+    scripts:
+      preinstall: packaging/preinstall.sh
+      postremove: packaging/postremove.sh
+    contents:
+      - src: packaging/{{PROJECT_NAME}}.service
+        dst: /usr/lib/systemd/system/{{PROJECT_NAME}}.service
+      - dst: /etc/{{PROJECT_NAME}}
+        type: dir
+        file_info:
+          mode: 0755
+      - src: packaging/config.yaml
+        dst: /etc/{{PROJECT_NAME}}/config.yaml
+        type: config
+        file_info:
+          owner: {{PROJECT_NAME}}
+          group: {{PROJECT_NAME}}
+          mode: 0600
+
+release:
+  replace_existing_draft: true
+  header: |
+    ## {{PROJECT_NAME}} {{ .Tag }}
+  footer: |
+    **Full changelog**: https://github.com/{{GH_OWNER}}/{{PROJECT_NAME}}/compare/{{ .PreviousTag }}...{{ .Tag }}

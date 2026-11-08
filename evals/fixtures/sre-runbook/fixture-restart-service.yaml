@@ -1,0 +1,181 @@
+skill: sre-runbook
+
+trigger: |
+  Write a runbook for restarting the nginx service on web01.example.com after a
+  config change, including verification that it came back healthy.
+
+# The skill under test reads live state via Bash in a real run. Here every
+# command it would run is pre-answered, so the sub-agent never touches a host.
+tool_responses:
+  - tool: bash
+    match_on: back up config and nginx -t config test
+    command: ssh web01.example.com "sudo cp -n /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak && sudo nginx -t"
+    response: |
+      nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+      nginx: configuration file /etc/nginx/nginx.conf test is successful
+      (exit code: 0)
+
+  - tool: bash
+    match_on: systemctl status nginx before restart
+    command: ssh web01.example.com "systemctl is-active nginx"
+    response: |
+      active
+      (exit code: 0)
+
+  - tool: bash
+    match_on: restart nginx
+    command: ssh web01.example.com "sudo systemctl restart nginx --no-block"
+    response: |
+      (exit code: 0)
+
+  - tool: bash
+    match_on: verify nginx healthy after restart (bounded retry)
+    command: >-
+      ssh web01.example.com "for i in $(seq 1 15); do
+      [ \"$(curl -sS -o /dev/null -w '%{http_code}' http://localhost/healthz)\" = 200 ]
+      && { echo 'PASS: 200 after '$i's'; exit 0; }; sleep 1; done;
+      echo 'FAIL: no 200 within 15s'; exit 1"
+    response: |
+      PASS: 200 after 2s
+      (exit code: 0)
+
+assertions:
+  - type: required_section
+    value: Command
+
+  - type: required_section
+    value: Expected
+
+  - type: required_section
+    value: Result
+
+  # The skill's non-interactive principle: a restart must not block on a TTY.
+  - type: required_section
+    value: --no-block
+
+  # Health is gated on a client-facing check, not on the supervisor's opinion.
+  - type: required_section
+    value: /healthz
+
+  # The two safety-critical items get their own assertions rather than relying
+  # on the judge: a rubric deduction can be absorbed under the threshold, a
+  # missing substring cannot.
+  #
+  # fixture-lint flags `nginx -t` as paraphrase-brittle (INFO) — kept anyway:
+  # it is an exact command, not a concept, and validating the config before a
+  # restart is the step whose omission this fixture most needs to catch.
+  - type: required_section
+    value: nginx -t
+
+  - type: required_section
+    value: Rollback
+
+  - type: llm_judge
+    rubric: |
+      The output is an SRE runbook for restarting nginx on web01.example.com.
+      Score 1.0 if ALL of the following hold:
+        - Every step carries Command, Expected, and Result sections.
+        - The config is validated (nginx -t) BEFORE the restart, not after.
+        - Every command is non-interactive: no vi/nano, no bare `systemctl
+          restart` that could prompt, no pager.
+        - Verification after the restart probes an actual endpoint (curl to
+          /healthz) rather than only asking systemd whether the unit is active.
+        - A rollback or recovery path is stated.
+      Deduct 0.2 for each missing item. Wording need not match the golden;
+      judge the substance.
+    # 5 items x 0.2 means one omission scores 0.8. The threshold must sit above
+    # that, or "ALL of the following" is not what the gate enforces — a runbook
+    # with no rollback would pass at 0.75.
+    pass_threshold: 0.9
+
+golden_output: |
+  # Runbook: Restart nginx on web01.example.com after a config change
+
+  **Blast radius:** one web node. Traffic to web01 fails for the duration of
+  the restart unless it is drained from the load balancer first.
+
+  **Rollback:** restore the backup taken in Step 1 and restart again:
+  `ssh web01.example.com "sudo cp /etc/nginx/nginx.conf.bak /etc/nginx/nginx.conf && sudo systemctl restart nginx --no-block"`
+  The backup is created by Step 1 below — a rollback that names a file no step
+  produces is not a rollback.
+
+  ## Step 1 — Back up the running config, then validate the new one
+
+  **Command**
+  ```bash
+  ssh web01.example.com "sudo cp -n /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak && sudo nginx -t"
+  ```
+
+  **Expected**
+  `syntax is ok` and `test is successful`, exit code 0. A failure here means
+  the restart must not proceed — nginx would fail to come back. `cp -n` will
+  not clobber an existing backup from an earlier change.
+
+  **Result**
+  ```
+  nginx: configuration file /etc/nginx/nginx.conf test is successful
+  (exit code: 0)
+  ```
+
+  ## Step 2 — Record pre-change state
+
+  **Command**
+  ```bash
+  ssh web01.example.com "systemctl is-active nginx"
+  ```
+
+  **Expected**
+  `active`. This is the baseline to compare against after the restart.
+
+  **Result**
+  ```
+  active
+  ```
+
+  ## Step 3 — Restart nginx
+
+  **Command**
+  ```bash
+  ssh web01.example.com "sudo systemctl restart nginx --no-block"
+  ```
+
+  **Expected**
+  Exit code 0. `--no-block` keeps the command from waiting on a job that may
+  hang, so the step cannot stall the run. It also means the command **returns
+  before nginx is serving** — Step 4 must therefore poll, not probe once.
+
+  **Result**
+  ```
+  (exit code: 0)
+  ```
+
+  ## Step 4 — Verify the service is actually serving
+
+  **Command**
+  ```bash
+  ssh web01.example.com "for i in \$(seq 1 15); do \
+    [ \"\$(curl -sS -o /dev/null -w '%{http_code}' http://localhost/healthz)\" = 200 ] \
+      && { echo 'PASS: 200 after '\$i's'; exit 0; }; sleep 1; done; \
+    echo 'FAIL: no 200 within 15s'; exit 1"
+  ```
+
+  **Expected**
+  `PASS: 200 after <n>s`, exit code 0. A single immediate probe races the
+  restart and can report connection-refused on a healthy node; a bounded
+  retry distinguishes "slow to come up" from "did not come up". The loop
+  emits an explicit `FAIL` on timeout rather than falling through silently.
+  Gate on this client-facing response, never on `systemctl is-active` —
+  a supervisor reporting the unit as running is not the service being ready.
+
+  **Result**
+  ```
+  PASS: 200 after 2s
+  ```
+
+  ## Verification summary
+
+  | Check | Expected | Result |
+  |-------|----------|--------|
+  | Config syntax | test successful | PASS |
+  | Restart exit code | 0 | PASS |
+  | Health endpoint | HTTP 200 | PASS |

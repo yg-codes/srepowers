@@ -1,0 +1,66 @@
+# Project — AI-instruction files (AGENTS.md is a symlink to CLAUDE.md)
+CLAUDE.md
+AGENTS.md
+
+# Leak-scan patterns for scripts/validate-repo.py. The patterns are the site's
+# own hostnames/paths/domains, so committing them would make the gate the leak.
+# Local-only, never tracked; the validator warns loudly when it is absent.
+.leakpatterns
+# Edition-scope estate-shape patterns for publish mode — same rule: the
+# patterns ARE the site's conventions, so they never ship.
+.editionpatterns
+
+# Claude Code
+.claude/debug/
+.claude/downloads/
+.claude/file-history/
+.claude/session-env/
+.claude/shell-snapshots/
+.claude/transcripts/
+.claude/SESSIONLOG.md
+
+# Serena MCP
+.serena/
+
+# SREPowers scratch — SDD briefs/reports/review packages, progress ledger,
+# and brainstorm visual-companion session files
+.srepowers/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Build
+dist/
+build/
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# PI
+.pi/
+
+# Python bytecode — skills ship scripts whose tests import them
+__pycache__/
+*.pyc

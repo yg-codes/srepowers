@@ -1,0 +1,5 @@
+# desc: every host that has sent (all time by default) — per index/sourcetype, first/last seen
+# earliest: 0
+| tstats count min(_time) as first max(_time) as last where index=* by host index sourcetype
+| eval first_iso=strftime(first,"%Y-%m-%dT%H:%M:%S%z"), last_iso=strftime(last,"%Y-%m-%dT%H:%M:%S%z")
+| sort host index sourcetype

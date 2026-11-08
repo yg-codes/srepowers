@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+# Lightweight Codex-oriented validation for repo-native and plugin packaging.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+cd "$REPO_ROOT"
+
+echo "========================================"
+echo " Codex Skill Validation"
+echo "========================================"
+echo ""
+
+fail() {
+  echo "[FAIL] $1"
+  exit 1
+}
+
+pass() {
+  echo "[PASS] $1"
+}
+
+[ -f .codex-plugin/plugin.json ] || fail ".codex-plugin/plugin.json missing"
+pass "Codex plugin manifest present"
+
+[ -f .agents/plugins/marketplace.json ] || fail ".agents/plugins/marketplace.json missing"
+pass "Codex marketplace present"
+
+[ -f .codex/hooks.json ] || fail ".codex/hooks.json missing"
+pass "Codex hooks config present"
+
+[ -f .codex/agents/infrastructure-operator.toml ] || fail "Codex infrastructure operator missing"
+[ -f .codex/agents/infrastructure-reviewer.toml ] || fail "Codex infrastructure reviewer missing"
+pass "Codex custom agents present"
+
+[ -d .agents/skills ] || fail ".agents/skills directory missing"
+[ -d .codex/skills ] || fail ".codex/skills directory missing"
+
+python3 - <<'PY'
+import json
+import re
+from pathlib import Path
+
+# Derived from the Codex marketplace manifest — the same single source
+# validate-repo.py reads (via .claude-plugin/marketplace.json). The set of
+# shipped plugins is declared once; a hardcoded tuple here drifted from a
+# new plugin's mirrors in 5.9.0, and public editions ship plugin subsets.
+marketplace = json.loads(Path(".agents/plugins/marketplace.json").read_text())
+
+# v5.6.1 invariant (superpowers v6.1.0 parity): the Codex marketplace manifest
+# must be installable — it needs a name, an interface.displayName, and a list
+# of plugin entries, each pointing at a packaged plugin under ./plugins/.
+if not isinstance(marketplace.get("plugins"), list):
+    raise SystemExit(".agents/plugins/marketplace.json plugins must be a list")
+if not marketplace.get("name"):
+    raise SystemExit(".agents/plugins/marketplace.json missing name")
+if not marketplace.get("interface", {}).get("displayName"):
+    raise SystemExit(".agents/plugins/marketplace.json missing interface.displayName")
+
+plugins = tuple(entry["name"] for entry in marketplace["plugins"])
+
+entries = {entry["name"]: entry for entry in marketplace["plugins"]}
+root_manifest = json.loads(Path(".codex-plugin/plugin.json").read_text())
+versions = {root_manifest["version"]}
+
+for plugin in plugins:
+    plugin_root = Path("plugins") / plugin
+    codex_manifest = plugin_root / ".codex-plugin" / "plugin.json"
+    claude_manifest = plugin_root / ".claude-plugin" / "plugin.json"
+    skills_dir = plugin_root / "skills"
+    commands_dir = plugin_root / "commands"
+
+    if not codex_manifest.is_file():
+        raise SystemExit(f"{codex_manifest} missing")
+    if not claude_manifest.is_file():
+        raise SystemExit(f"{claude_manifest} missing")
+
+    entry = entries.get(plugin)
+    if not entry:
+        raise SystemExit(f"{plugin} missing from Codex marketplace")
+
+    manifest = json.loads(codex_manifest.read_text())
+    claude_plugin_manifest = json.loads(claude_manifest.read_text())
+    versions.update(
+        {
+            entry["version"],
+            manifest["version"],
+            claude_plugin_manifest["version"],
+        }
+    )
+    if manifest.get("name") != plugin:
+        raise SystemExit(f"{codex_manifest} name mismatch")
+    if manifest.get("skills") != "./skills/":
+        raise SystemExit(f"{codex_manifest} skills path must be ./skills/")
+    # v5.6.1 invariant (superpowers v6.1.1 parity, upstream commits 7d8d3d4 /
+    # 640ce6c): Codex auto-discovers a plugin's hooks/hooks.json whenever the
+    # Codex manifest has no `hooks` field — load_plugin_hooks falls back to a
+    # hardcoded DEFAULT_HOOKS_CONFIG_FILE = "hooks/hooks.json" and registers it.
+    # srepowers-core ships plugins/srepowers-core/hooks/hooks.json (the Claude
+    # Code SessionStart hook), so the fallback would re-register that hook and
+    # its install-time trust prompt on every Codex install. Declare an empty
+    # inline hooks object ({}) to suppress the auto-discovery. An absent field,
+    # an empty array ([]), and an empty inline list all collapse back to the
+    # fallback, so the value must be exactly {}. The repo-root .codex/hooks.json
+    # bootstrap hook is unaffected (it is repo-dev convenience only).
+    if manifest.get("hooks") != {}:
+        raise SystemExit(f"{codex_manifest} must declare \"hooks\": {{}} to suppress hooks/hooks.json auto-discovery")
+
+    skills = sorted(path.parent.name for path in skills_dir.glob("*/SKILL.md"))
+    commands = sorted(path.stem for path in commands_dir.glob("*.md"))
+    if skills != commands:
+        raise SystemExit(f"{plugin} skills and commands differ")
+
+    for skill in skills:
+        text = (skills_dir / skill / "SKILL.md").read_text()
+        match = re.search(r"^name:\s*(.+)$", text, re.MULTILINE)
+        if not match:
+            raise SystemExit(f"{plugin}/{skill} missing frontmatter name")
+        if match.group(1).strip() != skill:
+            raise SystemExit(f"{plugin}/{skill} frontmatter name mismatch")
+
+    source = entry.get("source")
+    if not isinstance(source, dict):
+        raise SystemExit(f"{plugin} marketplace source must be object")
+    if source.get("source") != "local":
+        raise SystemExit(f"{plugin} marketplace source.source must be local")
+    if source.get("path") != f"./plugins/{plugin}":
+        raise SystemExit(f"{plugin} marketplace source.path mismatch")
+    if entry.get("category") != "Engineering":
+        raise SystemExit(f"{plugin} marketplace category must be Engineering")
+    policy = entry.get("policy")
+    if policy != {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}:
+        raise SystemExit(f"{plugin} marketplace policy must be installation=AVAILABLE, authentication=ON_INSTALL")
+
+if len(versions) != 1:
+    raise SystemExit(f"Codex marketplace and plugin versions differ: {sorted(versions)}")
+
+canonical = sorted(
+    path.parent.name
+    for plugin in plugins
+    for path in (Path("plugins") / plugin / "skills").glob("*/SKILL.md")
+)
+for mirror in (Path(".agents/skills"), Path(".codex/skills")):
+    mirrored = sorted(path.name for path in mirror.iterdir() if path.is_dir() or path.is_symlink())
+    if mirrored != canonical:
+        raise SystemExit(f"{mirror} does not match canonical plugin skills")
+    broken = [path.name for path in mirror.iterdir() if path.is_symlink() and not path.exists()]
+    if broken:
+        raise SystemExit(f"{mirror} has broken symlinks: {', '.join(broken)}")
+PY
+
+pass "Codex marketplace, plugin manifests, skills, commands, and mirrors are consistent"
+
+if command -v codex >/dev/null 2>&1; then
+  echo ""
+  echo "codex detected: $(codex --version 2>/dev/null || echo unknown)"
+else
+  echo ""
+  echo "[INFO] codex CLI not installed; skipping interactive runtime checks"
+fi
+
+echo ""
+echo "STATUS: PASSED"

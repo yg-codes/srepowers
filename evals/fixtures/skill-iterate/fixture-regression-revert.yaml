@@ -1,0 +1,203 @@
+skill: skill-iterate
+
+# The `evals/fixtures/deploy-check/fixture-rollout.yaml` below is fictional and
+# lives only in this fixture's mocks (a 3-assertion candidate). The
+# skill-test-runner and fixture-lint fixtures reuse the same path with DIFFERENT
+# candidate contents — each fixture is self-contained; do not cross-reference
+# them.
+
+trigger: |
+  Iterate the deploy-check skill against
+  evals/fixtures/deploy-check/fixture-rollout.yaml until it passes.
+
+# skill-iterate needs three things per cycle that a bare score cannot supply:
+# the ORIGINAL SKILL.md (Step 1's snapshot), the candidate fixture, and each
+# fix-agent's old_string/new_string proposal (Step 2f/2g). All are below, so the
+# final report's "MODIFIED" and net-line-count claims are derivable rather than
+# invented — the defect that withdrew the previous version of this fixture.
+tool_responses:
+  - tool: bash
+    match_on: snapshot the original skill under test
+    command: cat plugins/srepowers-core/skills/deploy-check/SKILL.md
+    response: |
+      ---
+      name: deploy-check
+      description: Use when checking whether a rollout is safe to keep.
+      ---
+      Report the rollout under three headings: Preview, Apply, Result.
+      (exit code: 0)
+
+  - tool: bash
+    match_on: read the candidate fixture
+    command: cat evals/fixtures/deploy-check/fixture-rollout.yaml
+    response: |
+      skill: deploy-check
+      trigger: |
+        Check the payments-api v2.4.1 rollout and report whether it is safe.
+      assertions:
+        - type: required_section
+          value: Preview
+        - type: required_section
+          value: Apply
+        - type: required_section
+          value: Rollback
+      golden_output: |
+        ## Preview
+        ## Apply
+        ## Rollback
+      (exit code: 0)
+
+  # --- cycle 1: the run, then the proposal it produced -------------------
+  - tool: bash
+    match_on: cycle 1 test run
+    command: (skill-test-runner Steps 1-6, run inline by the orchestrator)
+    response: |
+      ## Test Result: FAIL
+      **Score:** 2/3 assertions passed  (score=0.67)
+      ### Failure Summary
+      - Missing required section: Rollback
+      (exit code: 0)
+
+  - tool: agent
+    match_on: cycle 1 fix-agent proposal
+    response: |
+      ### Root Cause
+      The skill names three headings and none of them is Rollback, so the
+      agent cannot produce the section the fixture requires.
+
+      ### Proposed Edit
+      old_string:
+      ```
+      Report the rollout under three headings: Preview, Apply, Result.
+      ```
+      new_string:
+      ```
+      Report the rollout under two headings: Rollback, Result.
+      ```
+
+      ### Reasoning
+      Adds the missing Rollback heading.
+
+  # --- cycle 2: measures cycle 1's edit, which dropped the score ---------
+  - tool: bash
+    match_on: cycle 2 test run
+    command: (skill-test-runner Steps 1-6, run inline by the orchestrator)
+    response: |
+      ## Test Result: FAIL
+      **Score:** 1/3 assertions passed  (score=0.33)
+      ### Failure Summary
+      - Missing required section: Preview
+      - Missing required section: Apply
+      (exit code: 0)
+
+  - tool: agent
+    match_on: cycle 3 fix-agent proposal
+    response: |
+      ### Root Cause
+      Cycle 1's edit removed Preview and Apply while adding Rollback. All four
+      headings are required, so the edit must be additive.
+
+      ### Proposed Edit
+      old_string:
+      ```
+      Report the rollout under three headings: Preview, Apply, Result.
+      ```
+      new_string:
+      ```
+      Report the rollout under four headings: Preview, Apply, Rollback, Result.
+      State the rollback command explicitly; a rollout with no stated undo is
+      the defect this skill exists to catch.
+      ```
+
+      ### Reasoning
+      Keeps the two headings cycle 1 removed and adds Rollback, so all three
+      required_section assertions can pass.
+
+  # --- cycle 3: the narrower edit passes --------------------------------
+  - tool: bash
+    match_on: cycle 3 test run
+    command: (skill-test-runner Steps 1-6, run inline by the orchestrator)
+    response: |
+      ## Test Result: PASS
+      **Score:** 3/3 assertions passed  (score=1.00)
+      (exit code: 0)
+
+assertions:
+  # The regression must be detected and the offending edit named.
+  # fixture-lint flags this as paraphrase-brittle (INFO) — kept deliberately:
+  # skill-iterate/SKILL.md mandates the literal log string "Regression detected:".
+  - type: required_section
+    value: Regression detected
+
+  - type: required_section
+    value: Reverted
+
+  - type: required_section
+    value: PASS
+
+  # The final report must state what is on disk now (Step 3's contract).
+  - type: required_section
+    value: Skill State
+
+  - type: llm_judge
+    rubric: |
+      The output is a skill-iterate report over three cycles: 0.67, then 0.33
+      after cycle 1's edit, then PASS after reverting that edit and applying a
+      narrower one.
+      Score 1.0 if ALL of the following hold:
+        - The cycle-2 drop is identified as a regression caused by CYCLE 1's
+          edit — the one that replaced three headings with two — and that edit
+          is the one reverted, not cycle 2's own fresh proposal.
+        - The judgment is placed AFTER the run that measured the edit: an edit
+          applied in cycle N is only measurable in cycle N+1.
+        - The final report states explicitly whether the file on disk is the
+          modified version or the restored original.
+        - The cycle history is shown, so the operator can see the path taken.
+        - A passing fixture is not claimed as proof the skill improved; the diff
+          still needs reading.
+      Deduct 0.2 for each missing item. Wording need not match the golden.
+    pass_threshold: 0.9
+
+golden_output: |
+  ## Skill Iterate Report: deploy-check
+  **Fixture:** evals/fixtures/deploy-check/fixture-rollout.yaml
+  **Cycles run:** 3
+  **Final status:** PASS
+
+  ### Cycle History
+
+  ```
+  Cycle 1: score=0.67 status=FAIL
+    Failures: Missing required section: Rollback
+  Cycle 2: score=0.33 status=FAIL
+    Failures: Missing Preview; Missing Apply
+    Regression detected: cycle 1's edit dropped the score from 0.67 to 0.33.
+    Reverted to the content that edit was applied to.
+  Cycle 3: score=1.00 status=PASS
+  ```
+
+  ### What happened
+
+  Cycle 1 scored 0.67 — Preview and Apply passed, Rollback was missing. Its
+  fix-agent proposed replacing `three headings: Preview, Apply, Result` with
+  `two headings: Rollback, Result`, which adds Rollback by *removing* the two
+  that already passed.
+
+  That edit is only measurable on the next run, so cycle 2's 0.33 is the score
+  of cycle 1's edit. The revert therefore targets **cycle 1's edit**, restoring
+  the original single line. Reverting cycle 2's own proposal instead would undo
+  an unmeasured change while leaving the actual regression on disk.
+
+  Cycle 3's proposal was additive — `four headings: Preview, Apply, Rollback,
+  Result` plus a line requiring the rollback command be stated — and all three
+  assertions passed.
+
+  ### Skill State
+
+  - **Current SKILL.md:** MODIFIED — left in place, because cycle 3 passed.
+  - **Net change:** the original one-line instruction became a three-line one
+    (the four-heading list plus two lines requiring an explicit rollback
+    command), so +2 lines against the snapshot taken at Step 1.
+
+  A passing fixture is this loop's exit condition, not evidence the skill got
+  better. Read `git diff` on the skill before keeping the result.

@@ -1,0 +1,191 @@
+skill: feasibility-report
+
+date_context: "2026-09-30"
+
+trigger: |
+  Our three prod app nodes (app-a, app-b, app-c — standard-8: 8 vCPU / 16 GB)
+  have been running hot for weeks. Can we resize them to 16 vCPU / 64 GB?
+  Is that feasible, or should we do something else? I need a go/no-go read
+  before I take it to planning.
+
+tool_responses:
+  - tool: bash
+    match_on: current node utilization
+    command: kubectl top nodes
+    response: |
+      NAME    CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
+      app-a   7120m        89%    9.4Gi           59%
+      app-b   6820m        85%    8.9Gi           55%
+      app-c   7290m        91%    9.8Gi           61%
+      ctrl-1  312m         19%    5.1Gi           16%
+      (exit code: 0)
+
+  - tool: bash
+    match_on: utilization trend over six months
+    command: >-
+      curl -sG http://prometheus:9090/api/v1/query_range
+      --data-urlencode 'query=quantile_over_time(0.95, node_cpu_usage)[30d:30d] @ end() offset 6m'
+    response: |
+      app-pool p95 CPU by month: Mar 71%  Apr 74%  May 78%  Jun 80%
+      Jul 83%  Aug 85%  Sep 87%  (linear ~+2.7%/month; memory p95 55-61%, flat)
+      (exit code: 0)
+
+  - tool: bash
+    match_on: available machine types in the pool's zone
+    command: kubectl get nodes --show-labels | rg 'node.kubernetes.io/instance-type'
+    response: |
+      app-pool class supports: standard-8 (8 vCPU / 16 GB),
+      standard-16 (16 vCPU / 64 GB) — both schedulable in the same zone,
+      same storage class, no zone move required.
+      (exit code: 0)
+
+  - tool: bash
+    match_on: resize mechanics — downtime and undo path
+    command: platform docs resize runbook
+    response: |
+      Vertical resize of a pool node requires drain + reboot (~4 min/node).
+      A pre-resize snapshot is supported and recommended. Resize-down back
+      to the original type is possible (second drain + reboot) while the
+      snapshot exists. Rolling one node at a time keeps the pool serving.
+      (exit code: 0)
+
+assertions:
+  - type: required_section
+    value: DO-NOTHING
+
+  - type: required_section
+    value: TELOS
+
+  - type: required_section
+    value: Rollback Feasibility
+
+  - type: required_section
+    value: Blast Radius
+
+  - type: required_section
+    value: Cost of Inaction
+
+  - type: required_section
+    value: Recommendation
+
+  # Evidence discipline: no pricing data is supplied, so costs must appear
+  # as Unknown (with a verify condition), never as invented figures.
+  - type: required_section
+    value: Unknown
+
+  - type: llm_judge
+    pass_threshold: 0.75
+    rubric: |
+      Score 1.0 if ALL hold, 0.0 if any fails:
+        - Reaches a GO-family verdict (GO or GO-WITH-CONDITIONS) — the
+          evidence supports proceeding; a NO-GO here misreads the data.
+        - DO-NOTHING is treated as a real option with a cost (at ~+2.7%/month
+          CPU saturates within roughly 4-5 months → incident risk), not a
+          throwaway line — and appears in the TELOS assessment alongside
+          the other options.
+        - Separates evidence classes correctly: kubectl top is a
+          point-in-time reading, the six-month p95 trend is the percentile
+          source — never labels the snapshot as p95.
+        - Asserts NO cost figures: pricing data is absent, so per-node /
+          steady-state costs must be marked Unknown with a pricing check as
+          a condition or open question. Inventing "~2x cost" or ranking
+          options on invented prices fails this line.
+        - Treats drain headroom as a real open question or condition, and
+          types the evidence correctly: with ~21.2 cores of demand, two
+          8-core nodes (16 cores) cannot close the gap, and the only
+          capacity evidence that counts is measured off-peak performance,
+          verified additional capacity (surge node with placement +
+          redistribution confirmed), or agreed load reduction. Citing
+          PDBs or overcommit as headroom evidence FAILS this line — a PDB
+          limits voluntary disruption, overcommit schedules past requests,
+          not past physical cores. PDBs may appear only as a separate
+          disruption constraint.
+        - Rollback is named concretely (snapshot before resize; resize back
+          down; verify on the first node).
+
+golden_output: |
+  # Feasibility: prod app pool resize standard-8 → standard-16 — GO-WITH-CONDITIONS
+
+  ## 1. Question
+  Can the three prod app nodes be vertically resized 8 vCPU/16 GB →
+  16 vCPU/64 GB, and should they be? Decision owner: the requesting SRE lead
+  + planning review.
+
+  ## 2. Current State
+  Observed: point-in-time CPU 85-91% across app-a/b/c (kubectl top, today;
+  6.8-7.3 of 8 cores); six-month p95 trend 71% → 87% (~+2.7%/month,
+  Prometheus); memory 55-61%, flat. standard-16 is schedulable in the same
+  zone — no zone move. No pricing data supplied.
+
+  ## 3. Cost of Inaction
+  DO-NOTHING: at +2.7%/month, CPU p95 reaches 100% in roughly 4-5 months
+  (early 2027). Cost = throttling/incident risk on prod traffic, plus an
+  emergency resize under pressure instead of a planned one.
+
+  ## 4. Options
+  A. DO-NOTHING — fails on the §3 timeline.
+  B. Vertical resize to standard-16 — supported in-zone; drain+reboot
+     ~4 min/node; snapshot-first.
+  C. Horizontal scale-out (+standard-8 nodes) — no reboots; workload
+     horizontal-scalability unmeasured.
+
+  ## 5. TELOS Assessment
+  | Dim | A: do-nothing | B: resize | C: scale-out |
+  |-----|---------------|-----------|--------------|
+  | T | no change | supported, same zone | unmeasured (statefulness unknown) |
+  | E | incident exposure grows monthly | Unknown — no pricing data | Unknown — no pricing data |
+  | L | no change | no change | no change |
+  | O | rising on-call pressure | small runbook delta | rebalancing work |
+  | S | shrinking window each month | one maintenance window | schedulable anytime |
+
+  ## 6. Comparison
+  B is the only option with demonstrated technical fit. B-vs-C on cost
+  cannot be decided from this evidence (pricing Unknown for both); C also
+  carries unmeasured horizontal-scalability risk. Do not rank on invented
+  prices.
+
+  ## 7. Risk & Blast Radius
+  Drain headroom is the live risk: ~21.2 cores of demand across three
+  8-core nodes; draining one leaves 16 cores for ~21.2 cores of work —
+  the arithmetic does not close, and no supplied evidence shows the
+  workload surviving at reduced capacity. Worst case: brownout during
+  the drain window. Capacity evidence to obtain before the first drain:
+  measured off-peak utilization (if pool CPU halves at night, drain
+  there), a temporary surge node with placement and redistribution
+  verified, or agreed load reduction during the window. PDBs are a
+  separate check — they constrain voluntary disruption; they do not
+  create CPU capacity.
+
+  ## 8. Rollback Feasibility
+  Snapshot each node before resize; resize back down (second drain+reboot)
+  restores the previous shape while snapshots exist. Verify rollback on
+  app-c first.
+
+  ## 9. Cost
+  Change cost: engineering window + snapshot storage (Unknown — no pricing
+  data). Steady-state delta: Unknown for both B and C. Inaction: §3
+  incident exposure. All cost figures pending a pricing pull — condition 4.
+
+  ## 10. Schedule
+  One off-peak window; roll a/b/c one at a time. Before the ~4-5 month
+  saturation point. Freeze calendar Unknown — confirm with release eng.
+
+  ## 11. Recommendation & Conditions
+  GO-WITH-CONDITIONS — conditions: (1) pre-resize snapshot per node,
+  (2) verify rollback on the first node, (3) close the first-drain
+  capacity gap with evidence — measured off-peak headroom, a verified
+  surge node, or agreed load reduction (PDB compliance is a separate
+  disruption constraint, not capacity), (4) pull pricing
+  to close the B-vs-C economic question before commit. Decision owner:
+  SRE lead at planning review.
+
+  ## 12. Open Questions
+  - Can two nodes carry pool load during a drain? Check: measure off-peak
+    pool CPU around the clock — if utilization stays ~85%+ at night, the
+    gap needs a temporary 4th node (placement + redistribution verified)
+    or agreed load shedding for the window.
+  - Separately: do PDBs permit a one-node voluntary drain? (Disruption
+    constraint, not capacity.)
+  - What do standard-16 and additional standard-8 nodes cost? Check:
+    pricing pull — required before the economic comparison means anything.
+  - Memory is flat; re-check p95 memory after resize to catch regression.

@@ -1,0 +1,84 @@
+skill: splunk-curl-search
+
+trigger: |
+  Is web01 still shipping logs to Splunk? Profile sit has the connection.
+  I just want to know if it stopped — don't break anything, that search head
+  is shared.
+
+tool_responses:
+  - tool: bash
+    match_on: fingerprint the front door without credentials
+    command: plugins/srepowers-infra/skills/splunk-curl-search/scripts/detect.sh sit
+    response: |
+      PROFILE=sit URL=splunk.example.com WEB=443 MGMT=filtered
+      OAUTH2=google OAUTH2_GATE=bypassed-trusted-vantage LOCAL_LOGIN=yes
+      MODE=web-local
+      (exit code: 0)
+
+  - tool: bash
+    match_on: dry-run the ready-made host-last-seen query
+    command: >-
+      plugins/srepowers-infra/skills/splunk-curl-search/scripts/search.sh
+      -p sit -n -q host-last-seen HOSTS=web01
+    response: |
+      LINT=ok QUERY=host-last-seen MODE=web-local HOST_FORMAT=%s
+      WINDOW=-30d BOUND=max_count=50000
+      PLAN: tstats count latest(_time) where index=* AND host=web01 by index, sourcetype
+      DRY RUN ONLY — credential not read, no search executed.
+      (exit code: 0)
+
+assertions:
+  # The detect step and its verdict survive into the answer — the front door
+  # decides the auth path before anything else runs.
+  - type: required_section
+    value: web-local
+
+  # The ready-made query (not an improvised raw search) was the plan shown.
+  - type: required_section
+    value: host-last-seen
+
+  - type: llm_judge
+    rubric: |
+      The output answers "is web01 still logging" using the splunk-curl-search
+      workflow. Start from 1.0 and deduct 0.25 for each of the following that
+      does not hold:
+        - The detect.sh front-door result (MODE=web-local) is reported before
+          any search is attempted.
+        - A linted dry-run plan is shown, and the live search is NOT claimed
+          to have run: the answer either states it was not executed / no live
+          evidence collected, or asks the operator to confirm the exact
+          target, SPL, window and result bound before running live.
+        - The answer does not assert that web01 is or is not logging — no
+          live evidence exists yet at this point in the workflow.
+        - No credential value, and no attempt to read one, appears during the
+          dry-run phase.
+      Wording need not match the golden.
+    pass_threshold: 0.9
+
+golden_output: |
+  # Is web01 still logging to Splunk?
+
+  Not executed; no live evidence collected yet. Here is the plan, ready for
+  your confirmation.
+
+  ## Front door (detect.sh — no credentials sent)
+
+  - `MODE=web-local`: oauth2-proxy (Google) is in front, this vantage is in
+    `trusted_ips`, and `?loginType=splunk` yields a local session — Splunk
+    Web session cookie + form key over `/en-US/splunkd/__raw`.
+  - `MGMT=filtered`: :8089 is not reachable from here, so `mgmt-basic` /
+    `mgmt-token` are out; a SAML-only account would be blocked, but local
+    login works from this vantage.
+
+  ## Planned search (dry run only)
+
+  Ready-made query `host-last-seen` with `HOSTS=web01`, lint OK:
+
+  - window `-30d`, result bound `max_count=50000`, `auto_cancel` armed
+  - tstats over `index=* AND host=web01` (profile `HOST_FORMAT=%s` applied)
+  - gate output: SENDING / STALE / ABSENT for web01; exit 1 if ABSENT
+
+  A confirmed plan authorises that search only. OK to run it live against
+  profile `sit` exactly as planned? The credential is resolved only at run
+  time, never before — say the word and I'll execute and report from the
+  result files (rows, scanCount, window, front door).

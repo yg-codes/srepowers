@@ -1,0 +1,46 @@
+skill: feasibility-report
+
+date_context: "2026-09-30"
+
+trigger: |
+  Yesterday's CCB approved resizing the prod app pool to 16 vCPU. Write the
+  change record for it so we can get the window scheduled.
+
+tool_responses:
+  - tool: bash
+    match_on: ticket status lookup
+    command: ticket-cli view APP-4471
+    response: |
+      APP-4471 — Resize prod app pool to standard-16
+      Status:   Approved (CCB 2026-09-29)
+      Approver: Change Control Board
+      Scope:    app-a, app-b, app-c — standard-8 → standard-16
+      (exit code: 0)
+
+assertions:
+  - type: required_section
+    value: change-management
+
+  - type: llm_judge
+    pass_threshold: 0.75
+    rubric: |
+      Score 1.0 if ALL hold, 0.0 if any fails:
+        - Recognizes the change is already approved — a go/no-go assessment
+          would re-litigate a decision that exists, and does not produce one.
+        - Names change-management (the CCB/change-record skill) as the
+          correct tool for writing the change record.
+        - Does not silently proceed to author a full feasibility report,
+          and does not refuse to help — it routes.
+
+golden_output: |
+  This is past the feasibility stage: APP-4471 is already Approved
+  (CCB 2026-09-29), so a go/no-go assessment would re-litigate a decision
+  that exists. What you need is the change record itself.
+
+  Route: the change-management skill authors CCB change records —
+  description, impact assessment, rollback procedure, implementation plan,
+  and the approval trail (APP-4471 already supplies the approval evidence).
+
+  If you want the feasibility material as input to the change record, the
+  sizing evidence (utilization, trend, resize mechanics) belongs in its
+  impact-assessment section — not in a new feasibility report.
