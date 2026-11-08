@@ -44,9 +44,7 @@ categorizes issues by severity and lands on an explicit verdict.
 
 ## Provenance
 
-Partially adapted from [obra/superpowers](https://github.com/obra/superpowers) (MIT, © Jesse Vincent): the Spec Compliance and Receiving
-Feedback reference rows (inline-commented at the point of use). The
-rest of the skill is original.
+Dual-source: base skill from [Jeffallan/claude-skills](https://github.com/Jeffallan/claude-skills) `code-reviewer` (MIT — see CREDITS.md/LICENSE in this directory), with the Spec Compliance and Receiving Feedback reference rows adapted from [obra/superpowers](https://github.com/obra/superpowers) (MIT, © Jesse Vincent), inline-commented at the point of use.
 
 ---
 Last Updated: 2026-09-14
