@@ -1,8 +1,8 @@
 # Release Notes
 
-## 5.41.1 — SREPowers public edition (initial)
+## 5.41.2 — SREPowers public edition
 
-The first public edition of SREPowers, shipping the
+An edition of SREPowers, shipping the
 srepowers-core and srepowers-infra plugins.
 The full distribution additionally ships srepowers-domain,
 srepowers-private (site templates), and srepowers-swe as separate

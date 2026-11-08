@@ -239,12 +239,21 @@ PY
 # RELEASE-NOTES: born-sanitized, edition-only. Never derive from the private
 # notes — they quote site tokens in refusal entries (the private-root
 # --publish gate fails on exactly those).
+# EDITION_INITIAL=1 marks the FIRST cut of a (possibly recreated) public
+# repo; default 0 — a cut is an edition update, not "initial". The 5.41.1
+# push shipped the hardcoded "(initial)" label wrongly (5.41.0 was initial).
+NOTES_TITLE="## $VERSION — SREPowers public edition"
+NOTES_LEAD="An edition of SREPowers, shipping the"
+if [ "${EDITION_INITIAL:-0}" = "1" ]; then
+    NOTES_TITLE="## $VERSION — SREPowers public edition (initial)"
+    NOTES_LEAD="The first public edition of SREPowers, shipping the"
+fi
 cat > "$DEST/RELEASE-NOTES.md" <<NOTES
 # Release Notes
 
-## $VERSION — SREPowers public edition (initial)
+$NOTES_TITLE
 
-The first public edition of SREPowers, shipping the
+$NOTES_LEAD
 $(printf '%s and %s' "${EDITION_PLUGINS[0]}" "${EDITION_PLUGINS[1]}") plugins.
 The full distribution additionally ships srepowers-domain,
 srepowers-private (site templates), and srepowers-swe as separate

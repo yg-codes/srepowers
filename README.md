@@ -456,6 +456,7 @@ preserved:
 | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) © DietrichGebert | MIT | `ponytail`, `ponytail-review`, `ponytail-audit`, `ponytail-debt` | `license:` frontmatter in each SKILL.md |
 | [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) © Ayoub Ghriss | MIT | `srepowers-core:ops-brief` | `license:` frontmatter + skill README |
 | [`blader/humanizer`](https://github.com/blader/humanizer) 2.9.1 © Siqi Chen, via a community adaptation | MIT | `srepowers-core:humanizer` | `license:` frontmatter + skill README |
+| [Jeffallan/claude-skills](https://github.com/Jeffallan/claude-skills) (MIT) | 4 core skills — `sre-engineer`, `devops-engineer`, `code-reviewer`, `observability-engineer` (upstream `monitoring-expert`) — with references/ carried verbatim, plus 14 unpublished `srepowers-domain` skills | per-skill `LICENSE` + `CREDITS.md` |
 | [HumanLayer `show-me`](https://github.com/humanlayer/humanlayer) © 2025-2026 QueryTale, Inc. | **Apache-2.0** | `srepowers-swe:pr` — the Summary menu of visuals, reproduced near-verbatim (the only non-MIT upstream) | `srepowers-swe:pr/CREDITS.md` + Apache-2.0 `LICENSE` in the skill dir |
 
 The `pr` skill's copied menu carries Apache-2.0 obligations (license retained,

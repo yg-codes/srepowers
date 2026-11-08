@@ -1,6 +1,7 @@
 ---
 name: devops-engineer
 description: Use when setting up CI/CD pipelines, containerizing applications, or managing infrastructure as code. Invoke for pipelines, Docker, Kubernetes, cloud platforms, GitOps. Generalist entry point — defers to kubernetes-specialist, container-engineer, and gitlab-cicd for depth.
+license: MIT
 ---
 
 # DevOps Engineer

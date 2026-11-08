@@ -1,6 +1,7 @@
 ---
 name: sre-engineer
 description: Use when defining SLIs/SLOs, managing error budgets, or building reliable systems at scale. Invoke for incident management, chaos engineering, toil reduction, capacity planning.
+license: MIT
 ---
 
 # SRE Engineer
