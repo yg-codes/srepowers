@@ -157,14 +157,37 @@ version = sys.argv[-1]
 
 readme = (dest / "README.md").read_text()
 
-# 1. plugin table rows: keep shipped plugins only
+# 1. plugin table rows AND install commands: keep shipped plugins only.
+# Install-command lines naming unshipped plugins read as "plugin not found"
+# for edition visitors — the exact defect the v5.41.2 review caught.
+shipped_set = set(shipped)
 rows = []
 for line in readme.splitlines():
+    m = re.match(r"^/plugin install (srepowers-[a-z]+)@srepowers-marketplace$", line)
+    if m and m.group(1) not in shipped_set:
+        continue
     m = re.match(r"^\|\s*`(srepowers-[a-z]+)`\s*\|", line)
-    if m and m.group(1) not in shipped:
+    if m and m.group(1) not in shipped_set:
         continue
     rows.append(line)
 readme = "\n".join(rows) + "\n"
+# combined one-liner: rebuild from the shipped set
+allcmd = "/plugin install " + " ".join(f"{p}@srepowers-marketplace" for p in shipped)
+readme = re.sub(
+    r"^/plugin install (srepowers-[a-z]+@srepowers-marketplace)(?: srepowers-[a-z]+@srepowers-marketplace)+$",
+    allcmd,
+    readme,
+    count=1,
+    flags=re.MULTILINE,
+)
+# 1b. Codex install-step bullets naming unshipped plugins (bullet list form:
+# "- `srepowers-X` — description"): drop unshipped entries.
+readme = "\n".join(
+    l for l in readme.splitlines()
+    if not (m := re.match(r"^[-*] `(srepowers-[a-z]+)` — ", l)) or m.group(1) in shipped_set
+)
+if readme.endswith("\n\n"):
+    readme = readme[:-1]
 
 # 2. counts + mirror count from the staged tree
 counts = {p: len(list((dest / "plugins" / p / "skills").iterdir())) for p in shipped}

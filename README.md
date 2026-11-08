@@ -85,7 +85,7 @@ srepowers/
 | `srepowers-core` | 47 | Workflow spine, mandatory gates, incident response, SRE practices |
 | `srepowers-infra` | 12 | Portable infrastructure administration: Proxmox VE, Puppet code analysis, PuppetDB queries, DNS, TLS/PKI, backup/recovery, change management, GitLab CI/CD (incl. ECR & GoReleaser), Splunk search |
 
-Marketplace install pulls all five at once. Each plugin can also be installed individually if you only need a subset.
+Marketplace install pulls all plugins at once. Each plugin can also be installed individually if you only need a subset.
 
 ## What's Inside
 
@@ -107,16 +107,13 @@ Marketplace install pulls all five at once. Each plugin can also be installed in
 ```bash
 /plugin marketplace add yg-codes/srepowers
 /plugin install srepowers-core@srepowers-marketplace
-/plugin install srepowers-domain@srepowers-marketplace
 /plugin install srepowers-infra@srepowers-marketplace
-/plugin install srepowers-private@srepowers-marketplace
-/plugin install srepowers-swe@srepowers-marketplace
 ```
 
-Or install all five at once:
+Or install them all at once:
 
 ```bash
-/plugin install srepowers-core@srepowers-marketplace srepowers-domain@srepowers-marketplace srepowers-infra@srepowers-marketplace srepowers-private@srepowers-marketplace srepowers-swe@srepowers-marketplace
+/plugin install srepowers-core@srepowers-marketplace srepowers-infra@srepowers-marketplace
 ```
 
 Verify with `/help`. You should see commands such as `/test-driven-operation` and `/subagent-driven-operation`.
@@ -146,12 +143,9 @@ codex plugin marketplace add yg-codes/srepowers
 3. Search for `srepowers`, then install one or more plugins:
 
 - `srepowers-core` — workflow spine, mandatory gates, incident response
-- `srepowers-domain` — Go, Python, Rust, Kubernetes, Terraform, security, testing, and other domain skills
 - `srepowers-infra` — portable Proxmox, Puppet analysis, DNS, TLS, backup, GitLab CI/CD, and Splunk search skills
-- `srepowers-private` — sanitized site-specific Puppet/Hiera/Ansible/ClickUp/GitLab-sync/doc-sync workflow templates
-- `srepowers-swe` — general software-engineering flow (opt-in): spec→tickets, backlog triage, wayfinding, domain modeling, codebase design, prototyping, teaching, decision-input questionnaires, hard-bug diagnosis
 
-Install all five for full SREPowers coverage.
+Install all plugins for full SREPowers coverage.
 
 4. Verify installed skills.
 
@@ -192,12 +186,6 @@ Use this only when testing local repository changes before they are pushed.
 
 ```bash
 codex plugin marketplace add /path/to/srepowers
-```
-
-For this repository checkout:
-
-```bash
-codex plugin marketplace add /home/yg/src/github/srepowers
 ```
 
 2. Open `/plugins`, search for `srepowers`, and install the local plugin entries.
