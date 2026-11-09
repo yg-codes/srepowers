@@ -247,6 +247,18 @@ readme = readme.replace(
     "distributed separately from this edition.",
 )
 
+# 6. intro sentence claiming the edition "ships" an unshipped plugin. Fail
+# closed: if upstream wording drifts the replace would silently no-op.
+claim = "Since v5.9.0 it also ships an **opt-in** `srepowers-swe` plugin"
+if "srepowers-swe" not in shipped_set:
+    # idempotent: the edition's own tests re-stage an already-staged README
+    if claim not in readme and "full distribution (not this edition)" not in readme:
+        raise SystemExit("README intro swe claim not found — update the stager")
+    readme = readme.replace(
+        claim,
+        "Since v5.9.0 the full distribution (not this edition) also includes an **opt-in** `srepowers-swe` plugin",
+    )
+
 (dest / "README.md").write_text(readme)
 
 contrib = (dest / "CONTRIBUTING.md").read_text().splitlines()
